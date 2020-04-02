@@ -21,10 +21,10 @@ function getPixiApp(force) {
 function getPixiObj() {
     return (this.getPixiApp() || {}).stage;
 }
-function renderGraphic() {
-    console.log("Graphic render");
+function renderGraphic(obj) {
+    //console.log("Graphic render");
     let app = this.getPixiApp();
-    app.renderer.render(app.stage);
+    app.renderer.render(obj || app.stage);
 }
  
 let component = {

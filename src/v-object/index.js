@@ -27,8 +27,8 @@ function getMaskObj() {
     return this.maskObj;
 }
 
-function renderGraphic() {
-    this.$parent.renderGraphic();
+function renderGraphic(obj) {
+    this.$parent.renderGraphic(obj);
 }
 function draw(obj) {
     console.log('abstract draw function');
@@ -43,18 +43,24 @@ function makeScene() {
     maskObj && this.draw(maskObj);
     this.renderGraphic();
 }
-
+const propKeys = ['posX', 'posY', 'width', 'height', 'rotation'];
 let component = {
     template: require('./template.html'),
-    props: ['posX', 'posY', 'width', 'height', 'rotation'],
+    props: propKeys,
     data: function () {
         return {
-            pixiObj: null
+            pixiObj: null,
+            maskObj: null
         }
     },
     computed: {
         baseCompProps: function() {
-            return `${this.width} | ${this.height}`;
+            let array = [];
+            propKeys.forEach(k => {
+                if (typeof this[k] !== 'function') array.push(this[k])
+            });
+            return array.join('|');
+            //return `${this.width} | ${this.height}`;
         },
         compProps: function () {
             return `${this.baseCompProps}`;
