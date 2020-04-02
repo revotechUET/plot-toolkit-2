@@ -1,6 +1,4 @@
 const Vue = require('vue').default;
-const Hello = require('./hello/index.js').default;
-const MyHello = require('./myHello').default;
 const FragmentPlugin = require('vue-fragment').Plugin;
 const VScene = require('./v-scene').default;
 const VShape = require('./v-shape').default;
@@ -10,10 +8,6 @@ Vue.use(FragmentPlugin);
 const app = new Vue({
     el: "#vue-app",
     template: `<fragment>
-        <div class=".root">
-            <span>{{message}}</span>
-        </div>
-        <Hello slogan="Cong hoa xa hoi chu nghia" title="Don xin nghi hoc" />
         <v-scene v-bind:transparent="true" v-bind:width="width" v-bind:height="height">
             <v-shape shape="polygon" :path="[0, 1, 32, 21, 0, 41, 33, 61, 4, 81, 32, 101, 0, 101, 0, 1]" :enabled="true">
             </v-shape>
@@ -45,11 +39,9 @@ const app = new Vue({
             </v-shape>
         </v-scene>
         <button v-on:click="double">Click me</button>
-        <my-hello slogan="Cong hoa xa hoi chu nghia" title="Don xin nghi hoc" size="17"/>
     </fragment>
     `,
     data : {
-        message: "Cong hoa xa hoi chu nghia Viet Nammmm",
         width: 600,
         height: 400,
         x: 100,
@@ -72,6 +64,6 @@ const app = new Vue({
         }
     },
     components: {
-        Hello, VScene, MyHello, VShape
+        VScene, VShape
     }
 });
