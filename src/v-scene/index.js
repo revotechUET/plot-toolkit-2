@@ -1,5 +1,8 @@
 import {autoDetectRenderer, utils, Container} from 'pixi.js';
 import VObject from '../v-object';
+import template from './template.html';
+import style from './style.less';
+import {debounce} from 'lodash';
 function getPixiApp(force) {
     if (!this.pixiApp || force) {
         const renderer = autoDetectRenderer({ 
@@ -10,7 +13,7 @@ function getPixiApp(force) {
         });
         const stage = new Container();
         stage.sortableChildren = true;
-        stage.hostedComponent = this;
+        stage.hostComponent = this;
         this.pixiApp = {
             renderer, stage,
             transparent: this.transparent
@@ -21,26 +24,31 @@ function getPixiApp(force) {
 function getPixiObj() {
     return (this.getPixiApp() || {}).stage;
 }
-function renderGraphic(obj) {
-    //console.log("Graphic render");
+function rawRenderGraphic(obj) {
+    let app = this.getPixiApp();
+    if (obj) {
+        obj.render(app.renderer);
+    }
+    else app.renderer.render(obj || app.stage);
+}
+/*function renderGraphic(obj) {
     let app = this.getPixiApp();
     app.renderer.render(obj || app.stage);
-}
+}*/
  
 let component = {
     props: ['transparent'],
+    template,
     mounted: function() {
-        console.log('v-scene mounted fn');
-        console.log(utils.string2hex('#FF00FF44'));
         this.$el.appendChild(this.getPixiApp().renderer.view)
     },
     methods: {
-        getPixiApp, getPixiObj, renderGraphic
-    },
-    computed: {
-        compProps: function() {
-            return `${this.baseCompProps} | ${this.transparent}`;
-        }
+        getPixiApp, getPixiObj,
+        getRoot: function() {
+            return this.getPixiApp().stage;
+        },
+        rawRenderGraphic,
+        renderGraphic:debounce(rawRenderGraphic, 100) 
     },
     watch: {
         compProps: function() {

@@ -33,8 +33,8 @@ const app = new Vue({
             </v-circle>
             <v-rect 
                 fill-color="0xFFFFDD" 
-                :pos-x="x+100" 
-                :pos-y="y+100"
+                :pos-x="x + 100" 
+                :pos-y="y + 100"
                 line-color="#FF00FF"
                 height="180"
                 :enabled="true"
@@ -83,10 +83,20 @@ const app = new Vue({
       this.x += 10;
       this.y += 10;
     },
-    click1: function(target, localPos, globalPos, evt) {
-      target.hostedComponent.$nextTick(() => {
-        target.zIndex++;
-      });
+    methods: {
+      double: function(evt) {
+        this.x += 10;
+        this.y += 10;
+      },
+      click1: function(target, localPos, globalPos, evt) {
+        target.hostComponent.$nextTick(() => {
+          target.zIndex++;
+        });
+      },
+      dropFn: function(target, pos) {
+        if (pos.x !== undefined) this.x = pos.x;
+        if (pos.y !== undefined) this.y = pos.y;
+      }
     },
     dropFn: function(target, pos) {
       this.x = pos.x;
