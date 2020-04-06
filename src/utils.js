@@ -15,6 +15,6 @@ export function getPosY(coordinate, defaultY) {
 }
 export const DefaultColors = {
     lineColor: 0x0000FF,
-    fillColor: 0xFFFF00,
+    fillColor: 0xCCCCCC,
     lineWidth: 1
 }
