@@ -50,14 +50,14 @@ const app = new Vue({
                 :path="[0, 1, 32, 21, 0, 41, 33, 61, 4, 81, 32, 101]"
                 >
             </v-polygon>
-            <v-path v-bind:path="path" :enabled="true"></v-path>
+            <v-path v-bind:path="path" :enabled="true" fill-color="0xFFFFFF" shape="square"></v-path>
         </v-scene>
         <button v-on:click="double">Click me</button>
     </fragment>
     `,
   data: {
-    width: 600,
-    height: 400,
+    width: 1000,
+    height: 800,
     x: 100,
     y: 100,
     shape: "circle",
