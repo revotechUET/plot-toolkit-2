@@ -1,5 +1,6 @@
 import VContainer from '../v-container';
 import VShape from '../v-shape';
+import VRect from '../v-rect';
 import {getColor, getPosX, getPosY, getTransparency, DefaultColors} from "../utils";
 import template from './template.html';
 
@@ -119,10 +120,13 @@ let component = {
         },
         draw: function(obj) {
             obj.clear();
-            let lw = this.lineWidth || 1;
+            let lw = parseInt(this.lineWidth);
+            lw = isNaN(lw)?0:lw;
             let lt = this.lineTransparency || 1.0;
             obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
             obj.beginFill(getColor(this.fillColor, DefaultColors.fillColor), getTransparency(this.fillTransparency));
+            obj.drawRect(0,0, this.width, this.height);
+            /*
             switch(this.direction) {
             case 'vertical':
                 obj.drawRect(
@@ -138,6 +142,7 @@ let component = {
                 );
                 break;
             }
+            */
             obj.endFill();
             obj.x = getPosX(this.coordinate, this.posX);
             obj.y = getPosY(this.coordinate, this.posY);
@@ -145,7 +150,7 @@ let component = {
         }
     },
     components: {
-        VShape
+        VRect
     }
 }
 export default VShape.extend(component);

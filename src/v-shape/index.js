@@ -236,34 +236,36 @@ function normalizePos(pos) {
   }
   return pos;
 }
+  /*
 function draw(obj) {
-  // obj.clear();
-  // let lw = this.lineWidth || 1;
-  // let lt = this.lineTransparency || 1.0;
-  // if (this.hasMouseOver) {
-  //     lw += 4;
-  //     lt /= 2;
-  // }
-  // obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
-  // obj.beginFill(getColor(this.fillColor, DefaultColors.fillColor), getTransparency(this.fillTransparency));
-  // switch (this.shape) {
-  //     case 'rect':
-  //         obj.drawRect(0, 0, this.width || 0, this.height || 0);
-  //         break;
-  //     case 'circle':
-  //         obj.drawCircle(0, 0, this.radius || 0);
-  //         break;
-  //     case 'polygon':
-  //         obj.drawPolygon(this.path || []);
-  //         break;
-  //     default:
-  //         console.error('Unknown shape type');
-  // }
-  // obj.endFill();
-  // obj.x = getPosX(this.coordinate, this.posX);
-  // obj.y = getPosY(this.coordinate, this.posY);
-  // obj.rotation = this.rotation || 0;
+  obj.clear();
+  let lw = this.lineWidth || 1;
+  let lt = this.lineTransparency || 1.0;
+  if (this.hasMouseOver) {
+      lw += 4;
+      lt /= 2;
+  }
+  obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
+  obj.beginFill(getColor(this.fillColor, DefaultColors.fillColor), getTransparency(this.fillTransparency));
+  switch (this.shape) {
+      case 'rect':
+          obj.drawRect(0, 0, this.width || 0, this.height || 0);
+          break;
+      case 'circle':
+          obj.drawCircle(0, 0, this.radius || 0);
+          break;
+      case 'polygon':
+          obj.drawPolygon(this.path || []);
+          break;
+      default:
+          console.error('Unknown shape type');
+  }
+  obj.endFill();
+  obj.x = getPosX(this.coordinate, this.posX);
+  obj.y = getPosY(this.coordinate, this.posY);
+  obj.rotation = this.rotation || 0;
 }
+  */
 const propKeys = [
   "shape",
   "clipped",
@@ -309,7 +311,7 @@ let component = {
     createPixiObj,
     getMaskObj,
     registerEvents,
-    draw,
+    //draw,
     dragStart,
     dragEnd,
     dragMove,

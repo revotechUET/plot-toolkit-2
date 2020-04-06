@@ -10,13 +10,13 @@ const app = new Vue({
   el: "#vue-app",
   template: `<fragment>
         <v-scene name="scene" v-bind:transparent="true" v-bind:width="width" v-bind:height="height">
-            <v-resizable shape="rect" :fill-transparency="0.0001" :enabled="false"
+            <v-resizable shape="rect" :enabled="false"
                 :knob-flags="[true, true]"
-                :clipped="false"
+                :fill-color="0xFFFFCC"
                 name="resizeable" direction="horizontal"
                 :line-width="1" :line-color="0x888888"
                 :on-resize="resize"
-                :pos-x="40" :pos-y="0" :width="width1" :height="height1" size="30">
+                :pos-x="40" :pos-y="0" :width="width1" :height="height1" size="10">
             </v-resizable>
         </v-scene>
     </fragment>
@@ -26,7 +26,7 @@ const app = new Vue({
     height: 400,
     x: 100,
     y: 100,
-    width1: 170,
+    width1: 270,
     height1: 270
   },
   methods: {
