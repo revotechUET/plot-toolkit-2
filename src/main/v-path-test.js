@@ -1,11 +1,11 @@
 const Vue = require("vue").default;
 const FragmentPlugin = require("vue-fragment").Plugin;
-const VScene = require("./v-scene").default;
-const VShape = require("./v-shape").default;
-const VRect = require("./v-rect").default;
-const VCircle = require("./v-circle").default;
-const VPolygon = require("./v-polygon").default;
-const VPath = require("./v-path").default;
+const VScene = require("../v-scene").default;
+const VShape = require("../v-shape").default;
+const VRect = require("../v-rect").default;
+const VCircle = require("../v-circle").default;
+const VPolygon = require("../v-polygon").default;
+const VPath = require("../v-path").default;
 
 Vue.use(FragmentPlugin);
 
@@ -50,7 +50,7 @@ const app = new Vue({
                 :path="[0, 1, 32, 21, 0, 41, 33, 61, 4, 81, 32, 101]"
                 >
             </v-polygon>
-            <v-path v-bind:path="path" :enabled="true" fill-color="0xFFFFFF" shape="square"></v-path>
+            <v-path v-bind:path="path" :enabled="true" fill-color="0xFFFFFF" symbol-shape="star"></v-path>
         </v-scene>
         <button v-on:click="double">Click me</button>
     </fragment>

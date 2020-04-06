@@ -1,11 +1,11 @@
 const Vue = require("vue").default;
 const FragmentPlugin = require("vue-fragment").Plugin;
-const VScene = require("./v-scene").default;
-const VShape = require("./v-shape").default;
-const VRect = require("./v-rect").default;
-const VCircle = require("./v-circle").default;
-const VPolygon = require("./v-polygon").default;
-const VPath = require("./v-path").default;
+const VScene = require("../v-scene").default;
+const VShape = require("../v-shape").default;
+const VRect = require("../v-rect").default;
+const VCircle = require("../v-circle").default;
+const VPolygon = require("../v-polygon").default;
+const VPath = require("../v-path").default;
 
 Vue.use(FragmentPlugin);
 
@@ -50,7 +50,7 @@ const app = new Vue({
                 :path="[0, 1, 32, 21, 0, 41, 33, 61, 4, 81, 32, 101]"
                 >
             </v-polygon>
-            <v-path v-bind:path="path" :enabled="true"></v-path>
+            <v-path v-bind:path="path" :enabled="true" shape="star"></v-path>
         </v-scene>
         <button v-on:click="double">Click me</button>
     </fragment>
@@ -83,24 +83,14 @@ const app = new Vue({
       this.x += 10;
       this.y += 10;
     },
-    methods: {
-      double: function(evt) {
-        this.x += 10;
-        this.y += 10;
-      },
-      click1: function(target, localPos, globalPos, evt) {
-        target.hostComponent.$nextTick(() => {
-          target.zIndex++;
-        });
-      },
-      dropFn: function(target, pos) {
-        if (pos.x !== undefined) this.x = pos.x;
-        if (pos.y !== undefined) this.y = pos.y;
-      }
+    click1: function(target, localPos, globalPos, evt) {
+      target.hostComponent.$nextTick(() => {
+        target.zIndex++;
+      });
     },
     dropFn: function(target, pos) {
-      this.x = pos.x;
-      this.y = pos.y;
+      if (pos.x !== undefined) this.x = pos.x;
+      if (pos.y !== undefined) this.y = pos.y;
     }
   },
   components: {

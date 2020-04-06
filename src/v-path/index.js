@@ -30,7 +30,7 @@ function draw(obj) {
     obj.lineTo(points[i].x, points[i].y);
   }
   obj.beginFill(0xde3249, 1);
-  switch (this.shape) {
+  switch (this.symbolShape) {
     case "square":
       for (let i = 0; i < points.length; i++) {
         var edge = 10;
@@ -63,6 +63,7 @@ function draw(obj) {
 }
 
 let component = {
+  props: ["symbolShape"],
   methods: {
     draw
   }
