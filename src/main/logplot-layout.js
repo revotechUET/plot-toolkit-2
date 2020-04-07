@@ -10,9 +10,9 @@ Vue.use(Plugin);
 new Vue({
     el: "#vue-app",
     template: `
-        <v-scene :transparent="true" :width="width" :height="height">
-            <v-layout direction="vertical" :width="width" :height="height">
-                <v-resizable direction="vertical" :width="width" :height="uHeight"
+        <v-scene :transparent="true" :view-width="width" :view-height="height">
+            <v-layout direction="vertical" :view-width="width" :view-height="height">
+                <v-resizable direction="vertical" :view-width="width" :view-height="uHeight"
                     :constrained="true"
                     :on-resize="resize"
                     :fill-color="0xFFCCCC"
@@ -20,10 +20,10 @@ new Vue({
                     :size="3"
                     :knobFlags="[false, true]">
                 </v-resizable>
-                <v-container direction="vertical" :width="width" :height="lHeight" 
+                <v-container direction="vertical" :view-width="width" :view-height="lHeight" 
                     :constrained="true"
                     fill-color="0xCCFFCC">
-                    <v-rect :pos-x="50" :pos-y="50" :width="100" :height="150"
+                    <v-rect :view-pos-x="50" :view-pos-y="50" :view-width="100" :view-height="150"
                         :clipped="true"
                     />
                 </v-container>
@@ -31,7 +31,7 @@ new Vue({
         </v-scene>
     `,
     data: {
-        width: 800, height: 600, uHeight: 200
+        width: 600, height: 400, uHeight: 200
     },
     computed: {
         lHeight: function(){

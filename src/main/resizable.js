@@ -9,14 +9,14 @@ Vue.use(Plugin);
 const app = new Vue({
   el: "#vue-app",
   template: `<fragment>
-        <v-scene name="scene" v-bind:transparent="true" v-bind:width="width" v-bind:height="height">
+        <v-scene name="scene" :transparent="true" :view-width="width" :view-height="height">
             <v-resizable shape="rect" :enabled="false"
                 :knob-flags="[true, true]"
                 :fill-color="0xFFFFCC"
                 name="resizeable" direction="horizontal"
                 :line-width="1" :line-color="0x888888"
                 :on-resize="resize"
-                :pos-x="40" :pos-y="0" :width="width1" :height="height1" size="10">
+                :view-pos-x="40" :view-pos-y="0" :view-width="width1" :view-height="height1" size="10">
             </v-resizable>
         </v-scene>
     </fragment>

@@ -9,7 +9,7 @@ const KNOB_FILL_TRANS = 0.2;
 const KNOB_OUTLINE_TRANS_HIGHTLIGHT = 0.01;
 const KNOB_FILL_TRANS_HIGHTLIGHT = 1;
 let component = {
-    props: ['direction', 'width', 'height', 'size', 'onResize', 'knobFlags'],
+    props: ['direction', 'size', 'onResize', 'knobFlags'],
     template,
     data: function() {
         return {

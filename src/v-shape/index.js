@@ -127,27 +127,6 @@ function dragEnd(evtData, target) {
   }
   this.draggingData = {};
 }
-/*
-function dragEnd1(evtData, target) {
-    if (!this.dragging) return;
-    this.dragging = false;
-    this.pixiObj.zIndex = this.draggingData.zIndex;
-    this.makeScene();
-    let newPos = this.normalizePos(target.parent.toLocal(evtData.global));
-    newPos.x -= this.draggingData.x;
-    newPos.y -= this.draggingData.y;
-    if (this.dragConstraint === 'x') {
-        this.onDrop && this.onDrop(target, {x:newPos.x});
-    }
-    else if (this.dragConstraint === 'y') {
-        this.onDrop && this.onDrop(target, {y: newPos.y});
-    }
-    else {
-        this.onDrop && this.onDrop(target, newPos);
-    }
-    this.draggingData = {};
-}
-*/
 function dragMove(evtData, target) {
   if (this.dragging) {
     let pPos = this.$parent.getPixiObj().toLocal(evtData.global);
@@ -170,32 +149,6 @@ function dragMove(evtData, target) {
           this.maskObj.x = x;
           this.maskObj.y = this.draggingData.globalY;
         }
-      } else {
-        this.pixiObj.x = x;
-        this.pixiObj.y = y;
-        if (this.maskObj) {
-          this.maskObj.x = x;
-          this.maskObj.y = y;
-        }
-      }
-      this.rawRenderGraphic();
-    });
-  }
-}
-function dragMove1(evtData, target) {
-  if (this.dragging) {
-    let pPos = this.pixiObj.parent.toLocal(evtData.global);
-    let newPos = this.normalizePos(pPos);
-    console.log(newPos, pPos, evtData.global);
-    const x = newPos.x - this.draggingData.x;
-    const y = newPos.y - this.draggingData.y;
-    requestAnimationFrame(() => {
-      if (this.dragConstraint === "y") {
-        this.pixiObj.y = y;
-        if (this.maskObj) this.maskObj.y = y;
-      } else if (this.dragConstraint === "x") {
-        this.pixiObj.x = x;
-        if (this.maskObj) this.maskObj.x = x;
       } else {
         this.pixiObj.x = x;
         this.pixiObj.y = y;
@@ -236,44 +189,11 @@ function normalizePos(pos) {
   }
   return pos;
 }
-  /*
-function draw(obj) {
-  obj.clear();
-  let lw = this.lineWidth || 1;
-  let lt = this.lineTransparency || 1.0;
-  if (this.hasMouseOver) {
-      lw += 4;
-      lt /= 2;
-  }
-  obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
-  obj.beginFill(getColor(this.fillColor, DefaultColors.fillColor), getTransparency(this.fillTransparency));
-  switch (this.shape) {
-      case 'rect':
-          obj.drawRect(0, 0, this.width || 0, this.height || 0);
-          break;
-      case 'circle':
-          obj.drawCircle(0, 0, this.radius || 0);
-          break;
-      case 'polygon':
-          obj.drawPolygon(this.path || []);
-          break;
-      default:
-          console.error('Unknown shape type');
-  }
-  obj.endFill();
-  obj.x = getPosX(this.coordinate, this.posX);
-  obj.y = getPosY(this.coordinate, this.posY);
-  obj.rotation = this.rotation || 0;
-}
-  */
 const propKeys = [
   "shape",
   "clipped",
   "enabled",
-  "width",
-  "height",
   "radius",
-  "path",
   "lineWidth",
   "lineColor",
   "lineTransparency",
@@ -311,7 +231,6 @@ let component = {
     createPixiObj,
     getMaskObj,
     registerEvents,
-    //draw,
     dragStart,
     dragEnd,
     dragMove,

@@ -1,9 +1,9 @@
 <div>{{compProps}}
     <fragment v-if="direction === 'vertical'">
-        <v-rect v-for="(knob,index) in knobs"
+        <v-rect v-for="(knob,index) in knobs" :key="index"
             v-if="_knobFlags[index]"
-            :pos-x="0" :pos-y="index*(height - knobSize)" 
-            :width="width" :height="knobSize" 
+            :view-pos-x="0" :view-pos-y="index*(height - knobSize)" 
+            :view-width="width" :view-height="knobSize" 
             :enabled="true" :draggable="true" drag-constraint="y" 
             :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
             :line-transparency="knob.outline"
@@ -15,9 +15,9 @@
     </fragment>
     <fragment v-if="direction === 'horizontal'">
         <v-rect v-for="(knob, index) in knobs"
-            v-if="_knobFlags[index]"
-            :pos-x="index * (width - knobSize)" :pos-y="0" 
-            :width="knobSize" :height="height" 
+            v-if="_knobFlags[index]" :key="index"
+            :view-pos-x="index * (width - knobSize)" :view-pos-y="0" 
+            :view-width="knobSize" :view-height="height" 
             :enabled="true" :draggable="true" dragConstraint="x" 
             :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
             :line-transparency="knob.outline"
@@ -25,7 +25,7 @@
             :onmouseover="() => hightlight(knob)"
             :onmouseout="() => dehightlight(knob)"
             :on-drop="(target, pos) => dragEnd(index, pos)"
-            cursor="col-resize"></v-vrect>
+            cursor="col-resize"></v-rect>
     </fragment>
     <slot />
 </div>

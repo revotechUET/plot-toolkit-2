@@ -31,6 +31,7 @@ function draw(obj) {
 }
 
 let component = {
+  props: ["path"],
   methods: {
     draw
   }
