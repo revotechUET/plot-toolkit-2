@@ -63,7 +63,20 @@ function draw(obj) {
 }
 
 let component = {
-	props: ["symbolShape, "],
+	props: ["symbolShape", "view-path", "real-path"],
+	computed: {
+		path: function() {
+			if (this.viewPath) return this.viewPath;
+			if (!this.realPath) return [];
+			let transformXFn = this.$parent.transformX();
+			let transformYFn = this.$parent.transformY();
+			if (!transformXFn || !transformYFn) return [];
+			return this.realPath.map((point) => ({
+				x: transformXFn(point.x),
+				y: transformYFn(point.y),
+			}));
+		},
+	},
 	methods: {
 		draw,
 	},

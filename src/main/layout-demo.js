@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import {Plugin} from 'vue-fragment';
 import VScene from '../v-scene';
-import VShape from '../v-shape';
+import VRect from '../v-rect';
 import VLayout from "../v-layout";
 import VResizable from "../v-resizable";
 
@@ -10,29 +10,29 @@ Vue.use(Plugin);
 const app = new Vue({
     el: "#vue-app",
     template: `<fragment>
-        <v-scene name="scene" :transparent="true" :width="width" :height="height">
-            <v-layout name="layout" direction="horizontal" :width="width-50" :height="height">
-                <v-shape shape="rect" :width="30" :height="100" :line-width="1"
+        <v-scene name="scene" :transparent="true" :view-width="width" :view-height="height">
+            <v-layout name="layout" direction="horizontal" :view-width="width-50" :view-height="height">
+                <v-rect :view-width="30" :view-height="100" :line-width="1"
                     :constrained="true"
                     fill-color="#ffcccc" />
-                <v-shape shape="rect" :width="30" :height="100" :line-width="1" 
+                <v-rect :view-width="30" :view-height="100" :line-width="1" 
                     :constrained="true"
                     fill-color="#ccffcc" />
-                <v-shape shape="rect" :width="30" :height="100" :line-width="1" 
+                <v-rect :view-width="30" :view-height="100" :line-width="1" 
                     :constrained="true"
                     fill-color="#ffcccc" />
-                <v-shape shape="rect" :width="30" :height="100" :line-width="1" 
+                <v-rect :view-width="30" :view-height="100" :line-width="1" 
                     :constrained="true"
                     fill-color="#ccffcc" />
                 <v-resizable direction="horizontal"
                     :constrained="true"
                     :on-resize="resize"
                     :knob-flags="[false, true]"
-                    :width="w" :height="h" />
-                <v-shape shape="rect" :width="30" :height="100" :line-width="1" 
+                    :view-width="w" :view-height="h" />
+                <v-rect :view-width="30" :view-height="100" :line-width="1" 
                     :constrained="true"
                     fill-color="#ffcccc" />
-                <v-shape shape="rect" :width="30" :height="100" :line-width="1" 
+                <v-rect :view-width="30" :view-height="100" :line-width="1" 
                     :enabled="true" :draggable="true"
                     :constrained="true"
                     fill-color="#ccffcc" />
@@ -53,6 +53,6 @@ const app = new Vue({
         }
     },
     components: {
-        VScene, VLayout, VShape, VResizable
+        VScene, VLayout, VRect, VResizable
     }
 });

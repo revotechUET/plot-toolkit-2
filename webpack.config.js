@@ -11,7 +11,8 @@ module.exports = function(env) {
         },
         resolve: {
             alias: {
-                'vue$': 'vue/dist/vue.esm.js'
+                'vue$': 'vue/dist/vue.esm.js',
+                'd3-scale': 'd3-scale/dist/d3-scale.min.js'
             },
             extensions: ['*', '.js', '.vue', '.json']
         },

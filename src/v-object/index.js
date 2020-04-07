@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import template from './template.html';
+import {scaleLinear, scaleLog} from 'd3-scale';
 
 function makeScene() {
     let pixiObj = this.getPixiObj();
@@ -52,7 +53,9 @@ function draw(obj) {
     console.log('abstract draw function');
 }
 let component = {
-    props: ["name", "posX", "posY", "width", "height", 'rotation', 'cursor', 'constrained'],
+    props: ["name", "viewPosX", "viewPosY", "viewWidth", "viewHeight", 'rotation', 'cursor', 'constrained',
+        'realMinX', 'realMaxX', 'realMinY', 'realMaxY', 'xTransform', 'yTransform'    
+    ],
     template,
     data: function() {
         return {
@@ -75,6 +78,22 @@ let component = {
                 hash[key] = this[key];
             }
             return JSON.stringify(hash);
+        },
+        posX: function() {
+            if (!isNaN(this.viewPosX)) return this.viewPosX;
+            return this._getX(this.realMinX);
+        },
+        posY: function() {
+            if (!isNaN(this.viewPosY)) return this.viewPosY;
+            return this._getY(this.realMinY);
+        },
+        width: function() {
+            if (!isNaN(this.viewWidth)) return this.viewWidth;
+            return this._getX(this.realMaxX) - this._getX(this.realMinX);
+        },
+        height: function() {
+            if (!isNaN(this.viewHeight)) return this.viewHeight;
+            return this._getY(this.realMaxY) - this._getY(this.realMinY);
         }
     },
     watch: {
@@ -89,6 +108,60 @@ let component = {
         },
         triggerRelayout: function() {
             this.$parent.relayout(this);
+        },
+        _getX: function(realX) {
+            let transformX = this.$parent.transformX();
+            if (transformX) {
+                return transformX(realX);
+            }
+            return 0;
+        },
+        _getY: function(realY) {
+            let transformY = this.$parent.transformY();
+            if (transformY) {
+                return transformY(realY);
+            }
+            return 0;
+        },
+        transformX: function(){
+            let transformFn;
+            switch (this.xTransform) {
+                case "linear":
+                    transformFn = scaleLinear();
+                    break;
+                case "loga":
+                    transformFn = scaleLog();
+                    break;
+                default:
+                    return null;
+            }
+            if (isNaN(this.viewWidth) || isNaN(this.viewPosX)|| 
+                isNaN(this.realMinX)  || isNaN(this.realMaxX)  ) 
+            {
+                return null;
+            }
+            return transformFn.domain([this.realMinX, this.realMaxX])
+                .range([this.viewPosX, this.viewPosX + this.viewWidth]);
+        },
+        transformY: function() {
+            let transformFn;
+            switch (this.yTransform) {
+                case "linear":
+                    transformFn = scaleLinear();
+                    break;
+                case "loga":
+                    transformFn = scaleLog();
+                    break;
+                default:
+                    return null;
+            }
+            if (isNaN(this.viewHeight) || isNaN(this.viewPosY)|| 
+                isNaN(this.realMinY)  || isNaN(this.realMaxY)  ) 
+            {
+                return null;
+            }
+            return transformFn.domain([this.realMinY, this.realMaxY])
+                .range([this.viewPosY, this.viewPosY + this.viewHeight]);
         }
     }
 }
