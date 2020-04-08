@@ -1,12 +1,6 @@
 import VObject from "../v-object";
 import { Graphics } from "pixi.js";
-import {
-  getColor,
-  DefaultColors,
-  getTransparency,
-  getPosX,
-  getPosY
-} from "../utils";
+
 function createPixiObj() {
   return new Graphics();
 }

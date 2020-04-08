@@ -1,7 +1,7 @@
 import VShape from "../v-shape";
 import {
 	getColor,
-	DefaultColors,
+	DefaultValues,
 	getTransparency,
 	getPosX,
 	getPosY,
@@ -15,10 +15,10 @@ function draw(obj) {
 		lw += 4;
 		lt /= 2;
 	}
-	obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
+	obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
 
 	obj.beginFill(
-		getColor(this.fillColor, DefaultColors.fillColor),
+		getColor(this.fillColor, DefaultValues.fillColor),
 		getTransparency(this.fillTransparency)
 	);
 
