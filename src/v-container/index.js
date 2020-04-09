@@ -1,7 +1,8 @@
 import VObject from '../v-object';
 import { Graphics, Container } from 'pixi.js';
-import {getPosX, getPosY, getColor, getTransparency, DefaultColors} from '../utils';
+import {getPosX, getPosY, getColor, getTransparency, DefaultValues} from '../utils';
 import layoutMixin from '../mixins/layout';
+
 let component = {
     props: ['clipped', "lineWidth", "lineColor", "lineTransparency"],
     methods: {
@@ -9,7 +10,7 @@ let component = {
             obj.clear();
             let lw = this.lineWidth || 0;
             let lt = getTransparency(this.lineTransparency);
-            obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
+            obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
             obj.beginFill(0xFFFFFF, 0.001);
             obj.drawRect(0, 0, this.width, this.height);
             obj.endFill();

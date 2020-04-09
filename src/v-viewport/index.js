@@ -3,7 +3,7 @@ import {Graphics, Point} from 'pixi.js';
 import VContainer from "../v-container";
 import VRect from "../v-rect";
 import wheelManager from '../wheel-manager';
-import { getColor, getPosX, getPosY, getTransparency, DefaultColors } from '../utils';
+import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from '../utils';
 console.log('Load v-viewport');
 let component = {
     props: ["viewportWidth", "viewportHeight", "pan"],
@@ -56,7 +56,7 @@ let component = {
             obj.clear();
             let lw = isNaN(this.lineWidth)?0:this.lineWidth;
             let lt = getTransparency(this.lineTransparency);
-            obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
+            obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
             obj.beginFill(0xEEEEEE, 0.2);
             obj.drawRect(0,0, this.viewportWidth || 0, this.viewportHeight || 0);
             obj.endFill();
