@@ -2,7 +2,9 @@ import {autoDetectRenderer, utils, Container} from 'pixi.js';
 import VObject from '../v-object';
 import template from './template.html';
 import style from './style.less';
+import layoutMixin from '../mixins/layout';
 import {debounce} from 'lodash';
+import wheelManager from '../wheel-manager';
 function getPixiApp(force) {
     if (!this.pixiApp || force) {
         const renderer = autoDetectRenderer({ 
@@ -11,6 +13,9 @@ function getPixiApp(force) {
             transparent: this.transparent, 
             antialias: true 
         });
+        renderer.view.onwheel = (evt) => {
+            wheelManager.emit('wheel', evt);
+        }
         const stage = new Container();
         stage.sortableChildren = true;
         stage.hostComponent = this;
@@ -42,6 +47,11 @@ let component = {
     mounted: function() {
         this.$el.appendChild(this.getPixiApp().renderer.view)
     },
+    computed: {
+        componentType: function() {
+            return "VScene";
+        }
+    },
     methods: {
         getPixiApp, getPixiObj,
         getRoot: function() {
@@ -57,7 +67,8 @@ let component = {
             let app = this.getPixiApp(true);
             this.$el.appendChild(app.renderer.view);
         }
-    }
+    },
+    mixins: [layoutMixin]
 };
 
 export default VObject.extend(component);

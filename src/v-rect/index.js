@@ -9,10 +9,10 @@ import {
 
 function draw(obj) {
   obj.clear();
-  let lw = this.lineWidth || 1;
+  let lw = this.lineWidth || 0;
   let lt = this.lineTransparency || 1.0;
   if (this.hasMouseOver) {
-    lw += 4;
+    lw = lw?(lw + 4):0;
     lt /= 2;
   }
   obj.lineStyle(lw, getColor(this.lineColor, DefaultColors.lineColor), lt, 0);
@@ -31,6 +31,9 @@ function draw(obj) {
 }
 
 let component = {
+  computed: {
+    componentType: function() {return "VRect"}
+  },
   methods: {
     draw
   }

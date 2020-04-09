@@ -1,4 +1,5 @@
-<div>{{compProps}}
+<div style="padding-left:12px;">{{compProps}}
+    <slot />
     <fragment v-if="direction === 'vertical'">
         <v-rect v-for="(knob,index) in knobs" :key="index"
             v-if="_knobFlags[index]"
@@ -10,7 +11,8 @@
             :fill-transparency="knob.fill"
             :onmouseover="() => hightlight(knob)"
             :onmouseout="() => dehightlight(knob)"
-            :on-drop="(target, pos) => dragEnd(index, pos)"
+            :on-drag="(target) => dragStart(index, target)"
+            :on-drop="(target, pos) => dragEnd(index, pos, target)"
             cursor="row-resize"></v-rect>
     </fragment>
     <fragment v-if="direction === 'horizontal'">
@@ -24,8 +26,8 @@
             :fill-transparency="knob.fill"
             :onmouseover="() => hightlight(knob)"
             :onmouseout="() => dehightlight(knob)"
-            :on-drop="(target, pos) => dragEnd(index, pos)"
+            :on-drag="(target) => dragStart(index, target)"
+            :on-drop="(target, pos) => dragEnd(index, pos, target)"
             cursor="col-resize"></v-rect>
     </fragment>
-    <slot />
 </div>

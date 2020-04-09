@@ -1,0 +1,24 @@
+<div class="v-object">{{compProps}}
+    <v-rect :x-transform="xTransform" 
+        :y-transform="yTransform"
+        :real-max-x="realMaxX"
+        :real-max-y="realMaxY"
+        :real-min-x="realMinX"
+        :real-min-y="realMinY"
+        :constrained="false"
+        :view-width="viewWidth"
+        :view-height="viewHeight"
+        :view-pos-x="offsetX"
+        :view-pos-y="offsetY"
+        :enabled="true"
+        :clipped="clipped"
+        :line-width="0"
+        :fill-color="0xFFFF00"
+        :draggable="pan !== 'none'"
+        :drag-constraint="pan"
+        :onmouseover="detectCursor"
+        :onmousemove="detectCursor"
+        :on-drop="dragEnd">
+        <slot />
+    </v-rect>
+</div>

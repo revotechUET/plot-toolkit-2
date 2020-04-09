@@ -1,12 +1,5 @@
 import VObject from "../v-object";
 import { Graphics } from "pixi.js";
-import {
-  getColor,
-  DefaultColors,
-  getTransparency,
-  getPosX,
-  getPosY
-} from "../utils";
 function createPixiObj() {
   return new Graphics();
 }
@@ -54,7 +47,7 @@ function registerEvents(_pixiObj) {
     let localPos = currentTarget.toLocal(globalPos);
     this.onmousedown &&
       this.onmousedown(currentTarget, localPos, globalPos, evt);
-    if (this.draggable) this.dragStart(currentTarget, localPos, globalPos);
+    if (this.draggable) this.dragStart(currentTarget, localPos, globalPos, evt.data.originalEvent);
   };
   const handleMouseUp = evt => {
     let currentTarget = evt.currentTarget;
@@ -88,8 +81,9 @@ function registerEvents(_pixiObj) {
     .on("mouseupoutside", handleMouseUp)
     .on("mousemove", handleMouseMove);
 }
-function dragStart(target, localPos, globalPos) {
-  console.log("dragStart", localPos.x, localPos.y);
+function dragStart(target, localPos, globalPos, oriEvent) {
+  console.log("dragStart", localPos.x, localPos.y, globalPos, oriEvent);
+  if (target.locked) return;
   this.dragging = true;
   this.draggingData.x = localPos.x;
   this.draggingData.y = localPos.y;
@@ -130,31 +124,34 @@ function dragEnd(evtData, target) {
 function dragMove(evtData, target) {
   if (this.dragging) {
     let pPos = this.$parent.getPixiObj().toLocal(evtData.global);
+    let pStartPos = this.$parent.getPixiObj().toLocal({x:this.draggingData.globalX, y:this.draggingData.globalY})
     let newPos = this.normalizePos(pPos);
     let newGlobal = this.$parent.getPixiObj().toGlobal(newPos);
     const x = newGlobal.x - this.draggingData.x;
     const y = newGlobal.y - this.draggingData.y;
+    const px = newPos.x - this.draggingData.x;
+    const py = newPos.y - this.draggingData.y;
     requestAnimationFrame(() => {
       if (this.dragConstraint === "y") {
         this.pixiObj.y = y;
         this.pixiObj.x = this.draggingData.globalX;
         if (this.maskObj) {
-          this.maskObj.y = y;
-          this.maskObj.x = this.draggingData.globalX;
+          this.maskObj.y = py;
+          this.maskObj.x = pStartPos.x;
         }
       } else if (this.dragConstraint === "x") {
         this.pixiObj.x = x;
         this.pixiObj.y = this.draggingData.globalY;
         if (this.maskObj) {
-          this.maskObj.x = x;
-          this.maskObj.y = this.draggingData.globalY;
+          this.maskObj.x = px;
+          this.maskObj.y = pStartPos.y;
         }
       } else {
         this.pixiObj.x = x;
         this.pixiObj.y = y;
         if (this.maskObj) {
-          this.maskObj.x = x;
-          this.maskObj.y = y;
+          this.maskObj.x = px;
+          this.maskObj.y = py;
         }
       }
       this.rawRenderGraphic();

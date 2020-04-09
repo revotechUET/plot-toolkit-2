@@ -1,6 +1,7 @@
 import VContainer from '../v-container';
 import VShape from '../v-shape';
 import VRect from '../v-rect';
+import layoutMixin from "../mixins/layout";
 import {getColor, getPosX, getPosY, getTransparency, DefaultColors} from "../utils";
 import template from './template.html';
 
@@ -15,14 +16,17 @@ let component = {
         return {
             knobs: [{
                 outline: KNOB_OUTLINE_TRANS,
-                fill: KNOB_FILL_TRANS
+                fill: KNOB_FILL_TRANS,
+                mask: null
             },{
                 outline: KNOB_OUTLINE_TRANS,
-                fill: KNOB_FILL_TRANS
+                fill: KNOB_FILL_TRANS,
+                mask: null
             }]
         }
     },
     computed: {
+        componentType: function() { return "VResizable" },
         _knobFlags: function() {
             return (this.knobFlags || [true, true]).map(f => f?1:0);
         },
@@ -51,7 +55,11 @@ let component = {
             knob.outline = KNOB_OUTLINE_TRANS;
             knob.fill = KNOB_FILL_TRANS;
         },
-        dragEnd: function(knobIdx, pos) {
+        dragStart: function(knobIdx, target) {
+            this.knobs[knobIdx].mask = target.mask;
+            target.mask = null;
+        },
+        dragEnd: function(knobIdx, pos, target) {
             let width = this.width;
             let height = this.height;
             switch(knobIdx) {
@@ -82,6 +90,8 @@ let component = {
                     break;
                 }
             }
+            target.mask = this.knobs[knobIdx].mask;
+            this.knobs[knobIdx].mask = null;
             this.onResize && this.onResize({width, height}, this);
         },
         validateDrag: function(knobIdx, pPos) {
@@ -149,6 +159,7 @@ let component = {
             obj.rotation = this.rotation || 0;
         }
     },
+    mixins: [layoutMixin],
     components: {
         VRect
     }

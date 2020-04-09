@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import template from './template.html';
+import style from './style.less';
 import {scaleLinear, scaleLog} from 'd3-scale';
 
 function makeScene() {
@@ -7,13 +8,13 @@ function makeScene() {
     let maskObj = this.getMaskObj();
     
     if (this.constrained) {
-        this.coordinate.x = this.$parent.getX(this);
-        this.coordinate.y = this.$parent.getY(this);
+        this.coordinate.x = this.$parent.getChildX(this);
+        this.coordinate.y = this.$parent.getChildY(this);
     }
     else this.coordinate = {}
 
     pixiObj && this.draw(pixiObj);
-    maskObj && this.draw(maskObj);
+    maskObj && this.drawMask(maskObj);
     this.renderGraphic();
 }
 
@@ -31,7 +32,7 @@ function getPixiObj() {
             this.pixiObj.mask = this.$parent.getMaskObj();
             parentObj.addChild(this.pixiObj);
         }
-        else return null;       
+        else return null;
     }
     return this.pixiObj;
 }
@@ -72,12 +73,13 @@ let component = {
         watchedKeys: function() {
             return Object.keys(this.$props);
         },
+        componentType: function() {return "VObject"},
         compProps: function() {
             let hash = {};
             for (let key of this.watchedKeys) {
                 hash[key] = this[key];
             }
-            return JSON.stringify(hash);
+            return this.componentType + ":" + JSON.stringify(hash);
         },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
@@ -102,7 +104,10 @@ let component = {
     methods: {
         makeScene, createPixiObj, getPixiObj, getMaskObj, 
         renderGraphic, rawRenderGraphic, registerEvents, 
-        draw, 
+        draw,
+        drawMask: function(obj) {
+            this.draw(obj);
+        },
         getRoot: function() {
             return this.$parent.getRoot();
         },

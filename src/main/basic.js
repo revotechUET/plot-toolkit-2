@@ -57,7 +57,7 @@ Vue.use(FragmentPlugin);
 const template = `<fragment>
     <v-scene :transparent="true" :view-width="width" :view-height="height" 
       x-transform="linear" y-transform="linear" :view-pos-x="0" :view-pos-y="0"
-      :real-min-x="0" :real-max-x="5" :real-min-y="10" :real-max-y="500">
+      :real-min-x="0" :real-max-x="1" :real-min-y="10" :real-max-y="500">
         <v-path :real-path="path1" :enabled="true" symbol-shape="star"></v-path>
     </v-scene>
     <button v-on:click="double">Click me</button>
