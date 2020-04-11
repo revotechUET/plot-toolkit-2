@@ -54,6 +54,9 @@ let component = {
     },
     methods: {
         getPixiApp, getPixiObj,
+        getRenderer: function() {
+            return this.getPixiApp().renderer;
+        },
         getRoot: function() {
             return this.getPixiApp().stage;
         },

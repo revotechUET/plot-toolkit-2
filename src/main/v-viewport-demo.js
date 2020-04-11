@@ -17,7 +17,8 @@ new Vue({
             <v-viewport :view-pos-x="10" :view-pos-y="10" 
                 :view-width="2*width" :clipped="true"
                 :view-height="2*height" pan="y"
-                :viewport-width="0.5*width" :viewport-height="0.5*height" :line-width="1">
+                :viewport-width="0.5*width" :viewport-height="0.5*height" :line-width="1"
+                :fill-color="0xCCFFCC">
                 <v-rect :view-width="200" :view-height="200" 
                     :view-pos-x="100" :view-pos-y="100" 
                     fill-color="#FFDDDD" :line-width="1"></v-rect>

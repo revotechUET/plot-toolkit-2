@@ -22,7 +22,8 @@ function registerEvents(_pixiObj) {
   }
 
   const handleMouseOver = evt => {
-    this.hasMouseOver = true;
+    if (this.highlight)
+      this.hasMouseOver = true;
     this.onmouseover &&
       this.onmouseover(
         evt.currentTarget,
@@ -190,6 +191,7 @@ const propKeys = [
   "shape",
   "clipped",
   "enabled",
+  "highlight",
   "radius",
   "lineWidth",
   "lineColor",

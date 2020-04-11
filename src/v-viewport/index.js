@@ -104,18 +104,18 @@ let component = {
         },
         dragEnd: function(target, pos){
             let ofX = pos.x;
-            ofX = Math.max(ofX, this.viewportWidth - this.viewWidth);
+            ofX = Math.max(ofX, this.viewportWidth - this.width);
             ofX = Math.min(ofX, 0);
             let ofY = pos.y;
-            ofY = Math.max(ofY, this.viewportHeight - this.viewHeight);
+            ofY = Math.max(ofY, this.viewportHeight - this.height);
             ofY = Math.min(ofY, 0);
             this.offsetX = ofX;
             this.offsetY = ofY;
         },
         onPanDefault: function(deltaX, deltaY) {
             const resolution = 100;
-            let xFull = (this.viewWidth - this.viewportWidth);
-            let yFull = (this.viewHeight - this.viewportHeight); 
+            let xFull = (this.width - this.viewportWidth);
+            let yFull = (this.height - this.viewportHeight); 
             let xDir = (deltaX > 0)? 1: ( (deltaX == 0)?0:-1 );
             let yDir = (deltaY > 0)? 1: ( (deltaY == 0)?0:-1 );
             if (xDir) {
@@ -123,8 +123,8 @@ let component = {
                 if (x > 0) {
                     x = 0;
                 }
-                else if (x < this.viewportWidth - this.viewWidth) {
-                    x = this.viewportWidth - this.viewWidth
+                else if (x < this.viewportWidth - this.width) {
+                    x = this.viewportWidth - this.width
                 }
                 this.offsetX = x;
             }
@@ -133,14 +133,14 @@ let component = {
                 if (y > 0) {
                     y = 0;
                 }
-                else if ( y < this.viewportHeight - this.viewHeight ) {
-                    y = this.viewportHeight - this.viewHeight
+                else if ( y < this.viewportHeight - this.height ) {
+                    y = this.viewportHeight - this.height
                 }
                 this.offsetY = y;
             }
             requestAnimationFrame(() => {
                 this.rawRenderGraphic();
-            })
+            });
         }
     },
     components: {

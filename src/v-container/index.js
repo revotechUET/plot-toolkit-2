@@ -4,7 +4,7 @@ import {getPosX, getPosY, getColor, getTransparency, DefaultValues} from '../uti
 import layoutMixin from '../mixins/layout';
 
 let component = {
-    props: ['clipped', "lineWidth", "lineColor", "lineTransparency"],
+    props: ['clipped', "lineWidth", "lineColor", "lineTransparency", "fillColor"],
     methods: {
         draw: function(obj) {
             obj.clear();

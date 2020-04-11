@@ -6,8 +6,9 @@ import {
 	getPosX,
 	getPosY,
 } from "../utils";
+import layoutMixin from '../mixins/layout';
 
-function draw(obj) {
+function drawRect(obj, align = 0) {
   obj.clear();
   let lw = this.lineWidth || 0;
   let lt = this.lineTransparency || 1.0;
@@ -15,7 +16,7 @@ function draw(obj) {
     lw = lw?(lw + 4):0;
     lt /= 2;
   }
-  obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
+  obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, align);
 
 	obj.beginFill(
 		getColor(this.fillColor, DefaultValues.fillColor),
@@ -35,7 +36,9 @@ let component = {
     componentType: function() {return "VRect"}
   },
   methods: {
-    draw
-  }
+    drawRect,
+    draw: drawRect
+  },
+  mixins: [layoutMixin]
 };
 export default VShape.extend(component);
