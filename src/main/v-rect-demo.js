@@ -15,6 +15,7 @@ const app = new Vue({
                 :real-min-x="2" 
                 :real-max-x="6"
                 line-color="#FF00FF"
+                :line-width="1"
                 :enabled="true"
                 :draggable="true"
                 :on-drop="dropFn"

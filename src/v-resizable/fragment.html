@@ -1,0 +1,30 @@
+<fragment v-if="direction === 'vertical'">
+    <v-rect v-for="(knob,index) in knobs" :key="index"
+        v-if="_knobFlags[index]"
+        :view-pos-x="0" :view-pos-y="index*(height - knobSize)" 
+        :view-width="width" :view-height="knobSize" 
+        :enabled="true" :draggable="true" drag-constraint="y" 
+        :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
+        :line-transparency="knob.outline"
+        :fill-transparency="knob.fill"
+        :onmouseover="() => hightlight(knob)"
+        :onmouseout="() => dehightlight(knob)"
+        :on-drag="(target) => knobDragStart(index, target)"
+        :on-drop="(target, pos) => knobDragEnd(index, pos, target)"
+        cursor="row-resize"></v-rect>
+</fragment>
+<fragment v-if="direction === 'horizontal'">
+    <v-rect v-for="(knob, index) in knobs"
+        v-if="_knobFlags[index]" :key="index"
+        :view-pos-x="index * (width - knobSize)" :view-pos-y="0" 
+        :view-width="knobSize" :view-height="height" 
+        :enabled="true" :draggable="true" dragConstraint="x" 
+        :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
+        :line-transparency="knob.outline"
+        :fill-transparency="knob.fill"
+        :onmouseover="() => hightlight(knob)"
+        :onmouseout="() => dehightlight(knob)"
+        :on-drag="(target) => knobDragStart(index, target)"
+        :on-drop="(target, pos) => knobDragEnd(index, pos, target)"
+        cursor="col-resize"></v-rect>
+</fragment>

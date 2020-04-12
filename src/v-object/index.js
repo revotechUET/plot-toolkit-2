@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import {Fragment} from 'vue-fragment';
 import template from './template.html';
 import style from './style.less';
 import {scaleLinear, scaleLog} from 'd3-scale';
@@ -60,6 +61,7 @@ let component = {
     template,
     data: function() {
         return {
+            debug: false,
             pixiObj: null,
             maskObj: null,
             coordinate: {}
@@ -172,7 +174,8 @@ let component = {
             }
             return 0;
         }
-    }
+    },
+    components: {Fragment}
 }
 
 export default Vue.extend(component);

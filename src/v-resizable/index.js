@@ -1,4 +1,3 @@
-import VContainer from '../v-container';
 import VShape from '../v-shape';
 import VRect from '../v-rect';
 import layoutMixin from "../mixins/layout";
@@ -11,6 +10,9 @@ const KNOB_OUTLINE_TRANS_HIGHTLIGHT = 0.01;
 const KNOB_FILL_TRANS_HIGHTLIGHT = 1;
 let component = {
     props: ['direction', 'size', 'onResize', 'knobFlags'],
+    components: {
+        VRect
+    },
     template,
     data: function() {
         return {
@@ -55,11 +57,11 @@ let component = {
             knob.outline = KNOB_OUTLINE_TRANS;
             knob.fill = KNOB_FILL_TRANS;
         },
-        dragStart: function(knobIdx, target) {
+        knobDragStart: function(knobIdx, target) {
             this.knobs[knobIdx].mask = target.mask;
             target.mask = null;
         },
-        dragEnd: function(knobIdx, pos, target) {
+        knobDragEnd: function(knobIdx, pos, target) {
             let width = this.width;
             let height = this.height;
             switch(knobIdx) {
@@ -159,9 +161,6 @@ let component = {
             obj.rotation = this.rotation || 0;
         }
     },
-    mixins: [layoutMixin],
-    components: {
-        VRect
-    }
+    mixins: [layoutMixin]
 }
 export default VShape.extend(component);

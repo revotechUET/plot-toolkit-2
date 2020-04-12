@@ -48,7 +48,10 @@ function registerEvents(_pixiObj) {
     let localPos = currentTarget.toLocal(globalPos);
     this.onmousedown &&
       this.onmousedown(currentTarget, localPos, globalPos, evt);
-    if (this.draggable) this.dragStart(currentTarget, localPos, globalPos, evt.data.originalEvent);
+    if (this.draggable) {
+      evt.stopPropagation();
+      this.dragStart(currentTarget, localPos, globalPos, evt.data.originalEvent);
+    }
   };
   const handleMouseUp = evt => {
     let currentTarget = evt.currentTarget;
@@ -60,7 +63,10 @@ function registerEvents(_pixiObj) {
         globalPos,
         evt
       );
-    if (this.draggable) this.dragEnd(evt.data, currentTarget);
+    if (this.draggable) {
+      evt.stopPropagation();
+      this.dragEnd(evt.data, currentTarget);
+    }
   };
   const handleMouseMove = evt => {
     let currentTarget = evt.currentTarget;

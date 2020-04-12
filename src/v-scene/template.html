@@ -1,3 +1,8 @@
-<div style="padding-left:12px;" class="v-scene">{{compProps}}
-    <slot />
-</div>
+<fragment>
+    <div v-if="debug" style="padding-left:12px;" class="v-scene">{{compProps}}
+        <slot />
+    </div>
+    <fragment v-if="!debug" :props="compProps">
+        <slot />
+    </fragment>
+</fragment>

@@ -1,11 +1,11 @@
 import Vue from 'vue';
-import {Plugin} from 'vue-fragment';
+import {Plugin, Fragment} from 'vue-fragment';
 import VScene from '../v-scene';
 import VRect from '../v-rect';
 import VContainer from "../v-container";
 import VResizable from "../v-resizable";
 
-Vue.use(Plugin);
+//Vue.use(Plugin);
 
 const app = new Vue({
     el: "#vue-app",
@@ -54,6 +54,6 @@ const app = new Vue({
         }
     },
     components: {
-        VScene, VContainer, VRect, VResizable
+        VScene, VContainer, VRect, VResizable, Fragment
     }
 });

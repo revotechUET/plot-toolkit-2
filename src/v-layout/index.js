@@ -1,8 +1,6 @@
 import VContainer from "../v-container";
-import template from "./template.html";
 let component = {
     props: ['type', 'direction'],
-    template,
     computed: {
         componentType: function() {return "VLayout"}
     },

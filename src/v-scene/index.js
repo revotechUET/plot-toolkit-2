@@ -1,3 +1,4 @@
+//import {Fragment} from 'vue-fragment';
 import {autoDetectRenderer, utils, Container} from 'pixi.js';
 import VObject from '../v-object';
 import template from './template.html';
@@ -43,6 +44,9 @@ function rawRenderGraphic(obj) {
  
 let component = {
     props: ['transparent'],
+    components: {
+        //Fragment
+    },
     template,
     mounted: function() {
         this.$el.appendChild(this.getPixiApp().renderer.view)
