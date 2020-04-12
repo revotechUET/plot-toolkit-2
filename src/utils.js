@@ -1,6 +1,6 @@
 import { utils } from "pixi.js";
 
-export function convert2HexColor(color, defaultColor = 0x000000) {
+export function processColorStr(color, defaultColor = 0x000000) {
   let hex = defaultColor;
   let transparency = 1;
   if (color) {
@@ -98,7 +98,7 @@ export function convert2HexColor(color, defaultColor = 0x000000) {
       }
     }
   }
-  return {hex, transparency};
+  return {color: getColor(hex), transparency};
 }
 
 function getColorRegex(format) {

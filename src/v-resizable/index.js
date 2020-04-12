@@ -133,8 +133,8 @@ let component = {
             let lw = parseInt(this.lineWidth);
             lw = isNaN(lw)?0:lw;
             let lt = this.lineTransparency || 1.0;
-            obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
-            obj.beginFill(getColor(this.fillColor, DefaultValues.fillColor), getTransparency(this.fillTransparency));
+            obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
+            obj.beginFill(this.cFillColor.color, this.cFillColor.transparency);
             obj.drawRect(0,0, this.width, this.height);
             /*
             switch(this.direction) {

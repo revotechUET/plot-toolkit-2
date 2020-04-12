@@ -10,7 +10,7 @@ let component = {
             obj.clear();
             let lw = this.lineWidth || 0;
             let lt = getTransparency(this.lineTransparency);
-            obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
+            obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
             obj.beginFill(0xFFFFFF, 0.001);
             obj.drawRect(0, 0, this.width, this.height);
             obj.endFill();
