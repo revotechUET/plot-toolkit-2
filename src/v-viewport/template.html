@@ -1,10 +1,8 @@
 <fragment>
-    <div v-if="debug" style="padding-left:12px;">{{compProps}}
-        <slot />
+    <div v-if="debug" class="v-object">{{compProps}}
         ${require('./fragment.html')}
     </div>
     <fragment v-if="!debug" :props="compProps">
-        <slot />
         ${require('./fragment.html')}
     </fragment>
 </fragment>

@@ -1,19 +1,22 @@
 import Vue from 'vue';
+import {Fragment} from 'vue-fragment';
 import template from './template.html';
+import style from './style.less';
 import {scaleLinear, scaleLog} from 'd3-scale';
+import {processColorStr, getTransparency, DefaultValues} from '../utils';
 
 function makeScene() {
-    let pixiObj = this.getPixiObj();
     let maskObj = this.getMaskObj();
+    let pixiObj = this.getPixiObj();
     
     if (this.constrained) {
-        this.coordinate.x = this.$parent.getX(this);
-        this.coordinate.y = this.$parent.getY(this);
+        this.coordinate.x = this.$parent.getChildX(this);
+        this.coordinate.y = this.$parent.getChildY(this);
     }
     else this.coordinate = {}
 
+    maskObj && this.drawMask(maskObj);
     pixiObj && this.draw(pixiObj);
-    maskObj && this.draw(maskObj);
     this.renderGraphic();
 }
 
@@ -31,7 +34,7 @@ function getPixiObj() {
             this.pixiObj.mask = this.$parent.getMaskObj();
             parentObj.addChild(this.pixiObj);
         }
-        else return null;       
+        else return null;
     }
     return this.pixiObj;
 }
@@ -59,6 +62,7 @@ let component = {
     template,
     data: function() {
         return {
+            debug: true,
             pixiObj: null,
             maskObj: null,
             coordinate: {}
@@ -72,12 +76,22 @@ let component = {
         watchedKeys: function() {
             return Object.keys(this.$props);
         },
+        componentType: function() {return "VObject"},
         compProps: function() {
             let hash = {};
             for (let key of this.watchedKeys) {
                 hash[key] = this[key];
             }
-            return JSON.stringify(hash);
+            return this.componentType + ":" + JSON.stringify(hash);
+        },
+        cLineColor: function () {
+            return processColorStr(this.lineColor, DefaultValues.lineColor,
+                getTransparency(this.lineTransparency));
+        },
+        cFillColor: function () {
+            let cFc = processColorStr(this.fillColor, DefaultValues.fillColor,
+                getTransparency(this.fillTransparency));
+            return cFc;
         },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
@@ -94,34 +108,6 @@ let component = {
         height: function() {
             if (!isNaN(this.viewHeight)) return this.viewHeight;
             return this._getY(this.realMaxY) - this._getY(this.realMinY);
-        }
-    },
-    watch: {
-        compProps: makeScene
-    },
-    methods: {
-        makeScene, createPixiObj, getPixiObj, getMaskObj, 
-        renderGraphic, rawRenderGraphic, registerEvents, 
-        draw, 
-        getRoot: function() {
-            return this.$parent.getRoot();
-        },
-        triggerRelayout: function() {
-            this.$parent.relayout(this);
-        },
-        _getX: function(realX) {
-            let transformX = this.$parent.transformX();
-            if (transformX) {
-                return transformX(realX);
-            }
-            return 0;
-        },
-        _getY: function(realY) {
-            let transformY = this.$parent.transformY();
-            if (transformY) {
-                return transformY(realY);
-            }
-            return 0;
         },
         transformX: function(){
             let transformFn;
@@ -135,13 +121,12 @@ let component = {
                 default:
                     return null;
             }
-            if (isNaN(this.viewWidth) || isNaN(this.viewPosX)|| 
-                isNaN(this.realMinX)  || isNaN(this.realMaxX)  ) 
+            if (isNaN(this.viewWidth) || isNaN(this.realMinX) || isNaN(this.realMaxX)  ) 
             {
                 return null;
             }
             return transformFn.domain([this.realMinX, this.realMaxX])
-                .range([this.viewPosX, this.viewPosX + this.viewWidth]);
+                .range([0, this.viewWidth]);
         },
         transformY: function() {
             let transformFn;
@@ -155,15 +140,52 @@ let component = {
                 default:
                     return null;
             }
-            if (isNaN(this.viewHeight) || isNaN(this.viewPosY)|| 
-                isNaN(this.realMinY)  || isNaN(this.realMaxY)  ) 
+            if (isNaN(this.viewHeight) || isNaN(this.realMinY) || isNaN(this.realMaxY)  ) 
             {
                 return null;
             }
             return transformFn.domain([this.realMinY, this.realMaxY])
-                .range([this.viewPosY, this.viewPosY + this.viewHeight]);
+                .range([0, this.viewHeight]);
         }
-    }
+    },
+    watch: {
+        compProps: makeScene
+    },
+    methods: {
+        makeScene, createPixiObj, getPixiObj, getMaskObj, 
+        renderGraphic, rawRenderGraphic, registerEvents, 
+        draw,
+        drawMask: function(obj) {
+            this.draw(obj);
+        },
+        getRenderer: function() {
+            if (!this._renderer) {
+                this._renderer = this.$parent.getRenderer();
+            }
+            return this._renderer;
+        },
+        getRoot: function() {
+            return this.$parent.getRoot();
+        },
+        triggerRelayout: function() {
+            this.$parent.relayout(this);
+        },
+        _getX: function(realX) {
+            let transformX = this.$parent.transformX;
+            if (transformX) {
+                return transformX(realX);
+            }
+            return 0;
+        },
+        _getY: function(realY) {
+            let transformY = this.$parent.transformY;
+            if (transformY) {
+                return transformY(realY);
+            }
+            return 0;
+        }
+    },
+    components: {Fragment}
 }
 
 export default Vue.extend(component);

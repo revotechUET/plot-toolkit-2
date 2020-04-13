@@ -11,10 +11,11 @@ const app = new Vue({
             :view-pos-x="0" :view-pos-y="0" :real-min-x="0" :real-max-x="10"
             :real-min-y="10" :real-max-y="20" x-transform="linear" y-transform="linear">
             <v-rect 
-                fill-color="0xFFFFDD" 
+                fill-color="rgba(255, 0, 0, 0.3)" 
                 :real-min-x="2" 
                 :real-max-x="6"
                 line-color="#FF00FF"
+                :line-width="1"
                 :enabled="true"
                 :draggable="true"
                 :on-drop="dropFn"

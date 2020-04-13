@@ -22,7 +22,12 @@ module.exports = function(env) {
                 use: ['vue-loader']
             }, {
                 test: /\.html$/,
-                use: ['html-loader']
+                use: [{
+                    loader: 'html-loader',
+                    options: {
+                        interpolate: true
+                    }
+                }]
             }, {
                 test: /\.less$/,
                 use: ['style-loader', 'css-loader', 'less-loader']

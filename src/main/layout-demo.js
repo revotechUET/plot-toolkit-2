@@ -1,17 +1,17 @@
 import Vue from 'vue';
-import {Plugin} from 'vue-fragment';
+import {Plugin, Fragment} from 'vue-fragment';
 import VScene from '../v-scene';
 import VRect from '../v-rect';
-import VLayout from "../v-layout";
+import VContainer from "../v-container";
 import VResizable from "../v-resizable";
 
-Vue.use(Plugin);
+//Vue.use(Plugin);
 
 const app = new Vue({
     el: "#vue-app",
     template: `<fragment>
         <v-scene name="scene" :transparent="true" :view-width="width" :view-height="height">
-            <v-layout name="layout" direction="horizontal" :view-width="width-50" :view-height="height">
+            <v-container name="layout" layoutDirection="horizontal" :view-width="width-50" :view-height="height">
                 <v-rect :view-width="30" :view-height="100" :line-width="1"
                     :constrained="true"
                     fill-color="#ffcccc" />
@@ -27,6 +27,7 @@ const app = new Vue({
                 <v-resizable direction="horizontal"
                     :constrained="true"
                     :on-resize="resize"
+                    :clipped="true"
                     :knob-flags="[false, true]"
                     :view-width="w" :view-height="h" />
                 <v-rect :view-width="30" :view-height="100" :line-width="1" 
@@ -36,7 +37,7 @@ const app = new Vue({
                     :enabled="true" :draggable="true"
                     :constrained="true"
                     fill-color="#ccffcc" />
-            </v-layout>
+            </v-container>
         </v-scene>
     </fragment>
     `,
@@ -53,6 +54,6 @@ const app = new Vue({
         }
     },
     components: {
-        VScene, VLayout, VRect, VResizable
+        VScene, VContainer, VRect, VResizable, Fragment
     }
 });

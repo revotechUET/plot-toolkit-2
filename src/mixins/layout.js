@@ -1,9 +1,5 @@
-import VContainer from "../v-container";
-let component = {
-    props: ['type', 'direction'],
-    computed: {
-        componentType: function() {return "VLayout"}
-    },
+export default {
+    props: ['layoutType', "layoutDirection"],
     methods: {
         relayout: function(comp) {
             console.log(comp);
@@ -17,7 +13,7 @@ let component = {
             let x = 0;
             let idx = this.$children.filter(child => child.constrained).findIndex(child => component === child);
             if (idx < 0) return;
-            switch(this.direction) {
+            switch(this.layoutDirection) {
                 case "horizontal":
                     for (let i = 0; i < idx; i++) {
                         x += this.$children[i].width;
@@ -31,7 +27,7 @@ let component = {
             let y = 0;
             let idx = this.$children.filter(child => child.constrained).findIndex(child => component === child);
             if (idx < 0) return;
-            switch(this.direction) {
+            switch(this.layoutDirection) {
                 case "vertical":
                     for (let i = 0; i < idx; i++) {
                         y += this.$children[i].height;
@@ -43,4 +39,3 @@ let component = {
         }
     }
 }
-export default VContainer.extend(component);

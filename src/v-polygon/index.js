@@ -15,11 +15,11 @@ function draw(obj) {
 		lw += 4;
 		lt /= 2;
 	}
-	obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
+	obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
 
 	obj.beginFill(
-		getColor(this.fillColor, DefaultValues.fillColor),
-		getTransparency(this.fillTransparency)
+		this.cFillColor.color,
+    this.cFillColor.transparency	
 	);
 
 	obj.drawPolygon(this.path || []);
