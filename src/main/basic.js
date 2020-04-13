@@ -58,63 +58,50 @@ const template = `<fragment>
     <v-scene :transparent="true" :view-width="width" :view-height="height" 
       x-transform="linear" y-transform="linear" :view-pos-x="0" :view-pos-y="0"
       :real-min-x="0" :real-max-x="5" :real-min-y="10" :real-max-y="500">
-        <v-path :real-path="path1" :enabled="true" symbol-shape="star"></v-path>
+        <v-path :real-path="path1" :enabled="true" :symbol-shape="symbolShape" :symbol-size="symbolSize" :symbol-color="symbolColor" :line-dash="lineDash"></v-path>
     </v-scene>
     <button v-on:click="double">Click me</button>
 </fragment>
 `;
 const path1 = [];
-for (let y = 10; y < 500; y+=20) {
-  path1.push({y, x: Math.random()})
+for (let y = 10; y < 500; y += 20) {
+	path1.push({ y, x: Math.random() });
 }
 const app = new Vue({
-  el: "#vue-app",
-  template: template,
-  data: {
-    width: 600,
-    height: 400,
-    x: 100,
-    y: 100,
-    shape: "circle",
-    path: [
-      { x: 90, y: 0 },
-      { x: 210, y: 50 },
-      { x: 100, y: 90 },
-      { x: 150, y: 100 },
-      { x: 120, y: 120 },
-      { x: 30, y: 130 },
-      { x: 500, y: 150 },
-      { x: 300, y: 200 },
-      { x: 155, y: 220 },
-      { x: 189, y: 250 },
-      { x: 50, y: 300 },
-      { x: 250, y: 350 },
-      { x: 150, y: 400 },
-      { x: 560, y: 500 }
-    ],
-    path1: path1
-  },
-  methods: {
-    double: function(evt) {
-      this.x += 10;
-      this.y += 10;
-    },
-    click1: function(target, localPos, globalPos, evt) {
-      target.hostComponent.$nextTick(() => {
-        target.zIndex++;
-      });
-    },
-    dropFn: function(target, pos) {
-      if (pos.x !== undefined) this.x = pos.x;
-      if (pos.y !== undefined) this.y = pos.y;
-    }
-  },
-  components: {
-    VScene,
-    VShape,
-    VRect,
-    VCircle,
-    VPolygon,
-    VPath
-  }
+	el: "#vue-app",
+	template: template,
+	data: {
+		width: 600,
+		height: 400,
+		x: 100,
+		y: 100,
+		symbolShape: "star",
+		symbolSize: 3,
+		symbolColor: "0xde3249",
+		lineDash: "  15    3  ",
+		path1: path1
+	},
+	methods: {
+		double: function(evt) {
+			this.x += 10;
+			this.y += 10;
+		},
+		click1: function(target, localPos, globalPos, evt) {
+			target.hostComponent.$nextTick(() => {
+				target.zIndex++;
+			});
+		},
+		dropFn: function(target, pos) {
+			if (pos.x !== undefined) this.x = pos.x;
+			if (pos.y !== undefined) this.y = pos.y;
+		}
+	},
+	components: {
+		VScene,
+		VShape,
+		VRect,
+		VCircle,
+		VPolygon,
+		VPath
+	}
 });

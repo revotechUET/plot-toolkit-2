@@ -1,39 +1,35 @@
 import VShape from "../v-shape";
-import {
-	getColor,
-	DefaultValues,
-	getTransparency,
-	getPosX,
-	getPosY,
-} from "../utils";
+import { getColor, DefaultValues, getPosX, getPosY } from "../utils";
 
 function draw(obj) {
 	obj.clear();
 	let lw = this.lineWidth || 1;
 	let lt = this.lineTransparency || 1.0;
+	let symbolColor = this.symbolColor;
+
 	if (this.hasMouseOver) {
-		lw += 4;
+		lw += 2;
 		lt /= 2;
 	}
-	obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
+	obj.lineStyle(lw, getColor(symbolColor, DefaultValues.lineColor), lt, 0.5);
 
-	obj.beginFill(
-		getColor(this.fillColor, DefaultValues.fillColor),
-		getTransparency(this.fillTransparency)
-	);
+	let points = this.path;
+	let symbolSize = this.symbolSize;
 
-	var points = this.path;
-
-	obj.moveTo(points[0].x, points[0].y);
-
-	for (let i = 1; i < points.length; i++) {
-		obj.lineTo(points[i].x, points[i].y);
+	if (this.dashLine) {
+		obj.drawDashedLine(points, 0, 0, this.lineDash);
+	} else {
+		obj.moveTo(points[0].x, points[0].y);
+		for (let i = 1; i < points.length; i++) {
+			obj.lineTo(points[i].x, points[i].y);
+		}
 	}
-	obj.beginFill(0xde3249, 1);
+
+	obj.beginFill(symbolColor, 1);
 	switch (this.symbolShape) {
 		case "square":
 			for (let i = 0; i < points.length; i++) {
-				var edge = 10;
+				var edge = symbolSize * 2;
 				obj.drawRect(
 					points[i].x - edge / 2,
 					points[i].y - edge / 2,
@@ -44,12 +40,12 @@ function draw(obj) {
 			break;
 		case "circle":
 			for (let i = 0; i < points.length; i++) {
-				obj.drawCircle(points[i].x, points[i].y, 5);
+				obj.drawCircle(points[i].x, points[i].y, symbolSize);
 			}
 			break;
 		case "star":
 			for (let i = 0; i < points.length; i++) {
-				obj.drawStar(points[i].x, points[i].y, 5, 10, 0);
+				obj.drawStar(points[i].x, points[i].y, 5, symbolSize * 2, 0);
 			}
 			break;
 		default:
@@ -63,7 +59,14 @@ function draw(obj) {
 }
 
 let component = {
-	props: ["symbolShape", "view-path", "real-path"],
+	props: [
+		"symbolShape",
+		"viewPath",
+		"realPath",
+		"symbolSize",
+		"symbolColor",
+		"lineDash"
+	],
 	computed: {
 		path: function() {
 			if (this.viewPath) return this.viewPath;
@@ -71,14 +74,17 @@ let component = {
 			let transformXFn = this.$parent.transformX();
 			let transformYFn = this.$parent.transformY();
 			if (!transformXFn || !transformYFn) return [];
-			return this.realPath.map((point) => ({
+			return this.realPath.map(point => ({
 				x: transformXFn(point.x),
-				y: transformYFn(point.y),
+				y: transformYFn(point.y)
 			}));
 		},
+		dashLine: function() {
+			return !!this.lineDash;
+		}
 	},
 	methods: {
-		draw,
-	},
+		draw
+	}
 };
 export default VShape.extend(component);

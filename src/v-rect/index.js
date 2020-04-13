@@ -1,14 +1,16 @@
 import VShape from "../v-shape";
+import { Text, TextStyle } from "pixi.js";
 import {
 	getColor,
 	DefaultValues,
 	getTransparency,
 	getPosX,
-	getPosY,
+	getPosY
 } from "../utils";
 
 function draw(obj) {
 	obj.clear();
+	console.log(obj);
 	let lw = this.lineWidth || 1;
 	let lt = this.lineTransparency || 1.0;
 	if (this.hasMouseOver) {
@@ -32,7 +34,7 @@ function draw(obj) {
 
 let component = {
 	methods: {
-		draw,
-	},
+		draw
+	}
 };
 export default VShape.extend(component);
