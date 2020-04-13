@@ -62,7 +62,7 @@ let component = {
     template,
     data: function() {
         return {
-            debug: false,
+            debug: true,
             pixiObj: null,
             maskObj: null,
             coordinate: {}
@@ -92,8 +92,6 @@ let component = {
             let cFc = processColorStr(this.fillColor, DefaultValues.fillColor,
                 getTransparency(this.fillTransparency));
             return cFc;
-            //return processColorStr(this.fillColor, DefaultValues.fillColor,
-            //    getTransparency(this.fillTransparency));
         },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;

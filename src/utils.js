@@ -98,7 +98,7 @@ export function processColorStr(color, defaultColor = 0x000000, defaultTranspare
       }
     }
   }
-  return {color: getColor(hex, defaultColor), transparency};
+  return {color: getColor(parseInt(hex), defaultColor), transparency};
 }
 
 function getColorRegex(format) {
