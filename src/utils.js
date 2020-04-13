@@ -1,8 +1,8 @@
 import { utils } from "pixi.js";
 
-export function processColorStr(color, defaultColor = 0x000000) {
-  let hex = defaultColor;
-  let transparency = 1;
+export function processColorStr(color, defaultColor = 0x000000, defaultTransparency = 1) {
+  let hex = color;
+  let transparency = defaultTransparency;
   if (color) {
     switch (true) {
       case getColorRegex('rgb').test(color): {
@@ -73,7 +73,7 @@ export function processColorStr(color, defaultColor = 0x000000) {
         }
         break;
       }
-      default: {
+      case isNaN(color): {
         // Build-in Colors
         // 0x000000 for invalid colors
         let fakeDiv = document.createElement("div");
@@ -98,7 +98,7 @@ export function processColorStr(color, defaultColor = 0x000000) {
       }
     }
   }
-  return {color: getColor(hex), transparency};
+  return {color: getColor(hex, defaultColor), transparency};
 }
 
 function getColorRegex(format) {
