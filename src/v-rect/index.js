@@ -16,11 +16,16 @@ function drawRect(obj, align = 0) {
     lw = lw?(lw + 4):0;
     lt /= 2;
   }
-  obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, align);
+  obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, align);
+  //obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, align);
 
+	//obj.beginFill(
+		//getColor(this.fillColor, DefaultValues.fillColor),
+		//getTransparency(this.fillTransparency)
+	//);
 	obj.beginFill(
-		getColor(this.fillColor, DefaultValues.fillColor),
-		getTransparency(this.fillTransparency)
+		this.cFillColor.color,
+		this.cFillColor.transparency
 	);
 
 	obj.drawRect(0, 0, this.width || 0, this.height || 0);

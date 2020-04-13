@@ -56,7 +56,7 @@ let component = {
             obj.clear();
             let lw = isNaN(this.lineWidth)?0:this.lineWidth;
             let lt = getTransparency(this.lineTransparency);
-            obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, 0);
+            obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
             obj.beginFill(0xEEEEEE, 0.2);
             obj.drawRect(0,0, this.viewportWidth || 0, this.viewportHeight || 0);
             obj.endFill();

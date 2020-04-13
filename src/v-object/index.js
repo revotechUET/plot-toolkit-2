@@ -3,6 +3,7 @@ import {Fragment} from 'vue-fragment';
 import template from './template.html';
 import style from './style.less';
 import {scaleLinear, scaleLog} from 'd3-scale';
+import {processColorStr, DefaultValues} from '../utils';
 
 function makeScene() {
     let maskObj = this.getMaskObj();
@@ -82,6 +83,12 @@ let component = {
                 hash[key] = this[key];
             }
             return this.componentType + ":" + JSON.stringify(hash);
+        },
+        cLineColor: function() {
+          return processColorStr(this.lineColor, DefaultValues.lineColor);
+        },
+        cFillColor: function() {
+          return processColorStr(this.fillColor, DefaultValues.fillColor);
         },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
