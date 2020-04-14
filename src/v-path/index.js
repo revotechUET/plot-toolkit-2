@@ -13,8 +13,11 @@ function draw(obj) {
 	}
 	obj.lineStyle(lw, getColor(symbolColor, DefaultValues.lineColor), lt, 0.5);
 
-	let points = this.path;
-	let symbolSize = this.symbolSize;
+	let points = this.realPath;
+	let symbolSize =
+		typeof this.symbolSize === "string"
+			? parseInt(this.symbolSize)
+			: this.symbolSize || 5;
 
 	if (this.dashLine) {
 		obj.drawDashedLine(points, 0, 0, this.lineDash);
@@ -46,6 +49,11 @@ function draw(obj) {
 		case "star":
 			for (let i = 0; i < points.length; i++) {
 				obj.drawStar(points[i].x, points[i].y, 5, symbolSize * 2, 0);
+			}
+			break;
+		case "plus":
+			for (let i = 0; i < points.length; i++) {
+				obj.drawPlus(points[i].x, points[i].y, symbolSize);
 			}
 			break;
 		default:

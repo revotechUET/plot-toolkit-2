@@ -230,3 +230,10 @@ Graphics.prototype.drawDashedLine = function(points, x, y, lineDashSpec) {
 		}
 	}
 };
+
+Graphics.prototype.drawPlus = function(x, y, symbolSize) {
+	this.moveTo(x, y - symbolSize);
+	this.lineTo(x, y + symbolSize);
+	this.moveTo(x - symbolSize, y);
+	this.lineTo(x + symbolSize, y);
+};
