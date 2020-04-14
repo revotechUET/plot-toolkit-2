@@ -2,7 +2,7 @@ import VRect from "../v-rect";
 import { Text, TextStyle } from "pixi.js";
 
 let component = {
-	props: ["content", "contentStyle", "contentPos"],
+	props: ["content", "contentStyle", "marginTop", "marginLeft"],
 	data: function() {
 		return {
 			_content: null
@@ -12,23 +12,14 @@ let component = {
 		draw: function(obj) {
 			this.drawRect(obj);
 			let text = this.getContent();
-			console.log(this);
+			console.log(text);
 			text.text = this.content;
 			if (this.contentStyle) {
 				text.style = new TextStyle(this.contentStyle);
 			}
-			if (this.contentPos) {
-				let arr = this.contentPos
-					.replace("(", "")
-					.replace(")", "")
-					.replace("[", "")
-					.replace("]", "")
-					.split(/[\s,]+/)
-					.map(e => parseInt(e))
-					.filter(e => !isNaN(e));
-				text.x = arr[0];
-				text.y = arr[1];
-			}
+			text.y = this.marginTop ? this.marginTop : text.y;
+			text.x = this.marginLeft ? this.marginLeft : text.x;
+
 			if (this.clipped) {
 				text.mask = this.getMaskObj();
 			}
@@ -40,19 +31,22 @@ let component = {
 			}
 			return this._content;
 		},
-		getWidthOfText: function(){
-			
+		getWidthOfText: function() {
+			return 200;
+		},
+		getHeightOfText: function() {
+			return 100;
 		}
 	},
 	computed: {
 		width: function() {
-			if(!isNaN(this.viewWidth)) return this.viewWidth;
+			if (!isNaN(this.viewWidth)) return this.viewWidth;
 			return this.getWidthOfText();
 		},
-		height: function(){
-
-		},
-		
+		height: function() {
+			if (!isNaN(this.viewHeight)) return this.viewHeight;
+			return this.getHeightOfText();
+		}
 	}
 };
 
