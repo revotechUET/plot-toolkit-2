@@ -138,6 +138,117 @@ export function getTransparency(transparency) {
 		? 1
 		: transparency;
 }
+
+export function convert2rgbColor(color) {
+	if (color) {
+		switch (true) {
+			case getColorRegex("rgb").test(color): {
+                return color;
+			}
+			case getColorRegex("rgba").test(color): {
+                return color;
+			}
+			case getColorRegex("hex").test(color): {
+				let r = 0, g = 0, b = 0;
+
+				// 3 digits
+				if (color.length == 4) {
+					r = "0x" + color[1] + color[1];
+					g = "0x" + color[2] + color[2];
+					b = "0x" + color[3] + color[3];
+
+					// 6 digits
+				} else if (color.length == 7) {
+					r = "0x" + color[1] + color[2];
+					g = "0x" + color[3] + color[4];
+					b = "0x" + color[5] + color[6];
+				}
+
+				return "rgb("+ +r + "," + +g + "," + +b + ")";
+			}
+			case getColorRegex("hexA").test(color): {
+				let r = 0, g = 0, b = 0, a = 1;
+
+				if (color.length == 5) {
+					r = "0x" + color[1] + color[1];
+					g = "0x" + color[2] + color[2];
+					b = "0x" + color[3] + color[3];
+					a = "0x" + color[4] + color[4];
+
+				} else if (color.length == 9) {
+					r = "0x" + color[1] + color[2];
+					g = "0x" + color[3] + color[4];
+					b = "0x" + color[5] + color[6];
+					a = "0x" + color[7] + color[8];
+				}
+				a = +(a / 255).toFixed(3);
+
+				return "rgba(" + +r + "," + +g + "," + +b + "," + a + ")";
+			}
+			case isNaN(color): {
+				// Build-in Colors
+				// 0x000000 for invalid colors
+				let fakeDiv = document.createElement("div");
+				fakeDiv.style.color = color;
+				document.body.appendChild(fakeDiv);
+
+				let cs = window.getComputedStyle(fakeDiv),
+				pv = cs.getPropertyValue("color");
+
+				document.body.removeChild(fakeDiv);
+
+				return pv;
+			}
+		}
+	}
+}
+
+export function blendColorImage(image, foreground, background) {
+    if (!image) return null;
+
+    let canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+
+    let ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+
+    if (!(foreground || background)) return canvas;
+
+    let fgColor = rgbaStringToObj(foreground);
+    let bgColor = rgbaStringToObj(background);
+
+    let dataImg = ctx.getImageData(0, 0, image.width, image.height);
+    var pixels = dataImg.data;
+    for(var i = 0; i < pixels.length; i+=4) {
+        let existingAlpha = pixels[i+3]/255;
+
+        pixels[i] = fgColor.r * existingAlpha + bgColor.r * (1-existingAlpha);
+        pixels[i+1] = fgColor.g * existingAlpha + bgColor.g * (1-existingAlpha);
+        pixels[i+2] = fgColor.b * existingAlpha + bgColor.b * (1-existingAlpha);
+        // let newAlpha = fgColor.a * existingAlpha + bgColor.a * (1-existingAlpha);
+        let newAlpha = 1;
+        pixels[i+3] = parseInt(255 * newAlpha);
+    }
+    ctx.putImageData(dataImg, 0, 0);
+    return canvas;
+}
+
+function rgbaStringToObj(rgbaString) {
+    if (rgbaString.substring(0, 4) == 'rgb(') {
+        rgbaString = rgbaString.replace('rgb(', 'rgba(').replace(')', ', 1)');
+    }
+    let rgbaArr = rgbaString.substring(5, rgbaString.length - 1)
+        .replace(/ /g, '')
+        .split(',');
+    return {
+        r: parseInt(rgbaArr[0]),
+        g: parseInt(rgbaArr[1]),
+        b: parseInt(rgbaArr[2]),
+        a: parseInt(rgbaArr[3])
+    }
+}
+
 export function getPosX(coordinate, defaultX) {
 	return (coordinate || {}).x || defaultX || 0;
 }
