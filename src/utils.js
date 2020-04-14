@@ -143,13 +143,15 @@ export function convert2rgbColor(color) {
 	if (color) {
 		switch (true) {
 			case getColorRegex("rgb").test(color): {
-                return color;
+				return color;
 			}
 			case getColorRegex("rgba").test(color): {
-                return color;
+				return color;
 			}
 			case getColorRegex("hex").test(color): {
-				let r = 0, g = 0, b = 0;
+				let r = 0,
+					g = 0,
+					b = 0;
 
 				// 3 digits
 				if (color.length == 4) {
@@ -164,17 +166,19 @@ export function convert2rgbColor(color) {
 					b = "0x" + color[5] + color[6];
 				}
 
-				return "rgb("+ +r + "," + +g + "," + +b + ")";
+				return "rgb(" + +r + "," + +g + "," + +b + ")";
 			}
 			case getColorRegex("hexA").test(color): {
-				let r = 0, g = 0, b = 0, a = 1;
+				let r = 0,
+					g = 0,
+					b = 0,
+					a = 1;
 
 				if (color.length == 5) {
 					r = "0x" + color[1] + color[1];
 					g = "0x" + color[2] + color[2];
 					b = "0x" + color[3] + color[3];
 					a = "0x" + color[4] + color[4];
-
 				} else if (color.length == 9) {
 					r = "0x" + color[1] + color[2];
 					g = "0x" + color[3] + color[4];
@@ -193,7 +197,7 @@ export function convert2rgbColor(color) {
 				document.body.appendChild(fakeDiv);
 
 				let cs = window.getComputedStyle(fakeDiv),
-				pv = cs.getPropertyValue("color");
+					pv = cs.getPropertyValue("color");
 
 				document.body.removeChild(fakeDiv);
 
@@ -204,49 +208,52 @@ export function convert2rgbColor(color) {
 }
 
 export function blendColorImage(image, foreground, background) {
-    if (!image) return null;
+	if (!image) return null;
 
-    let canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
+	let canvas = document.createElement("canvas");
+	canvas.width = image.width;
+	canvas.height = image.height;
 
-    let ctx = canvas.getContext('2d');
-    ctx.drawImage(image, 0, 0);
+	let ctx = canvas.getContext("2d");
+	ctx.drawImage(image, 0, 0);
 
-    if (!(foreground || background)) return canvas;
+	if (!(foreground || background)) return canvas;
 
-    let fgColor = rgbaStringToObj(foreground);
-    let bgColor = rgbaStringToObj(background);
+	let fgColor = rgbaStringToObj(foreground);
+	let bgColor = rgbaStringToObj(background);
 
-    let dataImg = ctx.getImageData(0, 0, image.width, image.height);
-    var pixels = dataImg.data;
-    for(var i = 0; i < pixels.length; i+=4) {
-        let existingAlpha = pixels[i+3]/255;
+	let dataImg = ctx.getImageData(0, 0, image.width, image.height);
+	var pixels = dataImg.data;
+	for (var i = 0; i < pixels.length; i += 4) {
+		let existingAlpha = pixels[i + 3] / 255;
 
-        pixels[i] = fgColor.r * existingAlpha + bgColor.r * (1-existingAlpha);
-        pixels[i+1] = fgColor.g * existingAlpha + bgColor.g * (1-existingAlpha);
-        pixels[i+2] = fgColor.b * existingAlpha + bgColor.b * (1-existingAlpha);
-        // let newAlpha = fgColor.a * existingAlpha + bgColor.a * (1-existingAlpha);
-        let newAlpha = 1;
-        pixels[i+3] = parseInt(255 * newAlpha);
-    }
-    ctx.putImageData(dataImg, 0, 0);
-    return canvas;
+		pixels[i] = fgColor.r * existingAlpha + bgColor.r * (1 - existingAlpha);
+		pixels[i + 1] =
+			fgColor.g * existingAlpha + bgColor.g * (1 - existingAlpha);
+		pixels[i + 2] =
+			fgColor.b * existingAlpha + bgColor.b * (1 - existingAlpha);
+		// let newAlpha = fgColor.a * existingAlpha + bgColor.a * (1-existingAlpha);
+		let newAlpha = 1;
+		pixels[i + 3] = parseInt(255 * newAlpha);
+	}
+	ctx.putImageData(dataImg, 0, 0);
+	return canvas;
 }
 
 function rgbaStringToObj(rgbaString) {
-    if (rgbaString.substring(0, 4) == 'rgb(') {
-        rgbaString = rgbaString.replace('rgb(', 'rgba(').replace(')', ', 1)');
-    }
-    let rgbaArr = rgbaString.substring(5, rgbaString.length - 1)
-        .replace(/ /g, '')
-        .split(',');
-    return {
-        r: parseInt(rgbaArr[0]),
-        g: parseInt(rgbaArr[1]),
-        b: parseInt(rgbaArr[2]),
-        a: parseInt(rgbaArr[3])
-    }
+	if (rgbaString.substring(0, 4) == "rgb(") {
+		rgbaString = rgbaString.replace("rgb(", "rgba(").replace(")", ", 1)");
+	}
+	let rgbaArr = rgbaString
+		.substring(5, rgbaString.length - 1)
+		.replace(/ /g, "")
+		.split(",");
+	return {
+		r: parseInt(rgbaArr[0]),
+		g: parseInt(rgbaArr[1]),
+		b: parseInt(rgbaArr[2]),
+		a: parseInt(rgbaArr[3])
+	};
 }
 
 export function getPosX(coordinate, defaultX) {
@@ -282,38 +289,43 @@ export const DefaultValues = {
 	fillColor: 0xcccccc,
 	lineWidth: 1
 };
-Graphics.prototype.drawDashedLine = function(points, x, y, lineDashSpec) {
-	let p1, p2;
-	let dashLeft = 0;
-	let gapLeft = 0;
-	let dash, gap;
-	let lineDashArray = lineDashSpec;
 
-	if (typeof lineDashSpec === "string") {
-		lineDashArray = lineDashSpec
-			.replace("(", "")
-			.replace(")", "")
-			.replace("[", "")
-			.replace("]", "")
-			.split(/[\s,]+/)
-			.map(e => parseInt(e))
-			.filter(e => !isNaN(e));
-	}
-	dash = lineDashArray[0];
-	gap = lineDashArray[1];
-	for (let i = 0; i < points.length; i++) {
-		p1 = points[i];
-		if (i == points.length - 1) break;
-		else p2 = points[i + 1];
-		var dx = p2.x - p1.x;
-		var dy = p2.y - p1.y;
+Graphics.prototype.drawPlus = function(x, y, symbolSize) {
+	this.moveTo(x, y - symbolSize);
+	this.lineTo(x, y + symbolSize);
+	this.moveTo(x - symbolSize, y);
+	this.lineTo(x + symbolSize, y);
+};
+
+Graphics.prototype.drawLine = function(x1, y1, x2, y2, lineDashSpec) {
+	if (!lineDashSpec) {
+		this.moveTo(x1, y1);
+		this.lineTo(x2, y2);
+	} else {
+		let dashLeft = 0;
+		let gapLeft = 0;
+		let dash, gap;
+		let lineDashArray = lineDashSpec;
+
+		if (typeof lineDashSpec === "string") {
+			lineDashArray = lineDashSpec
+				.replace("(", "")
+				.replace(")", "")
+				.replace("[", "")
+				.replace("]", "")
+				.split(/[\s,]+/)
+				.map(e => parseInt(e))
+				.filter(e => !isNaN(e));
+		}
+		dash = lineDashArray[0];
+		gap = lineDashArray[1];
+
+		let dx = x2 - x1;
+		let dy = y2 - y1;
 		var len = Math.sqrt(dx * dx + dy * dy);
 		var normal = { x: dx / len, y: dy / len };
 		var progressOnLine = 0;
-		this.moveTo(
-			x + p1.x + gapLeft * normal.x,
-			y + p1.y + gapLeft * normal.y
-		);
+		this.moveTo(x1 + gapLeft * normal.x, y1 + gapLeft * normal.y);
 		while (progressOnLine <= len) {
 			progressOnLine += gapLeft;
 			if (dashLeft > 0) progressOnLine += dashLeft;
@@ -325,8 +337,8 @@ Graphics.prototype.drawDashedLine = function(points, x, y, lineDashSpec) {
 				dashLeft = 0;
 			}
 			this.lineTo(
-				x + p1.x + progressOnLine * normal.x,
-				y + p1.y + progressOnLine * normal.y
+				x1 + progressOnLine * normal.x,
+				y1 + progressOnLine * normal.y
 			);
 			progressOnLine += gap;
 			if (progressOnLine > len && dashLeft == 0) {
@@ -334,17 +346,10 @@ Graphics.prototype.drawDashedLine = function(points, x, y, lineDashSpec) {
 			} else {
 				gapLeft = 0;
 				this.moveTo(
-					x + p1.x + progressOnLine * normal.x,
-					y + p1.y + progressOnLine * normal.y
+					x1 + progressOnLine * normal.x,
+					y1 + progressOnLine * normal.y
 				);
 			}
 		}
 	}
-};
-
-Graphics.prototype.drawPlus = function(x, y, symbolSize) {
-	this.moveTo(x, y - symbolSize);
-	this.lineTo(x, y + symbolSize);
-	this.moveTo(x - symbolSize, y);
-	this.lineTo(x + symbolSize, y);
 };

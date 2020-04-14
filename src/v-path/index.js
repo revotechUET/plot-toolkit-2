@@ -1,5 +1,9 @@
 import VShape from "../v-shape";
 import { getColor, DefaultValues, getPosX, getPosY } from "../utils";
+import PIXI, { Graphics } from "pixi.js";
+
+let a = new Graphics();
+a.lineTo();
 
 function draw(obj) {
 	obj.clear();
@@ -20,11 +24,23 @@ function draw(obj) {
 			: this.symbolSize || 5;
 
 	if (this.dashLine) {
-		obj.drawDashedLine(points, 0, 0, this.lineDash);
+		for (let i = 0; i < points.length - 1; i++) {
+			obj.drawLine(
+				points[i].x,
+				points[i].y,
+				points[i + 1].x,
+				points[i + 1].y,
+				this.lineDash
+			);
+		}
 	} else {
-		obj.moveTo(points[0].x, points[0].y);
-		for (let i = 1; i < points.length; i++) {
-			obj.lineTo(points[i].x, points[i].y);
+		for (let i = 0; i < points.length - 1; i++) {
+			obj.drawLine(
+				points[i].x,
+				points[i].y,
+				points[i + 1].x,
+				points[i + 1].y
+			);
 		}
 	}
 
