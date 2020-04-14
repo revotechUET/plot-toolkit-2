@@ -1,7 +1,7 @@
 const Vue = require("vue").default;
 const FragmentPlugin = require("vue-fragment").Plugin;
 const VScene = require("../v-scene").default;
-const VRect = require("../v-rect").default;
+const VCircle = require("../v-circle").default;
 
 Vue.use(FragmentPlugin);
 function getPattern(patternName) {
@@ -20,7 +20,7 @@ const app = new Vue({
         <v-scene :transparent="true" :view-width="width" :view-height="height"
             :view-pos-x="0" :view-pos-y="0" :real-min-x="0" :real-max-x="10"
             :real-min-y="10" :real-max-y="20" x-transform="linear" y-transform="linear">
-            <v-rect 
+            <v-circle 
                 fill-color="rgba(255, 0, 0, 0.3)" 
                 :real-min-x="2" 
                 :real-max-x="6"
@@ -35,7 +35,7 @@ const app = new Vue({
                 :onmousedown="click1"
                 :real-min-y="13"
                 :real-max-y="17">
-            </v-rect>
+            </v-circle>
         </v-scene>
         <button v-on:click="double">Click me</button>
     </fragment>
@@ -68,6 +68,6 @@ const app = new Vue({
         }
     },
     components: {
-        VScene, VRect
+        VScene, VCircle
     }
 });

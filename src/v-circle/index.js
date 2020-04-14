@@ -2,10 +2,12 @@ import VShape from "../v-shape";
 import {
 	getColor,
 	DefaultValues,
+    blendColorImage,
 	getTransparency,
 	getPosX,
 	getPosY,
 } from "../utils";
+import { Texture } from "pixi.js";
 
 function draw(obj) {
 	obj.clear();
@@ -22,6 +24,13 @@ function draw(obj) {
     this.cFillColor.transparency	
 	);
 
+    if (this.imagePattern) {
+        let canvas = blendColorImage(this.imagePattern, this.cForegroundColor, this.cBackgroundColor);
+
+        const texture = Texture.from(canvas);
+        obj.beginTextureFill(texture);
+    }
+
 	obj.drawCircle(0, 0, this.radius || 0);
 
 	obj.endFill();
@@ -31,6 +40,7 @@ function draw(obj) {
 }
 
 let component = {
+    props: ['imagePattern', 'foregroundColor', 'backgroundColor'],
 	methods: {
 		draw,
 	},
