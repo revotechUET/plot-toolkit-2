@@ -9,6 +9,8 @@ import {
     getPosY,
 } from "../utils";
 import layoutMixin from '../mixins/layout';
+import factoryFn from '../mixins';
+
 import { Texture } from "pixi.js";
 
 async function drawRect(obj, align = 0) {
@@ -44,7 +46,9 @@ async function drawRect(obj, align = 0) {
 let component = {
     props: ['imagePattern', 'foregroundColor', 'backgroundColor'],
     computed: {
-        componentType: function() {return "VRect"}
+        componentType: function() {
+            return this.componentTypePrefix + " VRect";
+        }
     },
     methods: {
         drawRect,
@@ -52,4 +56,8 @@ let component = {
     },
     mixins: [layoutMixin]
 };
-export default VShape.extend(component);
+let VRect = VShape.extend(component);
+export function VRectFactory(opts) {
+	return factoryFn(VRect, opts);
+}
+export default VRect;

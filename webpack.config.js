@@ -1,4 +1,5 @@
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
+//const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const webpack = require('webpack');
 module.exports = function(env) {
     let entry = env.MAIN || './src/main/basic.js';
     console.log(entry);
@@ -34,7 +35,10 @@ module.exports = function(env) {
             }]
         },
         plugins: [
-            new VueLoaderPlugin()
+            //new VueLoaderPlugin()
+            /*new webpack.optimize.LimitChunkCountPlugin({
+                maxChunks: 1
+            })*/
         ]
     }
 }

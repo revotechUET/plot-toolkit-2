@@ -30,13 +30,13 @@ function createPixiObj() {
 }
 function getPixiObj() {
     if (!this.pixiObj) {
-        if (this.$parent) {
+        if (this.getParent()) {
             this.pixiObj = this.createPixiObj();
             this.pixiObj.sortableChildren = true;
             this.pixiObj.hostComponent = this;
-            this.pixiObj.cursor = this.cursor || 'default';
-            let parentObj = this.$parent.getPixiObj();
-            this.pixiObj.mask = this.$parent.getMaskObj();
+            this.pixiObj.cursor = this.cursor || this.kursor || 'default';
+            let parentObj = this.getParent().getPixiObj();
+            this.pixiObj.mask = this.getParent().getMaskObj();
             parentObj.addChild(this.pixiObj);
         }
         else return null;
@@ -67,7 +67,8 @@ let component = {
     template,
     data: function() {
         return {
-            debug: true,
+            debug: false,
+            kursor: null, 
             pixiObj: null,
             maskObj: null,
             coordinate: {}
@@ -77,11 +78,16 @@ let component = {
         this.makeScene();
         this.registerEvents();
     },
+    beforeDestroy: function() {
+        console.log('before destroy');
+        this.cleanUp();
+    },
     computed: {
         watchedKeys: function() {
             return Object.keys(this.$props);
         },
-        componentType: function() {return "VObject"},
+        componentTypePrefix: function() {return ""},
+        componentType: function() {return this.componentTypePrefix + " VObject"},
         compProps: function() {
             let hash = {};
             for (let key of this.watchedKeys) {
@@ -151,8 +157,7 @@ let component = {
                 default:
                     return null;
             }
-            if (isNaN(this.viewHeight) || isNaN(this.realMinY) || isNaN(this.realMaxY)  ) 
-            {
+            if (isNaN(this.viewHeight) || isNaN(this.realMinY) || isNaN(this.realMaxY)) {
                 return null;
             }
             return transformFn.domain([this.realMinY, this.realMaxY])
@@ -169,6 +174,9 @@ let component = {
         drawMask: function(obj) {
             this.draw(obj);
         },
+        getParent: function() {
+            return this.$parent;
+        },
         getRenderer: function() {
             if (!this._renderer) {
                 this._renderer = this.$parent.getRenderer();
@@ -178,22 +186,32 @@ let component = {
         getRoot: function() {
             return this.$parent.getRoot();
         },
+        getRootComp: function() {
+            return this.$parent.getRootComp();
+        },
         triggerRelayout: function() {
             this.$parent.relayout(this);
         },
         _getX: function(realX) {
-            let transformX = this.$parent.transformX;
+            let transformX = this.getParent().transformX;
             if (transformX) {
                 return transformX(realX);
             }
             return 0;
         },
         _getY: function(realY) {
-            let transformY = this.$parent.transformY;
+            let transformY = this.getParent().transformY;
             if (transformY) {
                 return transformY(realY);
             }
             return 0;
+        },
+        cleanUp: function() {
+            let parentObj = this.getParent().getPixiObj();
+            parentObj.removeChild(this.pixiObj);
+            if (this.maskObj) parentObj.removeChild(this.maskObj);
+            this.pixiObj = null;
+            this.maskObj = null;
         }
     },
     components: {Fragment}
