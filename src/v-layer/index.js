@@ -1,4 +1,4 @@
-import VObject from '../v-object';
+import VShape from '../v-shape';
 import {VTextboxFactory} from '../v-textbox';
 import { Graphics } from 'pixi.js';
 import {getPosX, getPosY, getColor, getTransparency, DefaultValues} from '../utils';
@@ -6,7 +6,9 @@ import template from "./template.html";
 import eventManager from '../event-manager';
 
 let component = {
-    props: ["enabled", "lineWidth", "lineColor", "lineTransparency", "fillColor", "refLineX", "refLineY"],
+    props: ["enabled", "lineWidth", "lineColor", "lineTransparency", 
+        "refLineX", "refLineY"
+    ],
     template,
     components: { VTextboxSticky: VTextboxFactory({'sticky': true}) },
     data: function() {
@@ -15,17 +17,7 @@ let component = {
             hasMouseOver: false,
             mouseGlobalX: null,
             mouseGlobalY: null, 
-            tooltips: [{
-                content:"hello",
-                viewPosX: 0,
-                viewPosY: 0,
-                fillTransparency: 0. 
-            },{
-                content:"goodbye",
-                viewPosX: 150,
-                viewPosY: 0,
-                fillTransparency: 0. 
-            }]
+            tooltips: []
         }
     },
     computed: {
@@ -181,4 +173,4 @@ let component = {
         }
     }
 }
-export default VObject.extend(component);
+export default VShape.extend(component);

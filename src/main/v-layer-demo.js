@@ -8,7 +8,7 @@ new Vue({
     el: '#vue-app',
     template:`
     <v-scene :view-width="800" :view-height="600" :transparent="true">
-        <v-rect :enabled='true' :draggable="true" 
+        <v-rect :enabled='true' :draggable="false" 
             :view-pos-x="10" :view-pos-y="10" 
             :view-width="400" :view-height="300" 
             :line-width="1" line-color="#FF000088">

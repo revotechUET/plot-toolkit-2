@@ -9,7 +9,6 @@ export default {
             this.onExtMousePos && this.onExtMousePos(this, target, globalPos, localPos, refLines);
         },
         signal: function(eventName, ...args) {
-            console.log(this._uid, eventName);
             eventManager.emit(eventName, ...args);
         }
     },

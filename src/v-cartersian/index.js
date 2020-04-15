@@ -1,6 +1,7 @@
 import VRect from '../v-rect';
 import VAxis from '../v-axis';
 import template from './template.html';
+import factoryFn from '../mixins';
 
 let component = {
     props: ['majorTicksX', 'majorTicksY', 'minorTicksX', 'minorTicksY',
@@ -12,5 +13,8 @@ let component = {
     components: {VAxis},
     template
 }
-
-export default VRect.extend(component);
+let VCartersian = VRect.extend(component);
+export default VCartersian;
+export function VCartersianFactory(opts) {
+    return factoryFn(VCartersian, opts);
+}

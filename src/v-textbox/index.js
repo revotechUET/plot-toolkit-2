@@ -26,7 +26,6 @@ let component = {
         draw: function(obj) {
             this.drawRect(obj);
             let text = this.getContent();
-            console.log(text);
             text.text = this.content;
             if (this.contentStyle) {
                 text.style = new TextStyle(this.contentStyle);

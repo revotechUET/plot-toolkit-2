@@ -45,7 +45,6 @@ function getPixiObj() {
 }
 
 function getMaskObj() {
-    console.log("VObject getMaskObj");
     return null;
 }
 function renderGraphic(obj) {
@@ -67,7 +66,7 @@ let component = {
     template,
     data: function() {
         return {
-            debug: false,
+            debug: true,
             kursor: null, 
             pixiObj: null,
             maskObj: null,
@@ -79,7 +78,6 @@ let component = {
         this.registerEvents();
     },
     beforeDestroy: function() {
-        console.log('before destroy');
         this.cleanUp();
     },
     computed: {
