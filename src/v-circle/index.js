@@ -3,13 +3,14 @@ import {
 	getColor,
 	DefaultValues,
     blendColorImage,
+    getImagePattern,
 	getTransparency,
 	getPosX,
 	getPosY,
 } from "../utils";
 import { Texture } from "pixi.js";
 
-function draw(obj) {
+async function draw(obj) {
 	obj.clear();
 	let lw = this.lineWidth || 1;
 	let lt = this.lineTransparency || 1.0;
@@ -24,8 +25,9 @@ function draw(obj) {
     this.cFillColor.transparency	
 	);
 
-    if (this.imagePattern) {
-        let canvas = blendColorImage(this.imagePattern, this.cForegroundColor, this.cBackgroundColor);
+    if (this.imagePatternUrl) {
+        let imagePattern = await getImagePattern(this.imagePatternUrl);
+        let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
         const texture = Texture.from(canvas);
         obj.beginTextureFill(texture);
@@ -40,7 +42,7 @@ function draw(obj) {
 }
 
 let component = {
-    props: ['imagePattern', 'foregroundColor', 'backgroundColor'],
+    props: ['imagePatternUrl', 'foregroundColor', 'backgroundColor'],
 	methods: {
 		draw,
 	},

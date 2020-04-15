@@ -153,13 +153,10 @@ export function convert2rgbColor(color) {
 					g = 0,
 					b = 0;
 
-				// 3 digits
 				if (color.length == 4) {
 					r = "0x" + color[1] + color[1];
 					g = "0x" + color[2] + color[2];
 					b = "0x" + color[3] + color[3];
-
-					// 6 digits
 				} else if (color.length == 7) {
 					r = "0x" + color[1] + color[2];
 					g = "0x" + color[3] + color[4];
@@ -255,6 +252,17 @@ function rgbaStringToObj(rgbaString) {
 		a: parseInt(rgbaArr[3])
 	};
 }
+
+export function getImagePattern(srcUrl) {
+    return new Promise(function(resolve, reject) {
+        let image = new Image();
+        image.crossOrigin = 'Anonymous';
+        image.src = srcUrl;
+        image.onload = function () {
+            resolve(image);
+        }
+    });
+};
 
 export function getPosX(coordinate, defaultX) {
 	return (coordinate || {}).x || defaultX || 0;
