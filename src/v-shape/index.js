@@ -1,25 +1,25 @@
 import VObject from "../v-object";
 import { Graphics } from "pixi.js";
 function createPixiObj() {
-  return new Graphics();
+	return new Graphics();
 }
 function getMaskObj() {
-  if (!this.clipped) return null;
-  if (!this.maskObj) {
-    if (this.$parent) {
-      this.maskObj = new Graphics();
-      let parentObj = this.$parent.getPixiObj();
-      parentObj.addChild(this.maskObj);
-    } else return null;
-  }
-  return this.maskObj;
+	if (!this.clipped) return null;
+	if (!this.maskObj) {
+		if (this.$parent) {
+			this.maskObj = new Graphics();
+			let parentObj = this.$parent.getPixiObj();
+			parentObj.addChild(this.maskObj);
+		} else return null;
+	}
+	return this.maskObj;
 }
 function registerEvents(_pixiObj) {
-  let pixiObj = _pixiObj || this.getPixiObj();
-  if (this.enabled) {
-    pixiObj.interactive = true;
-    //pixiObj.buttonMode = true;
-  }
+	let pixiObj = _pixiObj || this.getPixiObj();
+	if (this.enabled) {
+		pixiObj.interactive = true;
+		//pixiObj.buttonMode = true;
+	}
 
   const handleMouseOver = evt => {
     if (this.highlight)
@@ -97,36 +97,36 @@ function dragStart(target, localPos, globalPos, oriEvent) {
   this.draggingData.globalX = globalPos.x - localPos.x;
   this.draggingData.globalY = globalPos.y - localPos.y;
 
-  let childIdx = this.pixiObj.parent.getChildIndex(this.pixiObj);
-  this.draggingData.childIdx = childIdx;
-  this.pixiObj.parent.removeChild(this.pixiObj);
-  this.getRoot().addChild(this.pixiObj);
-  this.pixiObj.x = globalPos.x - localPos.x;
-  this.pixiObj.y = globalPos.y - localPos.y;
-  requestAnimationFrame(() => this.rawRenderGraphic());
+	let childIdx = this.pixiObj.parent.getChildIndex(this.pixiObj);
+	this.draggingData.childIdx = childIdx;
+	this.pixiObj.parent.removeChild(this.pixiObj);
+	this.getRoot().addChild(this.pixiObj);
+	this.pixiObj.x = globalPos.x - localPos.x;
+	this.pixiObj.y = globalPos.y - localPos.y;
+	requestAnimationFrame(() => this.rawRenderGraphic());
 
-  this.onDrag && this.onDrag(target);
+	this.onDrag && this.onDrag(target);
 }
 function dragEnd(evtData, target) {
-  if (!this.dragging) return;
-  this.dragging = false;
-  //this.pixiObj.zIndex = this.draggingData.zIndex;
-  this.getRoot().removeChild(this.pixiObj);
-  this.$parent
-    .getPixiObj()
-    .addChildAt(this.pixiObj, this.draggingData.childIdx);
-  this.makeScene();
-  let newPos = this.normalizePos(target.parent.toLocal(evtData.global));
-  newPos.x -= this.draggingData.x;
-  newPos.y -= this.draggingData.y;
-  if (this.dragConstraint === "x") {
-    this.onDrop && this.onDrop(target, { x: newPos.x });
-  } else if (this.dragConstraint === "y") {
-    this.onDrop && this.onDrop(target, { y: newPos.y });
-  } else {
-    this.onDrop && this.onDrop(target, newPos);
-  }
-  this.draggingData = {};
+	if (!this.dragging) return;
+	this.dragging = false;
+	//this.pixiObj.zIndex = this.draggingData.zIndex;
+	this.getRoot().removeChild(this.pixiObj);
+	this.$parent
+		.getPixiObj()
+		.addChildAt(this.pixiObj, this.draggingData.childIdx);
+	this.makeScene();
+	let newPos = this.normalizePos(target.parent.toLocal(evtData.global));
+	newPos.x -= this.draggingData.x;
+	newPos.y -= this.draggingData.y;
+	if (this.dragConstraint === "x") {
+		this.onDrop && this.onDrop(target, { x: newPos.x });
+	} else if (this.dragConstraint === "y") {
+		this.onDrop && this.onDrop(target, { y: newPos.y });
+	} else {
+		this.onDrop && this.onDrop(target, newPos);
+	}
+	this.draggingData = {};
 }
 function dragMove(evtData, target) {
   if (this.dragging) {
@@ -166,32 +166,38 @@ function dragMove(evtData, target) {
   }
 }
 function normalizePos(pos) {
-  if (!this.dragLimits) return pos;
-  let bound;
-  if (typeof this.dragLimits === "function") {
-    return this.dragLimits(pos, this);
-  } else if (this.dragLimits === "parent") {
-    bound = {
-      x: this.$parent.posX,
-      y: this.$parent.posY,
-      width: this.$parent.width,
-      height: this.$parent.height
-    };
-  } else if (this.dragLimits.constructor.name === "VueComponent") {
-    bound = {
-      x: this.dragLimits.posX || 0,
-      y: this.dragLimits.posY || 0,
-      width: this.dragLimits.width,
-      height: this.dragLimits.height
-    };
-  }
-  if ((pos.x - bound.x) * (pos.x - bound.x - bound.width) > 0) {
-    return { y: pos.y, x: pos.x < bound.x ? bound.x : bound.x + bound.width };
-  }
-  if ((pos.y - bound.y) * (pos.y - bound.y - bound.height) > 0) {
-    return { x: pos.x, y: pos.y < bound.y ? bound.y : bound.y + bound.height };
-  }
-  return pos;
+	if (!this.dragLimits) return pos;
+	let bound;
+	if (typeof this.dragLimits === "function") {
+		return this.dragLimits(pos, this);
+	} else if (this.dragLimits === "parent") {
+		bound = {
+			x: this.$parent.posX,
+			y: this.$parent.posY,
+			width: this.$parent.width,
+			height: this.$parent.height,
+		};
+	} else if (this.dragLimits.constructor.name === "VueComponent") {
+		bound = {
+			x: this.dragLimits.posX || 0,
+			y: this.dragLimits.posY || 0,
+			width: this.dragLimits.width,
+			height: this.dragLimits.height,
+		};
+	}
+	if ((pos.x - bound.x) * (pos.x - bound.x - bound.width) > 0) {
+		return {
+			y: pos.y,
+			x: pos.x < bound.x ? bound.x : bound.x + bound.width,
+		};
+	}
+	if ((pos.y - bound.y) * (pos.y - bound.y - bound.height) > 0) {
+		return {
+			x: pos.x,
+			y: pos.y < bound.y ? bound.y : bound.y + bound.height,
+		};
+	}
+	return pos;
 }
 const propKeys = [
   "shape",
@@ -217,30 +223,30 @@ const propKeys = [
   "onDrop"
 ];
 let component = {
-  props: propKeys,
-  data: function() {
-    return {
-      hasMouseOver: false,
-      dragging: false,
-      draggingData: {}
-    };
-  },
-  computed: {
-    watchedKeys: function() {
-      return ["hasMouseOver", ...Object.keys(this.$props)].filter(
-        v => v !== "dragLimits"
-      );
-    }
-  },
-  methods: {
-    createPixiObj,
-    getMaskObj,
-    registerEvents,
-    dragStart,
-    dragEnd,
-    dragMove,
-    normalizePos
-  }
+	props: propKeys,
+	data: function() {
+		return {
+			hasMouseOver: false,
+			dragging: false,
+			draggingData: {},
+		};
+	},
+	computed: {
+		watchedKeys: function() {
+			return ["hasMouseOver", ...Object.keys(this.$props)].filter(
+				(v) => v !== "dragLimits"
+			);
+		},
+	},
+	methods: {
+		createPixiObj,
+		getMaskObj,
+		registerEvents,
+		dragStart,
+		dragEnd,
+		dragMove,
+		normalizePos,
+	},
 };
 
 export default VObject.extend(component);

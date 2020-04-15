@@ -28,20 +28,19 @@ function getPixiApp(force) {
     return this.pixiApp;
 }
 function getPixiObj() {
-    return (this.getPixiApp() || {}).stage;
+	return (this.getPixiApp() || {}).stage;
 }
 function rawRenderGraphic(obj) {
-    let app = this.getPixiApp();
-    if (obj) {
-        obj.render(app.renderer);
-    }
-    else app.renderer.render(obj || app.stage);
+	let app = this.getPixiApp();
+	if (obj) {
+		obj.render(app.renderer);
+	} else app.renderer.render(obj || app.stage);
 }
 /*function renderGraphic(obj) {
     let app = this.getPixiApp();
     app.renderer.render(obj || app.stage);
 }*/
- 
+
 let component = {
     props: ['transparent'],
     components: {

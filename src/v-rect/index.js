@@ -1,7 +1,9 @@
 import VShape from "../v-shape";
+import { Text, TextStyle } from "pixi.js";
 import {
     getColor,
     DefaultValues,
+    blendColorImage,
     getTransparency,
     getPosX,
     getPosY,
@@ -9,25 +11,29 @@ import {
 import layoutMixin from '../mixins/layout';
 import factoryFn from '../mixins';
 
-function drawRect(obj, align = 0) {
+import { Texture } from "pixi.js";
+
+async function drawRect(obj, align = 0) {
     obj.clear();
     let lw = this.lineWidth || 0;
     let lt = this.lineTransparency || 1.0;
     if (this.hasMouseOver) {
-        lw = lw ? (lw + 4) : 0;
+        lw = lw?(lw + 4):0;
         lt /= 2;
     }
     obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, align);
-    //obj.lineStyle(lw, getColor(this.lineColor, DefaultValues.lineColor), lt, align);
 
-    //obj.beginFill(
-    //getColor(this.fillColor, DefaultValues.fillColor),
-    //getTransparency(this.fillTransparency)
-    //);
     obj.beginFill(
         this.cFillColor.color,
         this.cFillColor.transparency
     );
+
+    if (this.imagePattern) {
+        let canvas = blendColorImage(this.imagePattern, this.cForegroundColor, this.cBackgroundColor);
+
+        const texture = Texture.from(canvas);
+        obj.beginTextureFill(texture);
+    }
 
     obj.drawRect(0, 0, this.width || 0, this.height || 0);
 
@@ -38,6 +44,7 @@ function drawRect(obj, align = 0) {
 }
 
 let component = {
+    props: ['imagePattern', 'foregroundColor', 'backgroundColor'],
     computed: {
         componentType: function() {
             return this.componentTypePrefix + " VRect";

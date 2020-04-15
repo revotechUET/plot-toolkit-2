@@ -3,8 +3,12 @@ import {Fragment} from 'vue-fragment';
 import template from './template.html';
 import style from './style.less';
 import {scaleLinear, scaleLog} from 'd3-scale';
-import {processColorStr, getTransparency, DefaultValues} from '../utils';
-import eventManager from '../event-manager';
+import {
+    processColorStr,
+    getTransparency,
+    DefaultValues,
+    convert2rgbColor
+} from '../utils';
 
 function makeScene() {
     let maskObj = this.getMaskObj();
@@ -99,6 +103,12 @@ let component = {
             let cFc = processColorStr(this.fillColor, DefaultValues.fillColor,
                 getTransparency(this.fillTransparency));
             return cFc;
+        },
+        cForegroundColor: function() {
+            return convert2rgbColor(this.foregroundColor);
+        },
+        cBackgroundColor: function() {
+            return convert2rgbColor(this.backgroundColor);
         },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
