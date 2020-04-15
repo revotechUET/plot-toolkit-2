@@ -1,9 +1,5 @@
 import VShape from "../v-shape";
 import { getColor, DefaultValues, getPosX, getPosY } from "../utils";
-import PIXI, { Graphics } from "pixi.js";
-
-let a = new Graphics();
-a.lineTo();
 
 function draw(obj) {
 	obj.clear();
@@ -89,7 +85,7 @@ let component = {
 		"realPath",
 		"symbolSize",
 		"symbolColor",
-		"lineDash"
+		"lineDash",
 	],
 	computed: {
 		path: function() {
@@ -98,17 +94,17 @@ let component = {
 			let transformXFn = this.$parent.transformX();
 			let transformYFn = this.$parent.transformY();
 			if (!transformXFn || !transformYFn) return [];
-			return this.realPath.map(point => ({
+			return this.realPath.map((point) => ({
 				x: transformXFn(point.x),
-				y: transformYFn(point.y)
+				y: transformYFn(point.y),
 			}));
 		},
 		dashLine: function() {
 			return !!this.lineDash;
-		}
+		},
 	},
 	methods: {
-		draw
-	}
+		draw,
+	},
 };
 export default VShape.extend(component);
