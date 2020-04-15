@@ -153,13 +153,10 @@ export function convert2rgbColor(color) {
 					g = 0,
 					b = 0;
 
-				// 3 digits
 				if (color.length == 4) {
 					r = "0x" + color[1] + color[1];
 					g = "0x" + color[2] + color[2];
 					b = "0x" + color[3] + color[3];
-
-					// 6 digits
 				} else if (color.length == 7) {
 					r = "0x" + color[1] + color[2];
 					g = "0x" + color[3] + color[4];
@@ -252,9 +249,20 @@ function rgbaStringToObj(rgbaString) {
 		r: parseInt(rgbaArr[0]),
 		g: parseInt(rgbaArr[1]),
 		b: parseInt(rgbaArr[2]),
-		a: parseInt(rgbaArr[3])
+		a: parseInt(rgbaArr[3]),
 	};
 }
+
+export function getImagePattern(srcUrl) {
+    return new Promise(function(resolve, reject) {
+        let image = new Image();
+        image.crossOrigin = 'Anonymous';
+        image.src = srcUrl;
+        image.onload = function () {
+            resolve(image);
+        }
+    });
+};
 
 export function getPosX(coordinate, defaultX) {
 	return (coordinate || {}).x || defaultX || 0;
@@ -287,7 +295,7 @@ export function logMajorTest(value) {
 export const DefaultValues = {
 	lineColor: 0x0000ff,
 	fillColor: 0xcccccc,
-	lineWidth: 1
+	lineWidth: 1,
 };
 
 Graphics.prototype.drawPlus = function(x, y, symbolSize) {
@@ -314,8 +322,8 @@ Graphics.prototype.drawLine = function(x1, y1, x2, y2, lineDashSpec) {
 				.replace("[", "")
 				.replace("]", "")
 				.split(/[\s,]+/)
-				.map(e => parseInt(e))
-				.filter(e => !isNaN(e));
+				.map((e) => parseInt(e))
+				.filter((e) => !isNaN(e));
 		}
 		dash = lineDashArray[0];
 		gap = lineDashArray[1];
@@ -326,6 +334,67 @@ Graphics.prototype.drawLine = function(x1, y1, x2, y2, lineDashSpec) {
 		var normal = { x: dx / len, y: dy / len };
 		var progressOnLine = 0;
 		this.moveTo(x1 + gapLeft * normal.x, y1 + gapLeft * normal.y);
+		while (progressOnLine <= len) {
+			progressOnLine += gapLeft;
+			if (dashLeft > 0) progressOnLine += dashLeft;
+			else progressOnLine += dash;
+			if (progressOnLine > len) {
+				dashLeft = progressOnLine - len;
+				progressOnLine = len;
+			} else {
+				dashLeft = 0;
+			}
+			this.lineTo(
+				x1 + progressOnLine * normal.x,
+				y1 + progressOnLine * normal.y
+			);
+			progressOnLine += gap;
+			if (progressOnLine > len && dashLeft == 0) {
+				gapLeft = progressOnLine - len;
+			} else {
+				gapLeft = 0;
+				this.moveTo(
+					x1 + progressOnLine * normal.x,
+					y1 + progressOnLine * normal.y
+				);
+			}
+		}
+	}
+};
+
+Graphics.prototype.myLineTo = function(x, y, lineDashSpec) {
+	if (!lineDashSpec) {
+		console.log(this.currentPath.points);
+		this.lineTo(x, y);
+	} else {
+		let start = this.currentPath.points;
+		let x1 = start[0],
+			y1 = start[1];
+		let x2 = x,
+			y2 = y;
+		let dashLeft = 0;
+		let gapLeft = 0;
+		let dash, gap;
+		let lineDashArray = lineDashSpec;
+
+		if (typeof lineDashSpec === "string") {
+			lineDashArray = lineDashSpec
+				.replace("(", "")
+				.replace(")", "")
+				.replace("[", "")
+				.replace("]", "")
+				.split(/[\s,]+/)
+				.map((e) => parseInt(e))
+				.filter((e) => !isNaN(e));
+		}
+		dash = lineDashArray[0];
+		gap = lineDashArray[1];
+
+		let dx = x2 - x1;
+		let dy = y2 - y1;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		var normal = { x: dx / len, y: dy / len };
+		var progressOnLine = 0;
 		while (progressOnLine <= len) {
 			progressOnLine += gapLeft;
 			if (dashLeft > 0) progressOnLine += dashLeft;

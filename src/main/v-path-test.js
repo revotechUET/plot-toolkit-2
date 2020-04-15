@@ -43,8 +43,8 @@ const app = new Vue({
 			{ x: 50, y: 300 },
 			{ x: 250, y: 350 },
 			{ x: 150, y: 400 },
-			{ x: 560, y: 500 }
-		]
+			{ x: 560, y: 500 },
+		],
 	},
 	methods: {
 		double: function(evt) {
@@ -59,7 +59,7 @@ const app = new Vue({
 		dropFn: function(target, pos) {
 			this.x = pos.x;
 			this.y = pos.y;
-		}
+		},
 	},
 	components: {
 		VScene,
@@ -67,6 +67,6 @@ const app = new Vue({
 		VRect,
 		VCircle,
 		VPolygon,
-		VPath
-	}
+		VPath,
+	},
 });

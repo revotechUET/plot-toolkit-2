@@ -4,6 +4,7 @@ import {
     getColor,
     DefaultValues,
     blendColorImage,
+    getImagePattern,
     getTransparency,
     getPosX,
     getPosY,
@@ -28,8 +29,9 @@ async function drawRect(obj, align = 0) {
         this.cFillColor.transparency
     );
 
-    if (this.imagePattern) {
-        let canvas = blendColorImage(this.imagePattern, this.cForegroundColor, this.cBackgroundColor);
+    if (this.imagePatternUrl) {
+        let imagePattern = await getImagePattern(this.imagePatternUrl);
+        let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
         const texture = Texture.from(canvas);
         obj.beginTextureFill(texture);
@@ -44,7 +46,7 @@ async function drawRect(obj, align = 0) {
 }
 
 let component = {
-    props: ['imagePattern', 'foregroundColor', 'backgroundColor'],
+    props: ['imagePatternUrl', 'foregroundColor', 'backgroundColor'],
     computed: {
         componentType: function() {
             return this.componentTypePrefix + " VRect";

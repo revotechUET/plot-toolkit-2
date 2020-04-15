@@ -7,9 +7,9 @@ new Vue({
 	el: "#vue-app",
 	template: `<fragment>
         <v-scene :view-width="600" :view-height="400" :transparent="true">
-            <v-textbox :view-pos-x="30" :view-pos-y="30"
+            <v-textbox :view-pos-x="30" :view-pos-y="30" 
                 :line-width="1" :clipped="true"
-                line-color="rgba(0, 0, 255, 1)" fill-color="#FFFF0088" content="Troifds dsff dsf sd" :content-style="style" margin-top="50" margin-left="15"
+                line-color="rgba(0, 0, 255, 1)" fill-color="#FFFF0088" content="Troifds dsff dsf sd" :content-style="style" padding="12 0 0 0"
 				/>
         </v-scene>
     </fragment>
@@ -29,12 +29,12 @@ new Vue({
 			dropShadowAngle: Math.PI / 6,
 			dropShadowDistance: 6,
 			wordWrap: true,
-			wordWrapWidth: 440
-		}
+			wordWrapWidth: 440,
+		},
 	},
 	components: {
 		Fragment,
 		VTextbox,
-		VScene
-	}
+		VScene,
+	},
 });
