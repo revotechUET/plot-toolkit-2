@@ -44,7 +44,6 @@ const app = new Vue({
 			dropShadowDistance: 6,
 			wordWrap: true,
 			wordWrapWidth: 440,
-			backgroundColor: "red",
 		},
 	},
 	methods: {

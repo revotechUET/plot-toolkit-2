@@ -20,24 +20,32 @@ function draw(obj) {
 			: this.symbolSize || 5;
 
 	if (this.dashLine) {
-		for (let i = 0; i < points.length - 1; i++) {
-			obj.drawLine(
-				points[i].x,
-				points[i].y,
-				points[i + 1].x,
-				points[i + 1].y,
-				this.lineDash
-			);
+		obj.moveTo(points[0].x, points[0].y);
+		for (let i = 1; i < points.length; i++) {
+			obj.myLineTo(points[i].x, points[i].y, this.lineDash);
 		}
+		// for (let i = 0; i < points.length - 1; i++) {
+		// 	obj.drawLine(
+		// 		points[i].x,
+		// 		points[i].y,
+		// 		points[i + 1].x,
+		// 		points[i + 1].y,
+		// 		this.lineDash
+		// 	);
+		// }
 	} else {
-		for (let i = 0; i < points.length - 1; i++) {
-			obj.drawLine(
-				points[i].x,
-				points[i].y,
-				points[i + 1].x,
-				points[i + 1].y
-			);
+		obj.moveTo(points[0].x, points[0].y);
+		for (let i = 1; i < points.length; i++) {
+			obj.myLineTo(points[i].x, points[i].y);
 		}
+		// for (let i = 0; i < points.length - 1; i++) {
+		// 	obj.drawLine(
+		// 		points[i].x,
+		// 		points[i].y,
+		// 		points[i + 1].x,
+		// 		points[i + 1].y
+		// 	);
+		// }
 	}
 
 	obj.beginFill(symbolColor, 1);
