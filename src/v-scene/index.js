@@ -5,7 +5,7 @@ import template from './template.html';
 import style from './style.less';
 import layoutMixin from '../mixins/layout';
 import {debounce} from 'lodash';
-import wheelManager from '../wheel-manager';
+import eventManager from '../event-manager';
 function getPixiApp(force) {
     if (!this.pixiApp || force) {
         const renderer = autoDetectRenderer({ 
@@ -15,7 +15,7 @@ function getPixiApp(force) {
             antialias: true 
         });
         renderer.view.onwheel = (evt) => {
-            wheelManager.emit('wheel', evt);
+            eventManager.emit('wheel', evt);
         }
         const stage = new Container();
         stage.sortableChildren = true;
@@ -63,6 +63,12 @@ let component = {
         },
         getRoot: function() {
             return this.getPixiApp().stage;
+        },
+        getRootComp: function() {
+            return this;
+        },
+        getParent: function() {
+            return this;
         },
         rawRenderGraphic,
         renderGraphic:debounce(rawRenderGraphic, 100) 

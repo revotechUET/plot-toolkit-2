@@ -1,11 +1,18 @@
 import VRect from '../v-rect';
 import {Text} from "pixi.js";
+//import sticky from '../mixins/stick-to-root';
+import factoryFn from '../mixins';
 
 let component = {
     props: ["content"],
     data: function() {
         return {
             _content: null
+        }
+    },
+    computed: {
+        componentType: function() {
+            return this.componentTypePrefix + " VTextBox";
         }
     },
     methods: {
@@ -26,5 +33,9 @@ let component = {
         }
     }
 }
+let VTextbox = VRect.extend(component);
+export default VTextbox;
 
-export default VRect.extend(component);
+export function VTextboxFactory(opts) {
+    return factoryFn(VTextbox, opts);
+}

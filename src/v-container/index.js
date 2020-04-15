@@ -1,5 +1,5 @@
 import VObject from '../v-object';
-import { Graphics, Container } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 import {getPosX, getPosY, getColor, getTransparency, DefaultValues} from '../utils';
 import layoutMixin from '../mixins/layout';
 

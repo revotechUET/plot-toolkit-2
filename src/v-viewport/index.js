@@ -2,14 +2,14 @@ import template from "./template.html";
 import {Graphics, Point} from 'pixi.js';
 import VContainer from "../v-container";
 import VRect from "../v-rect";
-import wheelManager from '../wheel-manager';
+import eventManager from '../event-manager';
 import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from '../utils';
 console.log('Load v-viewport');
 let component = {
     props: ["viewportWidth", "viewportHeight", "pan"],
     template,
     created: function() {
-        wheelManager.on('wheel', (evt) => {
+        eventManager.on('wheel', (evt) => {
             if((evt.metaKey || evt.ctrlKey) && this.pixiObj.containsPoint({x:evt.offsetX, y:evt.offsetY})) {
                 let panFn = this.onPan?this.onPan:this.onPanDefault;
                 switch(this.pan) {
