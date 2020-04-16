@@ -1,39 +1,50 @@
 import VShape from "../v-shape";
 import {
-	getColor,
-	DefaultValues,
-	getTransparency,
-	getPosX,
-	getPosY,
+    getColor,
+    DefaultValues,
+    getTransparency,
+    getPosX,
+    getImagePattern,
+    blendColorImage,
+    getPosY,
 } from "../utils";
+import { Texture } from "pixi.js";
 
-function draw(obj) {
-	obj.clear();
-	let lw = this.lineWidth || 1;
-	let lt = this.lineTransparency || 1.0;
-	if (this.hasMouseOver) {
-		lw += 4;
-		lt /= 2;
-	}
-	obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
+async function draw(obj) {
+    obj.clear();
+    let lw = this.lineWidth || 1;
+    let lt = this.lineTransparency || 1.0;
+    if (this.hasMouseOver) {
+        lw += 4;
+        lt /= 2;
+    }
+    obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
 
-	obj.beginFill(
-		this.cFillColor.color,
-    this.cFillColor.transparency	
-	);
+    obj.beginFill(
+        this.cFillColor.color,
+        this.cFillColor.transparency	
+    );
 
-	obj.drawPolygon(this.path || []);
+    if (this.imagePatternUrl) {
+        let imagePattern = await getImagePattern(this.imagePatternUrl);
+        let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
-	obj.endFill();
-	obj.x = getPosX(this.coordinate, this.posX);
-	obj.y = getPosY(this.coordinate, this.posY);
-	obj.rotation = this.rotation || 0;
+        const texture = Texture.from(canvas);
+        obj.beginTextureFill(texture);
+    }
+
+    obj.drawPolygon(this.cPath || []);
+
+    obj.endFill();
+    obj.x = getPosX(this.coordinate, this.posX);
+    obj.y = getPosY(this.coordinate, this.posY);
+    obj.rotation = this.rotation || 0;
 }
 
 let component = {
-	props: ["path"],
-	methods: {
-		draw,
-	},
+    props: ['path', 'imagePatternUrl', 'foregroundColor', 'backgroundColor'],
+    methods: {
+        draw,
+    },
 };
 export default VShape.extend(component);

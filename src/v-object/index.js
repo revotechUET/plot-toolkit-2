@@ -110,6 +110,10 @@ let component = {
         cBackgroundColor: function() {
             return convert2rgbColor(this.backgroundColor);
         },
+        cPath: function() {
+            let path = this.path.map((item, idx) => idx % 2 ? this._getY(item) : this._getX(item));
+            return path;
+        },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
             return this._getX(this.realMinX);

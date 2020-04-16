@@ -1,5 +1,5 @@
 import VShape from "../v-shape";
-import { Text, TextStyle } from "pixi.js";
+import { Text, TextStyle, Texture } from "pixi.js";
 import {
     getColor,
     DefaultValues,
@@ -11,8 +11,6 @@ import {
 } from "../utils";
 import layoutMixin from '../mixins/layout';
 import factoryFn from '../mixins';
-
-import { Texture } from "pixi.js";
 
 async function drawRect(obj, align = 0) {
     obj.clear();
