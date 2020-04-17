@@ -30,7 +30,6 @@ new Vue({
     `,
     methods: {
         genTooltip: function(comp, target, globalPos, srcLocalPos, refLines) {
-            console.log(globalPos.x, globalPos.y);
             let localPos = comp.pixiObj.toLocal(globalPos);
             let xCoord = comp.transformX.invert(localPos.x);
             let yCoord = comp.transformY.invert(localPos.y);

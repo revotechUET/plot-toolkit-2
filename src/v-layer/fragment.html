@@ -1,7 +1,6 @@
 <slot />
-<v-textbox-sticky v-for="(message, idx) in tooltips" :line-width="1" :key="idx" 
-    :view-width="20" :view-height="20" 
-    fill-color="#FFFFCC"
+<v-textbox-sticky v-for="(message, idx) in tooltips" :line-width="0" :key="idx" 
+    fill-color="#FFFFCC" :content-style="{fontSize: 12, fontWeight:'bold', stroke:'#FFFFFF', strokeThickness:4}"
     :fill-transparency="message.fillTransparency"
     :view-pos-x="message.viewPosX" :view-pos-y="message.viewPosY" 
     :content="message.content">

@@ -6,8 +6,8 @@ import VZone from "../v-zone";
 Vue.use(Plugin);
 
 const app = new Vue({
-	el: "#vue-app",
-	template: `<fragment>
+    el: "#vue-app",
+    template: `<fragment>
         <v-scene name="scene" :transparent="true" :view-width="width" :view-height="height">
             <v-zone shape="rect" :enabled="false"
                 :knob-flags="[true, true]"
@@ -22,43 +22,43 @@ const app = new Vue({
         </v-scene>
     </fragment>
     `,
-	data: {
-		width: 600,
-		height: 400,
-		x: 100,
-		y: 100,
-		width1: 270,
-		height1: 270,
-		style: {
-			fontFamily: "Arial",
-			fontSize: 20,
-			fontStyle: "italic",
-			fontWeight: "bold",
-			fill: ["#ffffff", "#00ff99"], // gradient
-			stroke: "#4a1850",
-			strokeThickness: 5,
-			dropShadow: true,
-			dropShadowColor: "#000000",
-			dropShadowBlur: 4,
-			dropShadowAngle: Math.PI / 6,
-			dropShadowDistance: 6,
-			wordWrap: true,
-			wordWrapWidth: 440,
-		},
-	},
-	methods: {
-		resize: function({ width, height }) {
-			console.log("resize", width, height);
-			this.width1 = width;
-			this.height1 = height;
-		},
-		mousemove: function(target, local, global, evt) {
-			console.log(target, local, global);
-		},
-	},
-	components: {
-		VScene,
-		VResizable,
-		VZone,
-	},
+    data: {
+        width: 600,
+        height: 400,
+        x: 100,
+        y: 100,
+        width1: 270,
+        height1: 270,
+        style: {
+            fontFamily: "Arial",
+            fontSize: 20,
+            fontStyle: "italic",
+            fontWeight: "bold",
+            fill: ["#ffffff", "#00ff99"], // gradient
+            stroke: "#4a1850",
+            strokeThickness: 5,
+            dropShadow: true,
+            dropShadowColor: "#000000",
+            dropShadowBlur: 4,
+            dropShadowAngle: Math.PI / 6,
+            dropShadowDistance: 6,
+            wordWrap: true,
+            wordWrapWidth: 440,
+        },
+    },
+    methods: {
+        resize: function ({ width, height }) {
+            console.log("resize", width, height);
+            this.width1 = width;
+            this.height1 = height;
+        },
+        mousemove: function (target, local, global, evt) {
+            console.log(target, local, global);
+        },
+    },
+    components: {
+        VScene,
+        VResizable,
+        VZone,
+    },
 });

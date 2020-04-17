@@ -74,8 +74,7 @@ let component = {
                     key : key,
                     content : message,
                     viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y,
-                    fillTransparency: 0.3
+                    viewPosY: tooltipGlobalPos.y
                 });
             }
             else {
@@ -83,8 +82,7 @@ let component = {
                     key : key,
                     content : message,
                     viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y,
-                    fillTransparency: 0.3
+                    viewPosY: tooltipGlobalPos.y
                 });
             }
         },

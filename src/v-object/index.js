@@ -70,12 +70,19 @@ let component = {
             kursor: null, 
             pixiObj: null,
             maskObj: null,
-            coordinate: {}
+            coordinate: {},
+            intFillTransparency: 1
         };
     },
     mounted: function () {
-        this.makeScene();
-        this.registerEvents();
+        this.buildTexture().then(() => {
+        }).catch(error => {
+            this.fillTexture = null;
+            console.error(error.message);
+        }).finally(() => {
+            this.makeScene();
+            this.registerEvents();
+        });
     },
     beforeDestroy: function() {
         this.cleanUp();
@@ -99,7 +106,7 @@ let component = {
         },
         cFillColor: function () {
             let cFc = processColorStr(this.fillColor, DefaultValues.fillColor,
-                getTransparency(this.fillTransparency));
+                getTransparency(this.fillTransparency || this.intFillTransparency));
             return cFc;
         },
         cForegroundColor: function() {
@@ -210,6 +217,9 @@ let component = {
             if (this.maskObj) parentObj.removeChild(this.maskObj);
             this.pixiObj = null;
             this.maskObj = null;
+        },
+        buildTexture: function() {
+            return new Promise(resolve => resolve(null));
         }
     },
     components: {Fragment}
