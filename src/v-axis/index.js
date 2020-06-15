@@ -123,7 +123,7 @@ class LabelParticleContainer extends Container {
 }
 
 let component = {
-    props: ['axis', 'majorTicks', "majorTickLength", "minorTicks", "grid", "tickLabelPosition", "tickPrecision", "spaceComponent"],
+    props: ['axis', 'majorTicks', "majorTickLength", "minorTicks", "grid", "tickLabelPosition", "tickPrecision", "spaceComponent", "onAxisChanged"],
     created: function() {
         this._makeSceneDebounce = debounce(this.makeScene,200);
     },
@@ -133,7 +133,7 @@ let component = {
     computed: {
 		watchedKeys: function() {
 			return ["hasMouseOver", ...Object.keys(this.$props)].filter(
-				(v) => (v !== "dragLimits" && v !== "spaceComponent")
+				(v) => (v !== "dragLimits" && v !== "spaceComponent" && v !== "onAxisChanged")
 			);
 		},
         componentType: function() { return "VAxis" },
@@ -163,6 +163,41 @@ let component = {
             }
             return "tickProps:" + JSON.stringify(hash);
         },
+        transformPropsObj : function() {
+            let watchedProps;
+            switch(this.axis) {
+                case 'x':
+                    watchedProps = ['realMinX', 'realMaxX', 'width', 'xTransform'];
+                    break;
+                case 'y':
+                    watchedProps = ['realMinY', 'realMaxY', 'height', 'yTransform'];
+                    break;
+            }
+
+            let hash = {};
+            for (let key of watchedProps) {
+                hash[key] = this[key];
+            }
+            return hash;
+        },
+        transformProps: function() {
+            let watchedProps;
+            switch(this.axis) {
+                case 'x':
+                    watchedProps = ['realMinX', 'realMaxX', 'width', 'xTransform'];
+                    break;
+                case 'y':
+                    watchedProps = ['realMinY', 'realMaxY', 'height', 'yTransform'];
+                    break;
+            }
+
+            let hash = {};
+            for (let key of watchedProps) {
+                hash[key] = this[key];
+            }
+            return "transformProps:" + JSON.stringify(hash);
+        },
+
         containingViewportOffset: function() {
             let viewport = this.getContainingViewport() || {};
             if (this.axis === "x") {
@@ -178,6 +213,9 @@ let component = {
             if (this.tickLabelPosition === 'sticky') {
                 this.makeScene();
             }
+        },
+        transformProps: function() {
+            this.onAxisChanged && this.onAxisChanged(this.transformProps);
         },
         tickProps: function() {
             this.processTickValues();
