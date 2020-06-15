@@ -16,7 +16,7 @@ let component = {
                     case "x":
                         evt.stopPropagation();
                         evt.preventDefault();
-                        panFn(evt.deltaX,0);
+                        panFn(evt.deltaY, 0);
                         break;
                     case "y":
                         evt.stopPropagation();
@@ -28,7 +28,12 @@ let component = {
                     default:
                         evt.stopPropagation();
                         evt.preventDefault();
-                        panFn(evt.deltaX, evt.deltaY);
+                        if (evt.shiftKey) {
+                            panFn(evt.deltaY, 0);
+                        }
+                        else {
+                            panFn(0, evt.deltaY);
+                        }
                         break;
                 }
             }

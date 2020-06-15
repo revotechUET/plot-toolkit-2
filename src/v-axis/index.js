@@ -13,10 +13,18 @@ function drawOneXTick(obj, thisComp, container, i, majorTickIdx) {
     }
     else {
         let tickSize = (majorTickIdx < 0)? TICK_SIZE:TICK_SIZE_MAJOR;
-        obj.moveTo(x, 0);
-        obj.lineTo(x, tickSize);
-        obj.moveTo(x, thisComp.viewHeight - tickSize);
-        obj.lineTo(x, thisComp.viewHeight);
+        let offsetY = 0;
+        let viewHeight = thisComp.viewHeight;
+        if (thisComp.tickLabelPosition == "sticky") {
+            let viewport = thisComp.getContainingViewport();
+            offsetY = (viewport || {}).offsetY || 0;
+            viewHeight = (viewport || {}).viewportHeight || viewHeight;
+        }
+
+        obj.moveTo(x, 0 - offsetY);
+        obj.lineTo(x, tickSize - offsetY);
+        obj.moveTo(x, viewHeight - tickSize - offsetY);
+        obj.lineTo(x, viewHeight - offsetY);
     }
     if (majorTickIdx < 0) return;
     switch (thisComp.tickLabelPosition) {
@@ -29,6 +37,17 @@ function drawOneXTick(obj, thisComp, container, i, majorTickIdx) {
         case "middle":
             container.drawLabel(majorTickIdx, x, 0, thisComp.tickValues[i], {top: 0.5, left: 0, xTranslate: 0.5, yTranslate: 0.5});
             break;
+        case "sticky":
+            let viewport = thisComp.getContainingViewport();
+            let offsetY = (viewport || {}).offsetY || 0;
+            const yTickPos = -(thisComp.viewHeight / 2) + TICK_SIZE + 5 - offsetY;
+            container.drawLabel(majorTickIdx, x, yTickPos, thisComp.tickValues[i], {top: 0.5, left: 0, xTranslate: 0.5, yTranslate: 0.5});
+            break;
+        default:
+            if(!isNaN(thisComp.tickLabelPosition)) {
+                const yTickPos = Number(thisComp.tickLabelPosition);
+                container.drawLabel(majorTickIdx, x, yTickPos, thisComp.tickValues[i], {top: 0.5, left: 0, xTranslate: 0.5, yTranslate: 0.5});
+            }
     }
 }
 function drawOneYTick(obj, thisComp, container, i, majorTickIdx) {
@@ -39,10 +58,17 @@ function drawOneYTick(obj, thisComp, container, i, majorTickIdx) {
     }
     else {
         let tickSize = (majorTickIdx < 0)? TICK_SIZE:TICK_SIZE_MAJOR;
-        obj.moveTo(0, y);
-        obj.lineTo(tickSize, y);
-        obj.moveTo(thisComp.viewWidth - tickSize, y);
-        obj.lineTo(thisComp.viewWidth, y);
+        let offsetX = 0;
+        let viewWidth = thisComp.viewWidth;
+        if (thisComp.tickLabelPosition == "sticky") {
+            let viewport = thisComp.getContainingViewport();
+            offsetX = (viewport || {}).offsetX || 0;
+            viewWidth = (viewport || {}).viewportWidth || viewWidth;
+        }
+        obj.moveTo(0 - offsetX, y);
+        obj.lineTo(tickSize - offsetX, y);
+        obj.moveTo(viewWidth - tickSize - offsetX, y);
+        obj.lineTo(viewWidth - offsetX, y);
     }
     if (majorTickIdx < 0) return;
     switch (thisComp.tickLabelPosition) {
@@ -55,6 +81,17 @@ function drawOneYTick(obj, thisComp, container, i, majorTickIdx) {
         case "middle":
             container.drawLabel(majorTickIdx, 0, y, thisComp.tickValues[i], {top: 0, left: 0.5, xTranslate: 0.5, yTranslate: 0.5});
             break;
+        case "sticky":
+            let viewport = thisComp.getContainingViewport();
+            let offsetX = (viewport || {}).offsetX || 0;
+            const xTickPos = -(thisComp.viewWidth / 2) + TICK_SIZE + 5 - offsetX;
+            container.drawLabel(majorTickIdx, xTickPos, y, thisComp.tickValues[i], {top: 0, left: 0.5, xTranslate: 0.5, yTranslate: 0.5});
+            break;
+        default:
+            if(!isNaN(thisComp.tickLabelPosition)) {
+                const xTickPos = Number(thisComp.tickLabelPosition);
+                container.drawLabel(majorTickIdx, xTickPos, y, thisComp.tickValues[i], {top: 0, left: 0.5, xTranslate: 0.5, yTranslate: 0.5});
+            }
     }
 }
 class LabelParticleContainer extends Container {
@@ -86,7 +123,7 @@ class LabelParticleContainer extends Container {
 }
 
 let component = {
-    props: ['axis', 'majorTicks', "majorTickLength", "minorTicks", "grid", "tickLabelPosition", "tickPrecision"],
+    props: ['axis', 'majorTicks', "majorTickLength", "minorTicks", "grid", "tickLabelPosition", "tickPrecision", "spaceComponent"],
     created: function() {
         this._makeSceneDebounce = debounce(this.makeScene,200);
     },
@@ -94,6 +131,11 @@ let component = {
         this.processTickValues();
     },
     computed: {
+		watchedKeys: function() {
+			return ["hasMouseOver", ...Object.keys(this.$props)].filter(
+				(v) => (v !== "dragLimits" && v !== "spaceComponent")
+			);
+		},
         componentType: function() { return "VAxis" },
         transformFn: function() {
             switch(this.axis) {
@@ -120,9 +162,23 @@ let component = {
                 hash[key] = this[key];
             }
             return "tickProps:" + JSON.stringify(hash);
+        },
+        containingViewportOffset: function() {
+            let viewport = this.getContainingViewport() || {};
+            if (this.axis === "x") {
+                return viewport.offsetY;
+            }
+            else {
+                return viewport.offsetX;
+            }
         }
     },
     watch: {
+        containingViewportOffset: function() {
+            if (this.tickLabelPosition === 'sticky') {
+                this.makeScene();
+            }
+        },
         tickProps: function() {
             this.processTickValues();
             this.makeSceneDebounce();
@@ -132,6 +188,11 @@ let component = {
         }
     },
     methods: {
+        getContainingViewport: function() {
+            if (this.spaceComponent) 
+                return this.spaceComponent.$parent.$parent;
+            return null;
+        },
         getLabelContainer: function() {
             if (!this.container) {
                 this.container = new LabelParticleContainer(this);

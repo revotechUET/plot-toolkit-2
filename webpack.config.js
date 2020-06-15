@@ -1,10 +1,26 @@
-//const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const webpack = require('webpack');
+const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
+
+const plugins =  [
+    new HardSourceWebpackPlugin()
+];
 module.exports = function(env) {
     let entry = env.MAIN || './src/main/basic.js';
+    let isDev = (env.NODE_ENV || 'dev').trim() === "dev" ? true:false;
     console.log(entry);
     return {
-        mode: "development",
+        mode: (isDev || true) ? "development":"production",
+        devtool: (isDev || true) ? "cheap-module-eval-source-map":false,
+        optimization: {
+            minimize: isDev ? false:true
+        },
+        devServer: {
+            contentBase: __dirname,
+            watchContentBase: true,
+            compress: true,
+            bonjour: true,
+            clientLogLevel: 'debug',
+            port: 3001
+        },
         entry,
         output: {
             path: __dirname + "/dist",
@@ -12,10 +28,9 @@ module.exports = function(env) {
         },
         resolve: {
             alias: {
-                'vue$': 'vue/dist/vue.esm.js',
+                'vue$': __dirname + '/node_modules/vue/dist/vue.esm.js',
                 'd3-scale': 'd3-scale/dist/d3-scale.min.js'
             },
-            extensions: ['*', '.js', '.vue', '.json']
         },
         module: {
             rules: [{
@@ -34,11 +49,6 @@ module.exports = function(env) {
                 use: ['style-loader', 'css-loader', 'less-loader']
             }]
         },
-        plugins: [
-            //new VueLoaderPlugin()
-            /*new webpack.optimize.LimitChunkCountPlugin({
-                maxChunks: 1
-            })*/
-        ]
+        plugins 
     }
 }

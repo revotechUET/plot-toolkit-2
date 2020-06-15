@@ -9,6 +9,11 @@ let component = {
         'tickLabelPosition', "tickLabelPositionX", "tickLabelPositionY",
         'tickPrecision', 'tickPrecisionX', 'tickPrecisionY'
     ],
+    computed: {
+        componentType: function() {
+            return "VCartersian";
+        }
+    },
     components: {VAxis},
     template
 }

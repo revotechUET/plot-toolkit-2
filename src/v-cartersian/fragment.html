@@ -4,14 +4,17 @@
     :real-min-x="realMinX" :real-max-x="realMaxX" :x-transform="xTransform"
     :major-ticks="majorTicksX" :minor-ticks="minorTicksX" :major-tick-length="majorTickLengthX"
     :tick-label-position="tickLabelPositionX || tickLabelPosition" :grid="gridX||grid" 
-    :tick-precision="tickPrecisionX||tickPrecision">
+    :tick-precision="tickPrecisionX||tickPrecision"
+    :space-component="this">
     <v-axis 
         :fill-transparency="0.001"
         axis="y" :view-width="viewWidth" :view-height="viewHeight" 
         :real-min-y="realMinY" :real-max-y="realMaxY" :y-transform="yTransform"
         :major-ticks="majorTicksY" :minor-ticks="minorTicksY" :major-tick-length="majorTickLengthY"
         :tick-label-position="tickLabelPositionY||tickLabelPosition" :grid="gridY||grid" 
-        :tick-precision="tickPrecisionY||tickPrecision">
+        :tick-precision="tickPrecisionY||tickPrecision"
+        :space-component="this"
+        >
         <slot />
     </v-axis>
 </v-axis>
