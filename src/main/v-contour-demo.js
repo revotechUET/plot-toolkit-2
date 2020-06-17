@@ -15,9 +15,9 @@ new Vue({
             <v-scene :view-width="800" :view-height="600" :transparent="true">
                 <v-viewport :view-pos-x="30" :view-pos-y="30" :viewport-width="400" :viewport-height="400"
                     :draggable="true"
-                    :view-width="vpsize" :view-height="vpsize" pan="both" line-color="rgba(0,0,255,0.5)" :line-width="3"> 
+                    :view-width="vpWidth" :view-height="vpHeight" pan="both" line-color="rgba(0,0,255,0.5)" :line-width="3"> 
                     <v-cartersian
-                        :view-width="vpsize" :view-height="vpsize"
+                        :view-width="vpWidth" :view-height="vpHeight"
                         :enabled="true" :draggable="true"
                         :fill-color="0xFFFFFF" :line-width="1" :line-color="0x010101"
                         :real-min-x="20" :real-max-x="150"
@@ -26,15 +26,17 @@ new Vue({
                         :major-ticks-x="5" :minor-ticks-x="5" 
                         :major-ticks-y="5" :minor-ticks-y="5" 
                         :grid="false" tick-label-position-x="sticky" tick-label-position-y="sticky" tick-precision="1" >
-                        <v-image :draggable="true" :scaled="scaled" :clipped="true" :centering="centering" :view-width="vpsize" :view-height="vpsize" :image-url="imageURL"></v-image>
+                        <v-image :draggable="true" :scaled="scaled" :clipped="true" :centering="centering" :view-width="vpWidth" :view-height="vpHeight" :image-url="imageURL"></v-image>
                     </v-cartersian>
                 </v-viewport>
             </v-scene>
             <div>
                 <button @click="centering = !centering">centering</button>
                 <button @click="scaled = !scaled">scaled</button>
-                <button @click="vpsize += 50">+ Viewport</button>
-                <button @click="vpsize -= 50">- Viewport</button>
+                <button @click="vpWidth += 50">+ vpWidth</button>
+                <button @click="vpWidth -= 50">- vpWidth</button>
+                <button @click="vpHeight += 50">+ vpHeight</button>
+                <button @click="vpHeight -= 50">- vpHeight</button>
             </div>
 
             <div>
@@ -43,7 +45,7 @@ new Vue({
                     :on-data-changed="onDataChanged"></contour-file-import>
             </div>
 
-            <div style="display: none;">
+            <div style="display: block;">
                 <contour-view
                     ref="contourView"
                     :values="values" :n-rows="headers.numOfCols" :n-cols="headers.numOfRows"
@@ -55,7 +57,8 @@ new Vue({
                     :y-direction="yDirection" :show-scale="showScale"
                     :show-color-scale-legend="showColorScaleLegend" :color-legend-ticks="colorLegendTicks"
                     :negative-data="negativeData"
-                    :draw-width="vpsize" :draw-height="vpsize"
+                    :draw-width="vpWidth" :draw-height="vpHeight"
+                    :fit-container="true"
                     :on-draw-finished="updateImage"
                     :show-label="showLabel" :label-font-size="fontSize" :on-scale-changed="(_scl) => scale = _scl">
                 ></contour-view>
@@ -65,7 +68,8 @@ new Vue({
     computed: { },
     data: {
         imageURL: null,
-        vpsize: 500,
+        vpWidth: 500,
+        vpHeight: 500,
         urlIdx: 0,
         centering: false,
         scaled: true,
@@ -91,16 +95,9 @@ new Vue({
         showColorScaleLegend: false,
     },
     watch: {
-        /*
-        vpsize() {
-            setTimeout(() => {
-                this.updateImage();
-            })
-        },
         scale() {
-            this.updateImage();
+            console.log(this.scale);
         }
-        */
     },
     methods: {
         onDataChanged: function(changedData) {
@@ -111,6 +108,8 @@ new Vue({
             this.colorScale.domain(domain);
             this.minValue = domain[0];
             this.maxValue = domain[1];
+            this.vpWidth = this.headers.numOfCols;
+            this.vpHeight = this.headers.numOfRows;
         },
         updateImage: function() {
             const canvasEle = this.$refs.contourView.__contour.d3Canvas.node();
