@@ -13,20 +13,23 @@ new Vue({
     template: `
         <fragment>
             <v-scene :view-width="800" :view-height="600" :transparent="true">
-                <v-viewport :view-pos-x="30" :view-pos-y="30" :viewport-width="400" :viewport-height="400"
+                <v-viewport ref="viewport" :view-pos-x="30" :view-pos-y="30" :viewport-width="vpWidth" :viewport-height="vpHeight"
                     :draggable="true"
-                    :view-width="vpWidth" :view-height="vpHeight" pan="both" line-color="rgba(0,0,255,0.5)" :line-width="3"> 
-                    <v-cartersian
-                        :view-width="vpWidth" :view-height="vpHeight"
-                        :enabled="true" :draggable="true"
+                    :view-width="vpWidth" :view-height="vpHeight" pan="both" :on-zoom="zoomFn"
+                    line-color="rgba(0,0,255,0.5)" :line-width="3"> 
+                    <v-cartersian 
+                        :expanded="true"
+                        :enabled="true"
                         :fill-color="0xFFFFFF" :line-width="1" :line-color="0x010101"
-                        :real-min-x="20" :real-max-x="150"
-                        :real-min-y="30" :real-max-y="130"
+                        :real-min-x="minX" :real-max-x="maxX"
+                        :real-min-y="minY" :real-max-y="maxY"
                         x-transform="linear" y-transform="linear"
                         :major-ticks-x="5" :minor-ticks-x="5" 
                         :major-ticks-y="5" :minor-ticks-y="5" 
                         :grid="false" tick-label-position-x="sticky" tick-label-position-y="sticky" tick-precision="1" >
-                        <v-image :draggable="true" :scaled="scaled" :clipped="true" :centering="centering" :view-width="vpWidth" :view-height="vpHeight" :image-url="imageURL"></v-image>
+                        <v-image :scaled="scaled" :clipped="true" :centering="centering" 
+                            :expanded="true"
+                            :image-url="imageURL"></v-image>
                     </v-cartersian>
                 </v-viewport>
             </v-scene>
@@ -58,14 +61,19 @@ new Vue({
                     :show-color-scale-legend="showColorScaleLegend" :color-legend-ticks="colorLegendTicks"
                     :negative-data="negativeData"
                     :draw-width="vpWidth" :draw-height="vpHeight"
-                    :fit-container="true"
+                    :fit-container="false"
                     :on-draw-finished="updateImage"
                     :show-label="showLabel" :label-font-size="fontSize" :on-scale-changed="(_scl) => scale = _scl">
                 ></contour-view>
             </div>
         </fragment>
     `,
-    computed: { },
+    computed: {
+        minX() { return this.headers.minX},
+        maxX() { return this.headers.maxX},
+        minY() { return this.yDirection === "up" ? this.headers.maxY:this.headers.minY},
+        maxY() { return this.yDirection === "up" ? this.headers.minY:this.headers.maxY},
+    },
     data: {
         imageURL: null,
         vpWidth: 500,
@@ -108,8 +116,8 @@ new Vue({
             this.colorScale.domain(domain);
             this.minValue = domain[0];
             this.maxValue = domain[1];
-            this.vpWidth = this.headers.numOfCols;
-            this.vpHeight = this.headers.numOfRows;
+            // this.vpWidth = this.headers.numOfCols;
+            // this.vpHeight = this.headers.numOfRows;
         },
         updateImage: function() {
             const canvasEle = this.$refs.contourView.__contour.d3Canvas.node();
@@ -118,6 +126,30 @@ new Vue({
                 console.log(url);
                 this.imageURL = url;
             }) 
+        },
+        zoomFn: function(delta, centerX, centerY, evt) {
+            let destCanvas = document.querySelector(".draw-layer");
+            let newEvent = new evt.constructor(evt.type, evt);
+            newEvent.clientY += 560;
+            newEvent.y += 560;
+            newEvent.offsetY += 560;
+            newEvent.layerY += 560;
+            newEvent.screenY += 560;
+            destCanvas.dispatchEvent(newEvent);
+            return;
+            const zoomFactor = 2;
+            let {x, y} = this.$refs.viewport.pixiObj.children[0].toLocal({x:centerX, y:centerY});
+            this.$refs['viewport'].translate(x, y);
+            if (delta > 0) {
+                this.$refs['viewport'].translate(-x*zoomFactor, -y*zoomFactor);
+                this.vpWidth *= zoomFactor;
+                this.vpHeight *= zoomFactor;
+            }
+            else if (delta < 0) {
+                this.$refs['viewport'].translate(-x/zoomFactor, -y/zoomFactor);
+                this.vpWidth /= zoomFactor;
+                this.vpHeight /= zoomFactor;
+            }
         }
     },
     components: { VScene, VImage, Fragment, VViewport, VCartersian, ContourView, ContourFileImport }
