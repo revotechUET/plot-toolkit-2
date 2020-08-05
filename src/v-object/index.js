@@ -74,7 +74,7 @@ let component = {
     template,
     data: function() {
         return {
-            debug: true,
+            debug: false,
             kursor: null, 
             pixiObj: null,
             maskObj: null,

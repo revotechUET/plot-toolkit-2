@@ -7,7 +7,7 @@ let component = {
         "majorTickLengthX", "majorTickLengthY", 
         'grid', 'gridX', 'gridY', 
         'tickLabelPosition', "tickLabelPositionX", "tickLabelPositionY",
-        'tickPrecision', 'tickPrecisionX', 'tickPrecisionY'
+        'tickPrecision', 'tickPrecisionX', 'tickPrecisionY', "labelFillColor", "labelStrokeColor"
     ],
     computed: {
         componentType: function() {

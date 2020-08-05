@@ -85,7 +85,7 @@ function drawOneYTick(obj, thisComp, container, i, majorTickIdx) {
             let viewport = thisComp.getContainingViewport();
             let offsetX = (viewport || {}).offsetX || 0;
             const xTickPos = -(thisComp.viewWidth / 2) + TICK_SIZE + 5 - offsetX;
-            container.drawLabel(majorTickIdx, xTickPos, y, thisComp.tickValues[i], {top: 0, left: 0.5, xTranslate: 0.5, yTranslate: 0.5});
+            container.drawLabel(majorTickIdx, xTickPos, y, thisComp.tickValues[i], {top: 0, left: 0.5, xTranslate: 0, yTranslate: 0.5});
             break;
         default:
             if(!isNaN(thisComp.tickLabelPosition)) {
@@ -109,6 +109,9 @@ class LabelParticleContainer extends Container {
         else {
             label = new Text("");
             label.style.fontSize = 12;
+            label.style.fill = this.axisComp.labelFillColor || 0x000000;
+            label.style.stroke = this.axisComp.labelStrokeColor || 0x000000;
+            label.style.strokeThickness = this.axisComp.labelStrokeColor ? 2 : 0;
             this.addChild(label);
         }
         label.text = formatNumber(value, this.axisComp.tickPrecision);
@@ -123,7 +126,7 @@ class LabelParticleContainer extends Container {
 }
 
 let component = {
-    props: ['axis', 'majorTicks', "majorTickLength", "minorTicks", "grid", "tickLabelPosition", "tickPrecision", "spaceComponent", "onAxisChanged"],
+    props: ['axis', 'majorTicks', "majorTickLength", "minorTicks", "grid", "tickLabelPosition", "tickPrecision", "spaceComponent", "onAxisChanged", "labelFillColor", "labelStrokeColor"],
     created: function() {
         this._makeSceneDebounce = debounce(this.makeScene,200);
     },

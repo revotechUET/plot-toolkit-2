@@ -29,7 +29,7 @@ module.exports = function(env) {
         resolve: {
             alias: {
                 'vue$': __dirname + '/node_modules/vue/dist/vue.esm.js',
-                'd3-scale': 'd3-scale/dist/d3-scale.min.js'
+                //'d3-scale': 'd3-scale/dist/d3-scale.min.js'
             },
         },
         module: {

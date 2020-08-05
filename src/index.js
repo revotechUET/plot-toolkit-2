@@ -14,6 +14,8 @@ export {default as VShape} from './v-shape';
 export {default as VTextbox} from './v-textbox';
 export {default as VViewport} from './v-viewport';
 export {default as VZone} from './v-zone';
+export {default as VContour} from './v-contour';
+export {default as VBoundary} from './v-boundary';
 
 /*
 import {default as VScene} from './v-scene';

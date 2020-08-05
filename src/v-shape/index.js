@@ -213,7 +213,6 @@ const propKeys = [
   "onmousedown",
   "onmouseup",
   "onmouseover",
-  "onmouseover",
   "onmouseout",
   "onmousemove",
   "draggable",
