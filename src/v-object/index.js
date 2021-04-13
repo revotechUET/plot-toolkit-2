@@ -13,7 +13,7 @@ import {
 function makeScene() {
     let maskObj = this.getMaskObj();
     let pixiObj = this.getPixiObj();
-    
+
     if (this.constrained) {
         this.coordinate.x = this.$parent.getChildX(this);
         this.coordinate.y = this.$parent.getChildY(this);
@@ -114,6 +114,33 @@ let component = {
         },
         cBackgroundColor: function() {
             return convert2rgbColor(this.backgroundColor);
+        },
+        cShadingPath: function() {
+            let path = this.path.map((item, idx) => idx % 2 ? this._getY(item) : this._getX(item));
+            let begin, end;
+            switch(this.shadingSide) {
+                case 'left': {
+                    begin = [this.posX, path[1]];
+                    end = [this.posX, path[path.length - 1]];
+                    break;
+                }
+                case 'right': {
+                    begin = [this.posX + this.width, path[1]];
+                    end = [this.posX + this.width, path[path.length - 1]];
+                    break;
+                }
+                case 'up': {
+                    begin = [path[0], this.posY];
+                    end = [path[path.length - 2], this.posY];
+                    break;
+                }
+                case 'down': {
+                    begin = [path[0], this.posY + this.height];
+                    end = [path[path.length - 2], this.posY + this.height];
+                    break;
+                }
+            }
+            return [...begin, ...path, ...end];
         },
         posX: function() {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
