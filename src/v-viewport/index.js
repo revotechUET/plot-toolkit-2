@@ -6,30 +6,37 @@ import eventManager from '../event-manager';
 import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from '../utils';
 console.log('Load v-viewport');
 let component = {
-    props: ["viewportWidth", "viewportHeight", "pan"],
+    props: ["viewportWidth", "viewportHeight", "pan", "onPan", "onZoom"],
     template,
     created: function() {
         eventManager.on('wheel', (evt) => {
-            if((evt.metaKey || evt.ctrlKey) && this.pixiObj.containsPoint({x:evt.offsetX, y:evt.offsetY})) {
-                let panFn = this.onPan?this.onPan:this.onPanDefault;
-                switch(this.pan) {
-                    case "x":
-                        evt.stopPropagation();
-                        evt.preventDefault();
-                        panFn(evt.deltaX,0);
-                        break;
-                    case "y":
-                        evt.stopPropagation();
-                        evt.preventDefault();
-                        panFn(0, evt.deltaY);
-                        break;
-                    case "none":
-                        break;
-                    default:
-                        evt.stopPropagation();
-                        evt.preventDefault();
-                        panFn(evt.deltaX, evt.deltaY);
-                        break;
+            // if((evt.metaKey || evt.ctrlKey) && this.pixiObj.containsPoint({x:evt.offsetX, y:evt.offsetY})) {
+            if(this.pixiObj.containsPoint({x:evt.offsetX, y:evt.offsetY})) {
+                evt.stopPropagation();
+                evt.preventDefault();
+                if (evt.metaKey || evt.ctrlKey) {
+                    this.onZoom && this.onZoom(evt.deltaY, evt.offsetX, evt.offsetY,evt);
+                }
+                else {
+                    let panFn = this.onPan?this.onPan:this.onPanDefault;
+                    switch(this.pan) {
+                        case "x":
+                            panFn(evt.deltaY, 0);
+                            break;
+                        case "y":
+                            panFn(0, evt.deltaY);
+                            break;
+                        case "none":
+                            break;
+                        default:
+                            if (evt.shiftKey) {
+                                panFn(evt.deltaY, 0);
+                            }
+                            else {
+                                panFn(0, evt.deltaY);
+                            }
+                            break;
+                    }
                 }
             }
         });
@@ -111,6 +118,16 @@ let component = {
             ofY = Math.min(ofY, 0);
             this.offsetX = ofX;
             this.offsetY = ofY;
+        },
+        translate: function(deltaX, deltaY){
+            if (deltaX) {
+                let x = this.offsetX + deltaX;
+                this.offsetX = x;
+            }
+            if (deltaY) {
+                let y = this.offsetY + deltaY;
+                this.offsetY = y;
+            }
         },
         onPanDefault: function(deltaX, deltaY) {
             const resolution = 100;

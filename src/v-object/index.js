@@ -22,7 +22,14 @@ function makeScene() {
 
     maskObj && this.drawMask(maskObj);
     pixiObj && this.draw(pixiObj);
-    this.renderGraphic();
+    if (this.live) {
+        requestAnimationFrame(() => {
+            this.rawRenderGraphic();
+        });
+    }
+    else {
+        this.renderGraphic();
+    }
 }
 
 function createPixiObj() {
@@ -60,7 +67,7 @@ function draw(obj) {
     console.log('abstract draw function');
 }
 let component = {
-    props: ["name", "viewPosX", "viewPosY", "viewWidth", "viewHeight", 'rotation', 'cursor', 'constrained',
+    props: ["name", "viewPosX", "viewPosY", "viewWidth", "viewHeight", 'rotation', 'cursor', 'constrained', 'expanded',
         'realMinX', 'realMaxX', 'realMinY', 'realMaxY', 'xTransform', 'yTransform'    
     ],
     template,
@@ -151,10 +158,16 @@ let component = {
             return this._getY(this.realMinY);
         },
         width: function() {
+            if (this.expanded) {
+                return this.$parent.width;
+            }
             if (!isNaN(this.viewWidth)) return this.viewWidth;
             return this._getX(this.realMaxX) - this._getX(this.realMinX);
         },
         height: function() {
+            if (this.expanded) {
+                return this.$parent.height;
+            }
             if (!isNaN(this.viewHeight)) return this.viewHeight;
             return this._getY(this.realMaxY) - this._getY(this.realMinY);
         },
