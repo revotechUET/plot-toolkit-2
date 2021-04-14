@@ -1,17 +1,17 @@
-import {Graphics} from 'pixi.js';
+import { Graphics } from 'pixi.js';
 export default function CustomGraphics(geometry) {
     Graphics.call(this, geometry);
 }
 CustomGraphics.prototype = Object.create(Graphics.prototype);
 
-CustomGraphics.prototype.drawPlus = function(x, y, symbolSize) {
+CustomGraphics.prototype.drawPlus = function (x, y, symbolSize) {
     this.moveTo(x, y - symbolSize);
     this.lineTo(x, y + symbolSize);
     this.moveTo(x - symbolSize, y);
     this.lineTo(x + symbolSize, y);
 };
 
-CustomGraphics.prototype.drawLine = function(x1, y1, x2, y2, lineDashSpec) {
+CustomGraphics.prototype.drawLine = function (x1, y1, x2, y2, lineDashSpec) {
     if (!lineDashSpec) {
         this.moveTo(x1, y1);
         Graphics.prototype.lineTo.call(this, x2, y2);
@@ -68,7 +68,7 @@ CustomGraphics.prototype.drawLine = function(x1, y1, x2, y2, lineDashSpec) {
     }
 };
 
-CustomGraphics.prototype.lineTo = function(x, y, lineDashSpec) {
+CustomGraphics.prototype.myLineTo = function (x, y, lineDashSpec) {
     if (!lineDashSpec) {
         console.log(this.currentPath.points);
         Graphics.prototype.lineTo.call(this.x, y);
@@ -111,7 +111,7 @@ CustomGraphics.prototype.lineTo = function(x, y, lineDashSpec) {
             } else {
                 dashLeft = 0;
             }
-            Graphics.prototype.lineTo.call(this, 
+            Graphics.prototype.lineTo.call(this,
                 x1 + progressOnLine * normal.x,
                 y1 + progressOnLine * normal.y
             );
@@ -129,7 +129,7 @@ CustomGraphics.prototype.lineTo = function(x, y, lineDashSpec) {
     }
 };
 
-CustomGraphics.prototype.beginFill = function(color, transparency, texture) {
+CustomGraphics.prototype.beginFill = function (color, transparency, texture) {
     if (texture) {
         return this.beginTextureFill(texture);
     }

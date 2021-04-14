@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import {Plugin, Fragment} from 'vue-fragment';
+import { Plugin, Fragment } from 'vue-fragment';
 import VScene from '../v-scene';
 import VRect from '../v-rect';
 import VContainer from "../v-container";
@@ -11,7 +11,9 @@ const app = new Vue({
     el: "#vue-app",
     template: `<fragment>
         <v-scene name="scene" :transparent="true" :view-width="width" :view-height="height">
-            <v-container name="layout" layoutDirection="horizontal" :view-width="width-50" :view-height="height">
+            <v-container name="layout" layoutDirection="horizontal" :view-width="width-50" :view-height="height" 
+            :view-pos-x="0" :view-pos-y="0"
+            x-transform="none" y-transform="none">
 
                 <v-rect v-for="(r, idx) in rects" :key="idx" :view-width="30" :view-height="100" :line-width="1"
                     :constrained="true"
@@ -35,20 +37,20 @@ const app = new Vue({
         <button v-on:click="click">click</button>
     </fragment>
     `,
-    data : {
+    data: {
         width: 600,
         height: 400,
         w: 100, h: 100,
-        rects: [{color: "yellow"}, {color: "wheat"}, {color: "pink"}]
+        rects: [{ color: "yellow" }, { color: "wheat" }, { color: "pink" }]
     },
     methods: {
-        resize: function({width, height}, targetComp) {
+        resize: function ({ width, height }, targetComp) {
             this.w = width;
             this.h = height;
             this.$nextTick(() => targetComp.triggerRelayout());
         },
-        click: function() {
-            this.rects.splice(0);
+        click: function () {
+            this.rects.shift();
         }
     },
     components: {

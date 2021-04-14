@@ -10,7 +10,7 @@ import {
 } from "../utils";
 import { Texture } from "pixi.js";
 
-function draw(obj) {
+async function draw(obj) {
     obj.clear();
     let lw = this.lineWidth || 1;
     let lt = this.lineTransparency || 1.0;
@@ -26,14 +26,14 @@ function draw(obj) {
         this.fillTexture
     );
 
-    /*if (this.imagePatternUrl) {
+    if (this.imagePatternUrl) {
         let imagePattern = await getImagePattern(this.imagePatternUrl)
         let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
         const texture = Texture.from(canvas);
         obj.beginTextureFill(texture);
 
-    }*/
+    }
 
     obj.drawCircle(0, 0, this.radius || 0);
 

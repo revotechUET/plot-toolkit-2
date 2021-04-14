@@ -1,12 +1,17 @@
 import VObject from '../v-object';
 import { Graphics } from 'pixi.js';
-import {getPosX, getPosY, getColor, getTransparency, DefaultValues} from '../utils';
+import { getPosX, getPosY, getColor, getTransparency, DefaultValues } from '../utils';
 import layoutMixin from '../mixins/layout';
 
 let component = {
     props: ['clipped', "lineWidth", "lineColor", "lineTransparency", "fillColor"],
+    computed: {
+        componentType: function () {
+            return "VContainer";
+        }
+    },
     methods: {
-        draw: function(obj) {
+        draw: function (obj) {
             obj.clear();
             let lw = this.lineWidth || 0;
             let lt = getTransparency(this.lineTransparency);
@@ -19,8 +24,8 @@ let component = {
         },
         createPixiObj: function createPixiObj() {
             return new Graphics();
-        }, 
-        getMaskObj: function() {
+        },
+        getMaskObj: function () {
             if (!this.clipped) return null;
             if (!this.maskObj) {
                 if (this.$parent) {

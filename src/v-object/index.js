@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import {Fragment} from 'vue-fragment';
+import { Fragment } from 'vue-fragment';
 import template from './template.html';
 import style from './style.less';
-import {scaleLinear, scaleLog} from 'd3-scale';
+import { scaleLinear, scaleLog } from 'd3-scale';
 import {
     processColorStr,
     getTransparency,
@@ -68,13 +68,13 @@ function draw(obj) {
 }
 let component = {
     props: ["name", "viewPosX", "viewPosY", "viewWidth", "viewHeight", 'rotation', 'cursor', 'constrained', 'expanded',
-        'realMinX', 'realMaxX', 'realMinY', 'realMaxY', 'xTransform', 'yTransform'    
+        'realMinX', 'realMaxX', 'realMinY', 'realMaxY', 'xTransform', 'yTransform'
     ],
     template,
-    data: function() {
+    data: function () {
         return {
             debug: true,
-            kursor: null, 
+            kursor: null,
             pixiObj: null,
             maskObj: null,
             coordinate: {},
@@ -91,16 +91,19 @@ let component = {
             this.registerEvents();
         });
     },
-    beforeDestroy: function() {
+    beforeDestroy: function () {
         this.cleanUp();
     },
+    destroyed: function () {
+        this.$parent.relayout();
+    },
     computed: {
-        watchedKeys: function() {
+        watchedKeys: function () {
             return Object.keys(this.$props);
         },
-        componentTypePrefix: function() {return ""},
-        componentType: function() {return this.componentTypePrefix + " VObject"},
-        compProps: function() {
+        componentTypePrefix: function () { return "" },
+        componentType: function () { return this.componentTypePrefix + " VObject" },
+        compProps: function () {
             let hash = {};
             for (let key of this.watchedKeys) {
                 hash[key] = this[key];
@@ -116,16 +119,16 @@ let component = {
                 getTransparency(this.fillTransparency || this.intFillTransparency));
             return cFc;
         },
-        cForegroundColor: function() {
+        cForegroundColor: function () {
             return convert2rgbColor(this.foregroundColor);
         },
-        cBackgroundColor: function() {
+        cBackgroundColor: function () {
             return convert2rgbColor(this.backgroundColor);
         },
-        cShadingPath: function() {
+        cShadingPath: function () {
             let path = this.path.map((item, idx) => idx % 2 ? this._getY(item) : this._getX(item));
             let begin, end;
-            switch(this.shadingSide) {
+            switch (this.shadingSide) {
                 case 'left': {
                     begin = [this.posX, path[1]];
                     end = [this.posX, path[path.length - 1]];
@@ -149,29 +152,78 @@ let component = {
             }
             return [...begin, ...path, ...end];
         },
-        posX: function() {
+        posX: function () {
             if (!isNaN(this.viewPosX)) return this.viewPosX;
             return this._getX(this.realMinX);
         },
-        posY: function() {
+        posY: function () {
             if (!isNaN(this.viewPosY)) return this.viewPosY;
             return this._getY(this.realMinY);
         },
-        width: function() {
+        width: function () {
             if (this.expanded) {
                 return this.$parent.width;
             }
             if (!isNaN(this.viewWidth)) return this.viewWidth;
             return this._getX(this.realMaxX) - this._getX(this.realMinX);
         },
-        height: function() {
+        height: function () {
             if (this.expanded) {
                 return this.$parent.height;
             }
             if (!isNaN(this.viewHeight)) return this.viewHeight;
             return this._getY(this.realMaxY) - this._getY(this.realMinY);
         },
-        transformX: function(){
+        transformX: function () {
+            return this.getTransformX();
+        },
+        transformY: function () {
+            return this.getTransformY();
+        }
+    },
+    watch: {
+        compProps: makeScene
+    },
+    methods: {
+        makeScene, createPixiObj, getPixiObj, getMaskObj,
+        renderGraphic, rawRenderGraphic, registerEvents,
+        draw,
+        drawMask: function (obj) {
+            this.draw(obj);
+        },
+        getParent: function () {
+            return this.$parent;
+        },
+        getRenderer: function () {
+            if (!this._renderer) {
+                this._renderer = this.$parent.getRenderer();
+            }
+            return this._renderer;
+        },
+        getRoot: function () {
+            return this.$parent.getRoot();
+        },
+        getRootComp: function () {
+            return this.$parent.getRootComp();
+        },
+        triggerRelayout: function () {
+            this.$parent.relayout(this);
+        },
+        _getX: function (realX) {
+            let transformX = this.getParent().transformX;
+            if (transformX) {
+                return transformX(realX);
+            }
+            return 0;
+        },
+        _getY: function (realY) {
+            let transformY = this.getParent().transformY;
+            if (transformY) {
+                return transformY(realY);
+            }
+            return 0;
+        },
+        getTransformX: function () {
             let transformFn;
             switch (this.xTransform) {
                 case "linear":
@@ -180,17 +232,18 @@ let component = {
                 case "loga":
                     transformFn = scaleLog();
                     break;
-                default:
+                case "none":
                     return null;
+                default:
+                    throw new Error(`Unrecognized xTransform ${this.xTransform} of this component (${this.compProps})`);
             }
-            if (isNaN(this.viewWidth) || isNaN(this.realMinX) || isNaN(this.realMaxX)  ) 
-            {
-                return null;
+            if (isNaN(this.viewWidth) || isNaN(this.realMinX) || isNaN(this.realMaxX)) {
+                throw new Error(`Insufficient information for calculating transformX - (${this.compProps})`);
             }
             return transformFn.domain([this.realMinX, this.realMaxX])
                 .range([0, this.viewWidth]);
         },
-        transformY: function() {
+        getTransformY: function () {
             let transformFn;
             switch (this.yTransform) {
                 case "linear":
@@ -199,70 +252,29 @@ let component = {
                 case "loga":
                     transformFn = scaleLog();
                     break;
-                default:
+                case "none":
                     return null;
+                default:
+                    throw new Error(`unrecognized yTransform ${this.yTransform} of this component (${this.compProps})`);
             }
             if (isNaN(this.viewHeight) || isNaN(this.realMinY) || isNaN(this.realMaxY)) {
-                return null;
+                throw new Error(`Insufficient information for calculating transformY - (${this.compProps})`);
             }
             return transformFn.domain([this.realMinY, this.realMaxY])
                 .range([0, this.viewHeight]);
-        }
-    },
-    watch: {
-        compProps: makeScene
-    },
-    methods: {
-        makeScene, createPixiObj, getPixiObj, getMaskObj, 
-        renderGraphic, rawRenderGraphic, registerEvents, 
-        draw,
-        drawMask: function(obj) {
-            this.draw(obj);
         },
-        getParent: function() {
-            return this.$parent;
-        },
-        getRenderer: function() {
-            if (!this._renderer) {
-                this._renderer = this.$parent.getRenderer();
-            }
-            return this._renderer;
-        },
-        getRoot: function() {
-            return this.$parent.getRoot();
-        },
-        getRootComp: function() {
-            return this.$parent.getRootComp();
-        },
-        triggerRelayout: function() {
-            this.$parent.relayout(this);
-        },
-        _getX: function(realX) {
-            let transformX = this.getParent().transformX;
-            if (transformX) {
-                return transformX(realX);
-            }
-            return 0;
-        },
-        _getY: function(realY) {
-            let transformY = this.getParent().transformY;
-            if (transformY) {
-                return transformY(realY);
-            }
-            return 0;
-        },
-        cleanUp: function() {
+        cleanUp: function () {
             let parentObj = this.getParent().getPixiObj();
             parentObj.removeChild(this.pixiObj);
             if (this.maskObj) parentObj.removeChild(this.maskObj);
             this.pixiObj = null;
             this.maskObj = null;
         },
-        buildTexture: function() {
+        buildTexture: function () {
             return new Promise(resolve => resolve(null));
         }
     },
-    components: {Fragment}
+    components: { Fragment }
 }
 
 export default Vue.extend(component);

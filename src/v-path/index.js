@@ -13,7 +13,8 @@ function draw(obj) {
 	}
 	obj.lineStyle(lw, getColor(symbolColor, DefaultValues.lineColor), lt, 0.5);
 
-	let points = this.realPath;
+	let points = this.getPath();
+	console.log(points)
 	let symbolSize =
 		typeof this.symbolSize === "string"
 			? parseInt(this.symbolSize)
@@ -96,23 +97,34 @@ let component = {
 		"lineDash",
 	],
 	computed: {
-		path: function() {
+		// path: function () {
+		// 	if (this.viewPath) return this.viewPath;
+		// 	if (!this.realPath) return [];
+		// 	let transformXFn = this.$parent.getTransformX();
+		// 	let transformYFn = this.$parent.getTransformY();
+		// 	if (!transformXFn || !transformYFn) return [];
+		// 	return this.realPath.map((point) => ({
+		// 		x: transformXFn(point.x),
+		// 		y: transformYFn(point.y),
+		// 	}));
+		// },
+		dashLine: function () {
+			return !!this.lineDash;
+		},
+	},
+	methods: {
+		draw,
+		getPath: function () {
 			if (this.viewPath) return this.viewPath;
 			if (!this.realPath) return [];
-			let transformXFn = this.$parent.transformX();
-			let transformYFn = this.$parent.transformY();
+			let transformXFn = this.$parent.getTransformX();
+			let transformYFn = this.$parent.getTransformY();
 			if (!transformXFn || !transformYFn) return [];
 			return this.realPath.map((point) => ({
 				x: transformXFn(point.x),
 				y: transformYFn(point.y),
 			}));
 		},
-		dashLine: function() {
-			return !!this.lineDash;
-		},
-	},
-	methods: {
-		draw,
 	},
 };
 export default VShape.extend(component);

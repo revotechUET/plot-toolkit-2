@@ -1,18 +1,18 @@
 //import {Fragment} from 'vue-fragment';
-import {autoDetectRenderer, utils, Container} from 'pixi.js';
+import { autoDetectRenderer, utils, Container } from 'pixi.js';
 import VObject from '../v-object';
 import template from './template.html';
 import style from './style.less';
 import layoutMixin from '../mixins/layout';
-import {debounce} from 'lodash';
+import { debounce } from 'lodash';
 import eventManager from '../event-manager';
 function getPixiApp(force) {
     if (!this.pixiApp || force) {
-        const renderer = autoDetectRenderer({ 
-            width: this.width || 800, 
-            height: this.height || 600, 
-            transparent: this.transparent, 
-            antialias: true 
+        const renderer = autoDetectRenderer({
+            width: this.width || 800,
+            height: this.height || 600,
+            transparent: this.transparent,
+            antialias: true
         });
         renderer.view.onwheel = (evt) => {
             eventManager.emit('wheel', evt);
@@ -28,13 +28,13 @@ function getPixiApp(force) {
     return this.pixiApp;
 }
 function getPixiObj() {
-	return (this.getPixiApp() || {}).stage;
+    return (this.getPixiApp() || {}).stage;
 }
 function rawRenderGraphic(obj) {
-	let app = this.getPixiApp();
-	if (obj) {
-		obj.render(app.renderer);
-	} else app.renderer.render(obj || app.stage);
+    let app = this.getPixiApp();
+    if (obj) {
+        obj.render(app.renderer);
+    } else app.renderer.render(obj || app.stage);
 }
 /*function renderGraphic(obj) {
     let app = this.getPixiApp();
@@ -47,33 +47,33 @@ let component = {
         //Fragment
     },
     template,
-    mounted: function() {
+    mounted: function () {
         this.$el.appendChild(this.getPixiApp().renderer.view)
     },
     computed: {
-        componentType: function() {
+        componentType: function () {
             return "VScene";
         }
     },
     methods: {
         getPixiApp, getPixiObj,
-        getRenderer: function() {
+        getRenderer: function () {
             return this.getPixiApp().renderer;
         },
-        getRoot: function() {
+        getRoot: function () {
             return this.getPixiApp().stage;
         },
-        getRootComp: function() {
+        getRootComp: function () {
             return this;
         },
-        getParent: function() {
+        getParent: function () {
             return this;
         },
         rawRenderGraphic,
-        renderGraphic:debounce(rawRenderGraphic, 100) 
+        renderGraphic: debounce(rawRenderGraphic, 100)
     },
     watch: {
-        compProps: function() {
+        compProps: function () {
             let view = this.getPixiApp().renderer.view;
             this.$el.removeChild(view);
             let app = this.getPixiApp(true);

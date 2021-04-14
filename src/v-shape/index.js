@@ -243,7 +243,7 @@ let component = {
                 (v) => v !== "dragLimits"
             );
         },
-        textureProps: function() {
+        textureProps: function () {
             return `${this.imagePatternUrl}-${this.foregroundColor}-${this.backgroundColor}`;
         }
     },
@@ -255,7 +255,7 @@ let component = {
         dragEnd,
         dragMove,
         normalizePos,
-        buildTexture: function() {
+        buildTexture: function () {
             if (this.imagePatternUrl) {
                 return getImagePattern(this.imagePatternUrl).then((imagePattern) => {
                     let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
@@ -272,7 +272,7 @@ let component = {
         }
     },
     watch: {
-        textureProps: function() {
+        textureProps: function () {
             this.buildTexture().then(() => this.makeScene()).catch((err) => {
                 console.error(err.message);
                 this.makeScene();

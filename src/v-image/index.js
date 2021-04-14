@@ -1,5 +1,5 @@
 import VShape from "../v-shape";
-import { Loader, Texture, Sprite, SCALE_MODES  } from "pixi.js";
+import { Loader, Texture, Sprite, SCALE_MODES } from "pixi.js";
 
 function isDataURL(s) {
     return !!s.match(isDataURL.regex);
@@ -12,6 +12,7 @@ function draw(obj, align = 0) {
     obj.lineStyle(lw, "#000", 1, align);
     obj.drawRect(0, 0, this.width || 0, this.height || 0);
 
+    if (!this.imageBase64Data) this.handleImageUrlChange(this.imageUrl);
     if (this.imageBase64Data) {
         obj.removeChild(this.sprite);
         this.sprite = Sprite.from(this.imageBase64Data);
@@ -21,8 +22,8 @@ function draw(obj, align = 0) {
         }
         else {
             if (this.centering) {
-                let tranX = (this.width/2 - this.sprite.width/2);
-                let tranY = (this.height/2 - this.sprite.height/2);
+                let tranX = (this.width / 2 - this.sprite.width / 2);
+                let tranY = (this.height / 2 - this.sprite.height / 2);
                 this.sprite.x = tranX;
                 this.sprite.y = tranY;
             }
@@ -42,23 +43,25 @@ function drawMask(obj, align = 0) {
 
 let component = {
     props: ['imageUrl', "scaled", "centering"],
-    data: function() {
+    data: function () {
         return {
             imageBase64Data: null
         }
     },
     computed: {
-        componentType: function() {
+        componentType: function () {
             return this.componentTypePrefix + " VImage";
-        }
+        },
+        watchedKeys: function () {
+            return ["imageBase64Data", ...Object.keys(this.$props)].filter(
+                (v) => v !== "dragLimits"
+            );
+        },
     },
     methods: {
         draw,
-        drawMask
-        // getPixiObj
-    },
-    watch: {
-        imageUrl: function() {
+        drawMask,
+        handleImageUrlChange: function (imageUrl) {
             if (this.imageUrl) {
                 this.imageBase64Data = this.imageUrl;
                 if (!isDataURL(this.imageBase64Data)) {
@@ -85,10 +88,16 @@ let component = {
                 }
             }
         }
+        // getPixiObj
+    },
+    watch: {
+        imageUrl: function () {
+            this.handleImageUrlChange(this.imageUrl);
+        }
     }
 };
 let VImage = VShape.extend(component);
 export function VImageFactory(opts) {
-	return factoryFn(VImage, opts);
+    return factoryFn(VImage, opts);
 }
 export default VImage;

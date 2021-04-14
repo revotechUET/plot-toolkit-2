@@ -12,13 +12,7 @@ import {
 import layoutMixin from '../mixins/layout';
 import factoryFn from '../mixins';
 
-<<<<<<< HEAD
-import { Texture } from "pixi.js";
-
-function drawRect(obj, align = 0) {
-=======
 async function drawRect(obj, align = 0) {
->>>>>>> e182803a907f7308697fb590282bc961bccfedda
     obj.clear();
     let lw = this.lineWidth || 0;
     let lt = this.lineTransparency || 1.0;
@@ -33,15 +27,15 @@ async function drawRect(obj, align = 0) {
         this.cFillColor.transparency,
         this.fillTexture
     );
-    /*
-        if (this.imagePatternUrl) {
-            let imagePattern = await getImagePattern(this.imagePatternUrl);
-            let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
-    
-            const texture = Texture.from(canvas);
-            obj.beginTextureFill(texture);
-        }
-    */
+
+    if (this.imagePatternUrl) {
+        let imagePattern = await getImagePattern(this.imagePatternUrl);
+        let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
+
+        const texture = Texture.from(canvas);
+        obj.beginTextureFill(texture);
+    }
+
     obj.drawRect(0, 0, this.width || 0, this.height || 0);
 
     obj.endFill();

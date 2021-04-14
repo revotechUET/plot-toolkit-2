@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import {Fragment} from 'vue-fragment';
+import { Fragment } from 'vue-fragment';
 import VScene from '../v-scene';
 import VImage from '../v-image';
 import VRect from '../v-rect';
@@ -15,7 +15,7 @@ new Vue({
                 <v-rect :clipped="true" :view-width="700" :view-height="500" :line-width="1" line-color="red" fill-color="0xFFFFFF01">
                 </v-rect>
                 -->
-                <v-viewport :view-pos-x="30" :view-pos-y="30" :viewport-width="100" :viewport-height="100"
+                <v-viewport :view-pos-x="30" :view-pos-y="30" :viewport-width="vpsize" :viewport-height="vpsize"
                     :draggable="true"
                     :view-width="vpsize" :view-height="vpsize" pan="both" line-color="rgba(0,0,255,0.5)" :line-width="3"> 
                     <v-image :draggable="true" :scaled="scaled" :clipped="true" :centering="centering" :view-width="vpsize" :view-height="vpsize" :image-url="imageURL">

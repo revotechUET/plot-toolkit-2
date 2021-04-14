@@ -1,32 +1,33 @@
 import VShape from '../v-shape';
-import {VTextboxFactory} from '../v-textbox';
+import { VTextboxFactory } from '../v-textbox';
 import { Graphics } from 'pixi.js';
-import {getPosX, getPosY, getColor, getTransparency, DefaultValues} from '../utils';
+import { getPosX, getPosY, getColor, getTransparency, DefaultValues } from '../utils';
 import template from "./template.html";
 import eventManager from '../event-manager';
 
 let component = {
-    props: ["enabled", "lineWidth", "lineColor", "lineTransparency", 
-        "refLineX", "refLineY"
+    props: ["enabled", "lineWidth", "lineColor", "lineTransparency",
+        "refLineX", "refLineY",
+        "tooltipStyle"
     ],
     template,
-    components: { VTextboxSticky: VTextboxFactory({'sticky': true}) },
-    data: function() {
+    components: { VTextboxSticky: VTextboxFactory({ 'sticky': true }) },
+    data: function () {
         return {
             kursor: 'crosshair',
             hasMouseOver: false,
             mouseGlobalX: null,
-            mouseGlobalY: null, 
+            mouseGlobalY: null,
             tooltips: []
         }
     },
     computed: {
-        componentType: function() {
+        componentType: function () {
             return "VLayer";
         }
     },
     methods: {
-        draw: function(obj) {
+        draw: function (obj) {
             obj.clear();
             obj.lineStyle(0, 0xeeeeee, 1, 0.5, true);
             obj.beginFill(0xeeeeee, 0.001);
@@ -36,13 +37,13 @@ let component = {
             obj.y = getPosY(this.coordinate, this.posY);
             this.drawRefLines(obj);
         },
-        drawRefLines: function() {
+        drawRefLines: function () {
             if (!this.hasMouseOver || (!this.refLineX && !this.refLineY)) return;
             let obj = this.getLayerObj();
             if (!obj) return;
             obj.clear();
-            let refPosition = this.pixiObj.toGlobal({x:this.posX, y: this.posY});
-            obj.lineStyle(this.lineWidth, this.cLineColor.color, 
+            let refPosition = this.pixiObj.toGlobal({ x: this.posX, y: this.posY });
+            obj.lineStyle(this.lineWidth, this.cLineColor.color,
                 this.cLineColor.transparency, 0.5, true);
 
             if (this.refLineX) {
@@ -58,35 +59,37 @@ let component = {
             let pixiObj = new Graphics();
             return pixiObj;
         },
-        getLayerObj: function() {
+        getLayerObj: function () {
             if (!this.layerObj) {
                 this.layerObj = new Graphics();
                 this.getRoot().addChild(this.layerObj);
             }
             return this.layerObj;
         },
-        addTooltip: function(srcComp, message) {
+        addTooltip: function (srcComp, message) {
             let key = srcComp.componentType + srcComp.name;
             let tooltipIdx = this.tooltips.findIndex(t => t.key === key);
             let tooltipGlobalPos = srcComp.pixiObj.getGlobalPosition();
             if (tooltipIdx < 0) {
                 this.tooltips.push({
-                    key : key,
-                    content : message,
+                    key: key,
+                    content: message,
                     viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y
+                    viewPosY: tooltipGlobalPos.y,
+                    tooltipStyle: this.tooltipStyle,
                 });
             }
             else {
                 this.tooltips.splice(tooltipIdx, 1, {
-                    key : key,
-                    content : message,
+                    key: key,
+                    content: message,
                     viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y
+                    viewPosY: tooltipGlobalPos.y,
+                    tooltipStyle: this.tooltipStyle,
                 });
             }
         },
-        removeTooltip: function(srcComp, message) {
+        removeTooltip: function (srcComp, message) {
             let key = srcComp.componentType + srcComp.name;
             let tooltipIdx = this.tooltips.findIndex(t => t.key === key);
             if (tooltipIdx < 0) return;
@@ -96,7 +99,7 @@ let component = {
             this.mouseGlobalX = globalPos.x;
             this.mouseGlobalY = globalPos.y;
             eventManager.emit('ext-mousepos', target, globalPos, localPos, {
-                refLineX: this.refLineX, 
+                refLineX: this.refLineX,
                 refLineY: this.refLineY
             });
             requestAnimationFrame(() => {
@@ -165,7 +168,7 @@ let component = {
                 .on("mouseout", handleMouseOut)
                 .on("mousemove", handleMouseMove)
                 .on('mouseup', handleMouseUp);
-            
+
             eventManager.on('tooltip-on', this.addTooltip);
             eventManager.on('tooltip-off', this.removeTooltip);
         }
