@@ -3,21 +3,23 @@ import VAxis from '../v-axis';
 import VScene from '../v-scene';
 import VRect from '../v-rect';
 import VResizable from '../v-resizable';
-import {Plugin} from 'vue-fragment';
+import { Plugin } from 'vue-fragment';
 Vue.use(Plugin);
 new Vue({
     el: '#vue-app',
     template: `<fragment>
         <v-scene :view-width="width" :view-height="height" :transparent="true">
             <v-resizable :view-pos-x="30" :view-pos-y="50" :clipped="false" 
-                :view-width="w" :view-height="h" 
-                direction="horizontal" :size="3" :knob-flags="[false, true]" 
+                :view-width="w" :view-height="h"
+                x-transform="none" y-transform="none"
+                direction="horizontal" :size="5" :knob-flags="[false, true]" 
                 :enabled="true" :draggable="true"
                 :on-resize="({width, height}) => {w = width; h = height}">
                 <v-axis :clipped="true"
                     axis="y" :view-width="w" :view-height="h" 
                     :real-min-y="9.73" :real-max-y="maxVal" 
                     y-transform="loga"
+                    x-transform="none"
                     :grid="true"
                     :major-ticks="4" :major-tick-length="1" :minor-ticks="minorTicks" 
                     :line-width="1.5" :line-color="0x010101"
@@ -28,6 +30,7 @@ new Vue({
                         axis="x" :view-width="w" :view-height="h" 
                         :real-min-x="9.73" :real-max-x="maxValX" 
                         x-transform="linear"
+                        y-transfrom="none"
                         :grid="true"
                         :major-ticks="4" :minor-ticks="minorTicks" 
                         :line-width="1.5" :line-color="0x010101"
@@ -40,12 +43,12 @@ new Vue({
                 </v-axis>
             </v-resizable>
         </v-scene>
-        <button v-on:click="minorTicks--">Click Me</button>
-        <button v-on:click="maxVal += 0.3">Click Me</button>
+        <button v-on:click="minorTicks > 1 && minorTicks--">Minus Tick</button>
+        <button v-on:click="minorTicks++">Add Tick</button>
     </fragment>
     `,
     data: {
-        w:300, h: 300, width: 600, height: 400, minorTicks: 5, maxVal: 23090, maxValX: 40
+        w: 300, h: 300, width: 600, height: 400, minorTicks: 5, maxVal: 23090, maxValX: 40
     },
     components: {
         VAxis, VScene, VRect, VResizable

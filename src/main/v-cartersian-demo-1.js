@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import {Fragment} from 'vue-fragment';
+import { Fragment } from 'vue-fragment';
 import VScene from '../v-scene';
 import VRect from '../v-rect';
 import VViewport from '../v-viewport';
@@ -11,6 +11,7 @@ new Vue({
         <v-scene :view-width="800" :view-height="600" :transparent="true">
             <v-viewport :viewport-width="500" :viewport-height="300"
                 :view-pos-x="30" :view-pos-y="30"
+                x-transform="none" y-transform="none"
                 :constrained="true"
                 :view-width="1000" :view-height="400" pan="both" line-color="rgba(0,0,255,0.5)" :line-width="1"> 
                 <v-cartersian :view-width="1000" :view-height="500"

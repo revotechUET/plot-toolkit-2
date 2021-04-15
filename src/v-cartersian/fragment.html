@@ -1,7 +1,7 @@
 <v-axis 
     :fill-transparency="0.001"
     axis="x" :view-width="width" :view-height="height"
-    :real-min-x="realMinX" :real-max-x="realMaxX" :x-transform="xTransform"
+    :real-min-x="realMinX" :real-max-x="realMaxX" :x-transform="xTransform" y-transform="none"
     :major-ticks="majorTicksX" :minor-ticks="minorTicksX" :major-tick-length="majorTickLengthX"
     :tick-label-position="tickLabelPositionX || tickLabelPosition" :grid="gridX||grid" 
     :tick-precision="tickPrecisionX||tickPrecision" :label-fill-color="labelFillColor" :label-stroke-color="labelStrokeColor"
@@ -9,7 +9,7 @@
     <v-axis 
         :fill-transparency="0.001"
         axis="y" :view-width="width" :view-height="height" 
-        :real-min-y="realMinY" :real-max-y="realMaxY" :y-transform="yTransform"
+        :real-min-y="realMinY" :real-max-y="realMaxY" :y-transform="yTransform" x-transform="none"
         :major-ticks="majorTicksY" :minor-ticks="minorTicksY" :major-tick-length="majorTickLengthY"
         :tick-label-position="tickLabelPositionY||tickLabelPosition" :grid="gridY||grid" 
         :tick-precision="tickPrecisionY||tickPrecision" :label-fill-color="labelFillColor" :label-stroke-color="labelStrokeColor"

@@ -95,7 +95,9 @@ let component = {
         this.cleanUp();
     },
     destroyed: function () {
-        this.$parent.relayout();
+        if (this.constrained) {
+            this.$parent.relayout();
+        }
     },
     computed: {
         watchedKeys: function () {

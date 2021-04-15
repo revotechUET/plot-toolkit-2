@@ -18,7 +18,7 @@
         v-if="_knobFlags[index]" :key="index"
         :view-pos-x="index * (width - knobSize)" :view-pos-y="0" 
         :view-width="knobSize" :view-height="height" 
-        :enabled="true" :draggable="true" dragConstraint="x" 
+        :enabled="true" :draggable="true" drag-constraint="x" 
         :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
         :line-transparency="knob.outline"
         :fill-transparency="knob.fill"

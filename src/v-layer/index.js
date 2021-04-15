@@ -8,7 +8,7 @@ import eventManager from '../event-manager';
 let component = {
     props: ["enabled", "lineWidth", "lineColor", "lineTransparency",
         "refLineX", "refLineY",
-        "tooltipStyle"
+        "tooltipStyle", "viewportPosX", "viewportPosY"
     ],
     template,
     components: { VTextboxSticky: VTextboxFactory({ 'sticky': true }) },
@@ -42,10 +42,17 @@ let component = {
             let obj = this.getLayerObj();
             if (!obj) return;
             obj.clear();
-            let refPosition = this.pixiObj.toGlobal({ x: this.posX, y: this.posY });
+            let refPosition;
+            if (!this.viewportPosX && !this.viewportPosY) {
+                refPosition = this.pixiObj.toGlobal({ x: this.posX, y: this.posY });
+            } else {
+                refPosition = {
+                    x: this.viewportPosX,
+                    y: this.viewportPosY
+                }
+            }
             obj.lineStyle(this.lineWidth, this.cLineColor.color,
                 this.cLineColor.transparency, 0.5, true);
-
             if (this.refLineX) {
                 obj.moveTo(refPosition.x, this.mouseGlobalY);
                 obj.lineTo(refPosition.x + this.width, this.mouseGlobalY);
@@ -70,6 +77,10 @@ let component = {
             let key = srcComp.componentType + srcComp.name;
             let tooltipIdx = this.tooltips.findIndex(t => t.key === key);
             let tooltipGlobalPos = srcComp.pixiObj.getGlobalPosition();
+            if (this.viewportPosX && this.viewportPosY) {
+                tooltipGlobalPos.x = this.viewportPosX;
+                tooltipGlobalPos.y = this.viewportPosY;
+            }
             if (tooltipIdx < 0) {
                 this.tooltips.push({
                     key: key,
