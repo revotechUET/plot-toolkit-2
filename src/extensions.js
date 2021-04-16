@@ -70,7 +70,7 @@ CustomGraphics.prototype.drawLine = function (x1, y1, x2, y2, lineDashSpec) {
 
 CustomGraphics.prototype.myLineTo = function (x, y, lineDashSpec) {
     if (!lineDashSpec) {
-        console.log(this.currentPath.points);
+        // console.log(this.currentPath.points);
         Graphics.prototype.lineTo.call(this, x, y);
     } else {
         let start = this.currentPath.points;

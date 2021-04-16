@@ -78,7 +78,7 @@ function draw(obj) {
 			}
 			break;
 		default:
-			console.error("Unknown shape type");
+		// console.error("Unknown shape type");
 	}
 
 	obj.endFill();
