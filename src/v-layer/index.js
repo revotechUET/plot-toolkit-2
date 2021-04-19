@@ -42,15 +42,7 @@ let component = {
             let obj = this.getLayerObj();
             if (!obj) return;
             obj.clear();
-            let refPosition;
-            if (!this.viewportPosX && !this.viewportPosY) {
-                refPosition = this.pixiObj.toGlobal({ x: this.posX, y: this.posY });
-            } else {
-                refPosition = {
-                    x: this.viewportPosX,
-                    y: this.viewportPosY
-                }
-            }
+            let refPosition = this.pixiObj.toGlobal({ x: this.posX, y: this.posY });
             obj.lineStyle(this.lineWidth, this.cLineColor.color,
                 this.cLineColor.transparency, 0.5, true);
             if (this.refLineX) {
@@ -77,26 +69,39 @@ let component = {
             let key = srcComp.componentType + srcComp.name;
             let tooltipIdx = this.tooltips.findIndex(t => t.key === key);
             let tooltipGlobalPos = srcComp.pixiObj.getGlobalPosition();
-            if (this.viewportPosX && this.viewportPosY) {
+            if (this.viewportPosX) {
                 tooltipGlobalPos.x = this.viewportPosX;
+            }
+            if (this.viewportPosY) {
                 tooltipGlobalPos.y = this.viewportPosY;
+            }
+            if (message.tooltipPosY) {
+                tooltipGlobalPos.y = message.tooltipPosY;
             }
             if (tooltipIdx < 0) {
                 this.tooltips.push({
                     key: key,
-                    content: message,
+                    content: message.content,
+                    viewWidth: message.viewWidth,
+                    viewHeight: message.viewHeight,
                     viewPosX: tooltipGlobalPos.x,
                     viewPosY: tooltipGlobalPos.y,
                     tooltipStyle: this.tooltipStyle,
+                    fillColor: message.fillColor,
+                    fillTransparency: message.fillTransparency
                 });
             }
             else {
                 this.tooltips.splice(tooltipIdx, 1, {
                     key: key,
-                    content: message,
+                    content: message.content,
+                    viewWidth: message.viewWidth,
+                    viewHeight: message.viewHeight,
                     viewPosX: tooltipGlobalPos.x,
                     viewPosY: tooltipGlobalPos.y,
                     tooltipStyle: this.tooltipStyle,
+                    fillColor: message.fillColor,
+                    fillTransparency: message.fillTransparency
                 });
             }
         },

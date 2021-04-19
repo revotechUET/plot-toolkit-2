@@ -1,7 +1,8 @@
 <slot />
 <v-textbox-sticky v-for="(message, idx) in tooltips" :line-width="0" :key="idx" 
-    fill-color="#FFFFCC" :content-style="message.tooltipStyle"
-    :fill-transparency="message.fillTransparency"
+    :fill-color="message.fillColor || '#FFFFCC'" :content-style="message.tooltipStyle"
+    :fill-transparency="message.fillTransparency || 0"
+    :view-width="message.viewWidth" :view-height="message.viewHeight"
     :view-pos-x="message.viewPosX" :view-pos-y="message.viewPosY" 
     :content="message.content">
 </v-textbox-sticky>
