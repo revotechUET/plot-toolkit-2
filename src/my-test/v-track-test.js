@@ -7,7 +7,8 @@ import VRect, { VRectFactory } from '../v-rect';
 import VLayer from '../v-layer';
 import VViewport from '../v-viewport';
 import VPath from '../v-path';
-import data from '../main/data-polygon';
+import VPolygon from '../v-polygon';
+import dataPolygon from '../main/data-polygon';
 
 new Vue({
     el: "#vue-app",
@@ -82,16 +83,33 @@ new Vue({
                                 :real-min-x="realMinX" :real-max-x="realMaxX"
                                 :real-min-y="realMinY" :real-max-y="realMaxY"
                                 :on-resize="onResize2">
-                                <v-path :view-width="viewWidth" :view-height="viewHeight" 
+                                <v-path :view-width="viewWidth" :view-height="viewHeight"
                                     :real-path="myData1" symbol-color="0xFF0000">
-                                </v-path>
-                                <v-path :view-width="viewWidth" :viewHeight="viewHeight"
-                                    :real-path="path" symbol-color="0xF0F000" symbol-shape="plus"
-                                    :symbol-size="5"
-                                    :line-width="1">
                                 </v-path>
                             </v-resizable>
                         </v-rect-ext-mouse>
+                        <v-rect :transparent="true" :view-width="w" :view-height="viewHeight"
+                            fill-color="0xFF0000" :fill-transparency="0.001" line-color="0xFF0000"
+                            :view-pos-x="w + viewWidth" :view-pos-y="0" :real-min-x="6" :real-max-x="30"
+                            :real-min-y="325" :real-max-y="3500" x-transform="linear" y-transform="linear">
+                            <v-polygon 
+                                fill-color="rgba(255, 0, 0, 0.3)" 
+                                :view-pos-x="0" :view-pos-y="0"
+                                :real-min-x="6" 
+                                :real-max-x="30"
+                                line-color="#FF00FF"
+                                image-pattern-url="src/main/trait_rapproches_.png"
+                                foregroundColor="red"
+                                backgroundColor="green"
+                                :path="dataPolygon"
+                                :isShading="true"
+                                shadingSide="down"
+                                :line-width="1"
+                                :enabled="true"
+                                :real-min-y="325"
+                                :real-max-y="3500">
+                            </v-polygon>
+                        </v-rect>
                     </v-layer>
                 </v-viewport>
             </v-resizable>
@@ -114,30 +132,22 @@ new Vue({
                 fontSize: 13,
             },
             path: [
-                { x: 7, y: 620 },
-                { x: 10, y: 760 },
-                { x: 25, y: 1040 },
-                { x: 20, y: 1200 },
-                { x: 15, y: 1500 },
-                { x: 8, y: 1820 },
-                { x: 26, y: 2150 },
-                { x: 20, y: 2340 },
-                { x: 16, y: 2600 },
-                { x: 20, y: 2860 },
-                { x: 10, y: 3000 },
-                { x: 25, y: 3110 },
-                { x: 16, y: 3240 },
-                { x: 12, y: 3350 },
-                { x: 29, y: 3450 },
+                { x: 6.32, y: 500 },
+                { x: 8.32, y: 800 },
+                { x: 12.21, y: 1200 },
+                { x: 6.32, y: 1500 },
+                { x: 20.32, y: 2500 },
+                { x: 15.32, y: 3200 },
             ],
             symbolShape: "star",
             symbolSize: "2",
             symbolColor: "0xde3249",
             lineDash: "4 3",
+            dataPolygon
         }
     },
     components: {
-        Fragment, VScene, VAxis, VPath,
+        Fragment, VScene, VAxis, VPath, VPolygon,
         VResizable, VRect, VLayer, VViewport,
         VRectExtMouse: VRectFactory({ extMouseListener: true })
     },
@@ -172,10 +182,10 @@ new Vue({
         },
         myData1: function () {
             let res = [];
-            for (let i = 0; i < data.length; i += 2) {
+            for (let i = 0; i < dataPolygon.length; i += 2) {
                 res.push({
-                    x: data[i],
-                    y: data[i + 1]
+                    x: dataPolygon[i],
+                    y: dataPolygon[i + 1]
                 });
             }
             return res;
