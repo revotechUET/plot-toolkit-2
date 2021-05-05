@@ -10,7 +10,7 @@ import {
     convert2rgbColor
 } from '../utils';
 
-function makeScene() {
+async function makeScene() {
     let maskObj = this.getMaskObj();
     let pixiObj = this.getPixiObj();
 
@@ -21,7 +21,7 @@ function makeScene() {
     else this.coordinate = {}
 
     maskObj && this.drawMask(maskObj);
-    pixiObj && this.draw(pixiObj);
+    pixiObj && await this.draw(pixiObj);
     if (this.live) {
         requestAnimationFrame(() => {
             this.rawRenderGraphic();
@@ -73,7 +73,7 @@ let component = {
     template,
     data: function () {
         return {
-            debug: true,
+            debug: false,
             kursor: null,
             pixiObj: null,
             maskObj: null,
@@ -86,8 +86,8 @@ let component = {
         }).catch(error => {
             this.fillTexture = null;
             console.error(error.message);
-        }).finally(() => {
-            this.makeScene();
+        }).finally(async () => {
+            await this.makeScene();
             this.registerEvents();
         });
     },
