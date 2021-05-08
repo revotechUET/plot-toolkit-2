@@ -1,51 +1,45 @@
 import Vue from 'vue';
 import { Fragment } from 'vue-fragment';
 import VScene from '../v-scene';
-import VShading from '../v-shading';
-import VPath from '../v-path';
+import VTrack from '../v-track';
 import VRect from '../v-rect';
 import Pallete from '../main/pallete.json';
 
 new Vue({
     el: "#vue-app",
     template: `<fragment>
-        <v-scene :transparent="true" :view-width="viewWidth" :view-height="viewHeight"
-            :view-pos-x="0" :view-pos-y="0"
-            x-transform="none" y-transform="none">
-            <v-rect 
+        <v-scene :transparent="true" :view-width="600" :view-height="viewHeight"
+            :view-pos-x="0" :view-pos-y="0">
+            <v-track
+                :track-view-width="trackViewWidth"
                 :view-width="viewWidth" :view-height="viewHeight"
                 :view-pos-x="0" :view-pos-y="0"
-                fill-color="0xf0f5f5" :fill-transparency="1"
+                fill-color="0xFFFFFF" :fill-transparency="1"
                 :real-min-x="realMinX" :real-max-x="realMaxX"
                 :real-min-y="realMinY" :real-max-y="realMaxY"
-                x-transform="linear" y-transform="linear"> 
-                <v-shading
-                    fill-color="rgba(255, 0, 0, 0.3)" 
-                    :real-min-x="realMinX" :real-max-x="realMaxX"
-                    :real-min-y="realMinY" :real-max-y="realMaxY"
-                    :view-width="viewWidth" :view-height="viewHeight"
-                    x-transform="linear" y-transform="linear"
-                    :real-right="realPath1"
-                    :real-left="realPath2"
-                    line-color="#000000"
-                    cursor="crosshair"
-                    :enabled="true"
-                    min-color="#F0F000"
-                    max-color="#0000FF"
-                    type-fill-color="Pallete"
-                    :pallete="myPallete['BGR']"
-                    :fill-pattern-list="fillPatternList"
-                    :custom-fill-values="fillValues"
-                    :foreground-color-list="foregroundColorList"
-                    :background-color-list="backgroundColorList">
-                </v-shading>
-            </v-rect>
+                x-transform="linear" y-transform="linear"
+                :color-path-list="['0xFF0000', '0x00FF00']"
+                :real-right="realPath2"
+                :real-left="realPath1"
+                cursor="crosshair"
+                :enabled="true"
+                min-color="#F0F000"
+                max-color="#0000FF"
+                type-fill-color="Pallete"
+                :pallete="myPallete['BGR']"
+                :fill-pattern-list="fillPatternList"
+                :custom-fill-values="fillValues"
+                :foreground-color-list="foregroundColorList"
+                :background-color-list="backgroundColorList"
+                >
+            </v-track>
         </v-scene>
     </fragment>`,
     data: function () {
         return {
-            viewWidth: 200,
+            viewWidth: 600,
             viewHeight: 500,
+            trackViewWidth: 200,
             realMinX: 14,
             realMaxX: 30,
             realMinY: 325,
@@ -121,9 +115,6 @@ new Vue({
         }
     },
     components: {
-        Fragment, VScene, VShading, VPath, VRect
-    },
-    mounted: function () {
-        console.log(Pallete["content"]["BGR"].length);
+        Fragment, VScene, VTrack, VRect
     }
 })

@@ -1,0 +1,10 @@
+<fragment v-if="isShading">
+    <v-path 
+        :real-path="shadingPathLeft" :line-width="3" :line-transparency="0.5" 
+        :line-color-list="shadingColorList" :shading-offset-x="2">
+    </v-path>
+    <v-path 
+        :real-path="shadingPathRight" :line-width="3" :line-transparency="0.5" 
+        :line-color-list="shadingColorList" :shading-offset-x="-2">
+    </v-path>
+</fragment>

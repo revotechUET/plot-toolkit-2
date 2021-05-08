@@ -14,7 +14,6 @@ function draw(obj) {
 	obj.lineStyle(lw, getColor(symbolColor, DefaultValues.lineColor), lt, 0.5);
 
 	let points = this.getPath();
-	console.log(points)
 	let symbolSize =
 		typeof this.symbolSize === "string"
 			? parseInt(this.symbolSize)
@@ -37,6 +36,8 @@ function draw(obj) {
 	} else {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
+			obj.lineStyle(lw, getColor((this.lineColorList && this.lineColorList[i - 1])
+				|| symbolColor, DefaultValues.lineColor), lt, 0.5);
 			obj.myLineTo(points[i].x, points[i].y);
 		}
 		// for (let i = 0; i < points.length - 1; i++) {
@@ -95,6 +96,8 @@ let component = {
 		"symbolSize",
 		"symbolColor",
 		"lineDash",
+		"shadingOffsetX",
+		"lineColorList"
 	],
 	computed: {
 		// path: function () {
@@ -108,6 +111,9 @@ let component = {
 		// 		y: transformYFn(point.y),
 		// 	}));
 		// },
+		componentType: function () {
+			return "VPath";
+		},
 		dashLine: function () {
 			return !!this.lineDash;
 		},
@@ -120,10 +126,17 @@ let component = {
 			let transformXFn = this.$parent.getTransformX();
 			let transformYFn = this.$parent.getTransformY();
 			if (!transformXFn || !transformYFn) return [];
-			return this.realPath.map((point) => ({
-				x: transformXFn(point.x),
-				y: transformYFn(point.y),
-			}));
+			if (!this.realPath.length) {
+				return [
+					{ x: transformXFn(this.realPath) - (this.shadingOffsetX || 0), y: transformYFn(this.$parent.realMinY) },
+					{ x: transformXFn(this.realPath) - (this.shadingOffsetX || 0), y: transformYFn(this.$parent.realMaxY) },
+				]
+			} else {
+				return this.realPath.map((point) => ({
+					x: transformXFn(point.x) - (this.shadingOffsetX || 0),
+					y: transformYFn(point.y),
+				}));
+			}
 		},
 	},
 };

@@ -218,7 +218,6 @@ export function blendColorImage(image, foreground, background) {
 
     let fgColor = rgbaStringToObj(foreground);
     let bgColor = rgbaStringToObj(background);
-
     let dataImg = ctx.getImageData(0, 0, image.width, image.height);
     var pixels = dataImg.data;
     for (var i = 0; i < pixels.length; i += 4) {
@@ -229,8 +228,8 @@ export function blendColorImage(image, foreground, background) {
             fgColor.g * existingAlpha + bgColor.g * (1 - existingAlpha);
         pixels[i + 2] =
             fgColor.b * existingAlpha + bgColor.b * (1 - existingAlpha);
-        // let newAlpha = fgColor.a * existingAlpha + bgColor.a * (1-existingAlpha);
-        let newAlpha = 1;
+        let newAlpha = fgColor.a * existingAlpha + bgColor.a * (1 - existingAlpha);
+        // let newAlpha = 1;
         pixels[i + 3] = parseInt(255 * newAlpha);
     }
     ctx.putImageData(dataImg, 0, 0);
@@ -249,7 +248,7 @@ function rgbaStringToObj(rgbaString) {
         r: parseInt(rgbaArr[0]),
         g: parseInt(rgbaArr[1]),
         b: parseInt(rgbaArr[2]),
-        a: parseInt(rgbaArr[3]),
+        a: Number(rgbaArr[3]),
     };
 }
 

@@ -1,0 +1,38 @@
+<v-resizable 
+    :view-pos-x="viewPosX || 0" :view-pos-y="viewPosY || 0"
+    :view-width="trackWidth" :view-height="viewHeight"
+    direction="horizontal" :knob-flags="[true, true]"
+    line-color="0x010101" :line-width="1"
+    :fill-color="fillColor" :fill-transparency="fillTransparency"
+    :size="5" :x-transform="xTransform" :y-transform="yTransform"
+    :real-min-x="realMinX" :real-max-x="realMaxX"
+    :real-min-y="realMinY" :real-max-y="realMaxY"
+    :on-resize="trackResize">
+    <v-shading
+        :view-pos-x="viewPosX || 0" :view-pos-y="viewPosY || 0"
+        :real-min-x="realMinX" :real-max-x="realMaxX"
+        :real-min-y="realMinY" :real-max-y="realMaxY"
+        :view-width="trackWidth" :view-height="viewHeight"
+        :x-transform="xTransform" :y-transform="yTransform"
+        :real-right="realLeft"
+        :real-left="realRight"
+        line-color="#000000"
+        cursor="crosshair"
+        :enabled="true"
+        :min-color="minColor"
+        :max-color="maxColor"
+        :type-fill-color="typeFillColor"
+        :pallete="pallete"
+        :fill-pattern-list="fillPatternList"
+        :custom-fill-values="customFillValues"  
+        :foreground-color-list="foregroundColorList"
+        :background-color-list="backgroundColorList">
+    </v-shading>
+    <v-path :real-path="realLeft" :view-width="trackWidth"
+        :symbol-color="colorPathList[0] || '0x0000F0'">
+    </v-path>
+    <v-path :real-path="realRight" :view-width="trackWidth"
+        :symbol-color="colorPathList[1] || '0x0000F0'">
+    </v-path>
+    <slot />
+</v-resizable>

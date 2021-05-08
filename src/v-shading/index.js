@@ -1,4 +1,6 @@
 import VShape from "../v-shape";
+import VPath from '../v-path';
+import VRect from '../v-rect';
 import { scaleLinear, scaleQuantile } from "d3-scale";
 import pattern from '../main/pattern_sample.json';
 import {
@@ -10,18 +12,23 @@ import {
     getPosX,
     getPosY
 } from "../utils";
-import { Texture } from "pixi.js";
+import template from './template.html';
+import { Texture, utils } from "pixi.js";
 
 async function draw(obj) {
+    console.log("shading draw");
+    this.shadingColorList = [];
+    this.shadingPathLeft = [];
+    this.shadingPathRight = [];
     obj.clear();
     let fillValues = [],
         bgColors = [],
         fillPatterns = [],
         fgColors = [],
-        mn, mx;
-    let myFillColor;
-    let transformColor;
-    let myPallete;
+        mn, mx,
+        myFillColor,
+        transformColor,
+        myPallete;
     switch (this.typeFillColor) {
         case "Gradient": //transform linear
             if (!this.minColor || !this.maxColor) {
@@ -163,32 +170,62 @@ async function draw(obj) {
                 throw new Error(`No sufficient information for fill color Pallete: ${this.pallete}`);
             }
             myPallete = this.pallete.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
-            console.log("My Pallete", myPallete);
             transformColor = scaleQuantile().domain([this.realMinX, this.realMaxX]).range(myPallete);
             break;
         default:
-            if (!this.minColor || !this.maxColor) {
-                throw new Error(`No sufficient information for fill color Gradient: ${this.minColor} and ${this.maxColor}`)
-            }
-            transformColor = scaleLinear().domain([this.realMinX, this.realMaxX]).range([this.minColor, this.maxColor]);
+            throw new Error(`No sufficient information for type fill color : ${this.typeFillColor}`);
     }
 
     for (let i = 0; i < this.cPolygonList.length; i++) {
         let polygon = this.cPolygonList[i], idx = i;
         let posXFillColor;
         if (polygon.length === 4) { // this polygon is quadrilateral
-            posXFillColor = polygon[0]["x"] > polygon[1]["x"] ? polygon[0]["x"] : polygon[1]["x"];
+            posXFillColor = Math.max(polygon[0]["x"], polygon[1]["x"]);
+
+            if (i === 0) {
+                if (polygon[0]["x"] > polygon[1]["x"]) {
+                    this.shadingPathLeft.push(polygon[1], polygon[2]);
+                    this.shadingPathRight.push(polygon[0], polygon[3]);
+                } else {
+                    this.shadingPathLeft.push(polygon[0], polygon[3]);
+                    this.shadingPathRight.push(polygon[1], polygon[2]);
+                }
+            } else {
+                if (polygon[2]["x"] < polygon[3]["x"]) {
+                    this.shadingPathLeft.push(polygon[2]);
+                    this.shadingPathRight.push(polygon[3]);
+                } else {
+                    this.shadingPathLeft.push(polygon[3]);
+                    this.shadingPathRight.push(polygon[2]);
+                }
+            }
         } else { // this polygon is not quadriateral => it must be triangle
             posXFillColor = Math.min(polygon[0]["x"], polygon[1]['x']);
             if (idx >= 1 && this.cPolygonList[idx - 1].length === 3 && polygon[0]["x"] < polygon[1]["x"]) {
                 posXFillColor = polygon[2]["x"];
+            }
+            if (i === 0) {
+                if (polygon[0]["x"] < polygon[1]["x"]) {
+                    this.shadingPathLeft.push(polygon[0], polygon[2]);
+                    this.shadingPathRight.push(polygon[1], polygon[2]);
+                } else {
+                    this.shadingPathLeft.push(polygon[1], polygon[2]);
+                    this.shadingPathRight.push(polygon[0], polygon[2]);
+                }
             } else {
-                posXFillColor = Math.min(polygon[0]["x"], polygon[1]['x']);
+                if (polygon[0]["x"] < polygon[1]["x"]) {
+                    this.shadingPathLeft.push(polygon[0]);
+                    this.shadingPathRight.push(polygon[1]);
+                } else {
+                    this.shadingPathLeft.push(polygon[1]);
+                    this.shadingPathRight.push(polygon[0]);
+                }
             }
         }
         switch (this.typeFillColor) {
             case "Gradient":
                 myFillColor = processColorStr(transformColor(posXFillColor));
+                this.shadingColorList.push(myFillColor.color);
                 obj.beginFill(
                     myFillColor.color,
                     myFillColor.transparency
@@ -208,6 +245,7 @@ async function draw(obj) {
                     let srcUrl = `https://users.i2g.cloud/pattern/${pattern[fillPatterns[index]]}_.png?service=WI_BACKEND`;
                     let myFgColor = convert2rgbColor(fgColors[index]),
                         myBgColor = convert2rgbColor(transformColor(xScale));
+                    this.shadingColorList.push((processColorStr(transformColor(xScale)).color));
                     let imagePattern = await getImagePattern(srcUrl);
                     let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
                     const texture = Texture.from(canvas);
@@ -218,11 +256,11 @@ async function draw(obj) {
                 break;
             case "Pallete":
                 myFillColor = processColorStr(transformColor(posXFillColor));
+                this.shadingColorList.push(myFillColor.color);
                 obj.beginFill(
                     myFillColor.color,
                     myFillColor.transparency
                 );
-                console.log(myFillColor);
                 this.myDrawPolygon(obj, polygon);
                 obj.endFill();
                 break;
@@ -306,6 +344,21 @@ function generatePolygons(path, bothIsArr) {
     return polygonArr;
 }
 
+function registerEvents(_pixiObj) {
+    let pixiObj = _pixiObj || this.getPixiObj();
+    pixiObj.interactive = true;
+
+    const handleMouseDown = async evt => {
+        this.isShading = !this.isShading;
+        this.$children.length > 0 && this.$children.forEach(child => {
+            child.cleanUp();
+            child.makeScene();
+        });
+    }
+
+    pixiObj.on("mousedown", handleMouseDown);
+}
+
 let component = {
     props: [
         "realLeft",
@@ -319,12 +372,13 @@ let component = {
         "fillPatternList",
         "pallete"
     ],
+    template,
     data: function () {
         return {
-            imageUrl: '',
-            fgColor: '',
-            bgColor: '',
-            polygon: [],
+            isShading: false,
+            shadingPathLeft: [],
+            shadingPathRight: [],
+            shadingColorList: [],
         }
     },
     computed: {
@@ -356,18 +410,25 @@ let component = {
                 path = [begin, ...path, end];
             }
             return generatePolygons(path, bothIsArr);
+        },
+        componentType: function () {
+            return "VShading";
         }
     },
     methods: {
         draw,
+        registerEvents,
         myDrawPolygon: function (obj, polygon) {
             let res = [];
-            polygon = polygon.forEach(item => {
+            polygon.forEach(item => {
                 res.push(this._getX(item.x), this._getY(item.y));
             });
             obj.drawPolygon(res);
         }
     },
+    components: {
+        VRect, VPath
+    }
 };
 
 export default VShape.extend(component);
