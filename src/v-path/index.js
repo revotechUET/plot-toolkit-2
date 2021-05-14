@@ -36,8 +36,6 @@ function draw(obj) {
 	} else {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
-			obj.lineStyle(lw, getColor((this.lineColorList && this.lineColorList[i - 1])
-				|| symbolColor, DefaultValues.lineColor), lt, 0.5);
 			obj.myLineTo(points[i].x, points[i].y);
 		}
 		// for (let i = 0; i < points.length - 1; i++) {
@@ -97,7 +95,7 @@ let component = {
 		"symbolColor",
 		"lineDash",
 		"shadingOffsetX",
-		"lineColorList"
+		"shadingOffsetY"
 	],
 	computed: {
 		// path: function () {
@@ -134,7 +132,7 @@ let component = {
 			} else {
 				return this.realPath.map((point) => ({
 					x: transformXFn(point.x) - (this.shadingOffsetX || 0),
-					y: transformYFn(point.y),
+					y: transformYFn(point.y) - (this.shadingOffsetY || 0),
 				}));
 			}
 		},

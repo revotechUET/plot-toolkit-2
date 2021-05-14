@@ -1,6 +1,6 @@
 <v-resizable 
     :view-pos-x="viewPosX || 0" :view-pos-y="viewPosY || 0"
-    :view-width="trackWidth" :view-height="viewHeight"
+    :view-width="trackViewWidth" :view-height="viewHeight"
     direction="horizontal" :knob-flags="[true, true]"
     line-color="0x010101" :line-width="1"
     :fill-color="fillColor" :fill-transparency="fillTransparency"
@@ -8,31 +8,76 @@
     :real-min-x="realMinX" :real-max-x="realMaxX"
     :real-min-y="realMinY" :real-max-y="realMaxY"
     :on-resize="trackResize">
-    <v-shading
-        :view-pos-x="viewPosX || 0" :view-pos-y="viewPosY || 0"
-        :real-min-x="realMinX" :real-max-x="realMaxX"
-        :real-min-y="realMinY" :real-max-y="realMaxY"
-        :view-width="trackWidth" :view-height="viewHeight"
+    <v-resizable :view-pos-x="0" :view-pos-y="0"
+        :view-height="trackHeaderHeight" :view-width="trackViewWidth"
+        line-color="0x010101" :line-width="1"
+        direction="vertical" :knob-flags="[true, true]"
+        :fill-color="trackHeaderFillColor || '0xFFFFFF'" :fill-transparency="fillTransparency"
+        :size="5" :on-resize="trackHeaderResize"
+        x-transform="none" y-transform="none">
+        <v-viewport :view-pos-x="0" :view-pos-y="0"
+            :view-width="trackViewWidth" :view-height="Math.max(trackHeaderHeight, trackHeaderChildrenHeight)"
+            :viewport-width="trackViewWidth" :viewport-height="trackHeaderHeight"
+            x-transform="none" y-transform="none"
+            line-color="0x000000" :line-width="1">
+            <v-rect v-for="(child, idx) in shadingList"
+                :key = "child.name + ' ' + idx" :name="child.comp + ' ' + idx"
+                :view-pos-x="0" :view-pos-y="idx * 50"
+                :enabled="true"
+                :view-width="trackViewWidth" :view-height="50"
+                fill-color="0xFFFFFF" 
+                :fill-transparency="shadingList[idx].shading ? 0.5 : 1"
+                line-color="0x080808" :line-width="1"
+                :onmousedown="childHighlight">
+                <v-text-box
+                    :content="child.name" :fill-color="shadingList[idx].shading ? '0xF00000' : '0xFFFFFF'"
+                    :fill-transparency="shadingList[idx].shading ? 0.5 : 1"
+                    line-color="0x010101" :line-width="1"
+                    :view-width="12/ 26 * textWidth(child.name) + 10"
+                    :view-height="12/ 26 * textHeight(child.name) + 10"
+                    :content-style="headerContentStyle"
+                    :view-pos-x="trackViewWidth/2 - (12/ 26 * textWidth(child.name) + 10) / 2"
+                    :view-pos-y="25 - (12/ 26 * textHeight(child.name) + 10) / 2"
+                />
+            </v-rect>
+        </v-viewport>
+    </v-resizable>
+    <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight || viewPosY || 0"
+        :view-width="trackViewWidth" :view-height="trackBodyHeight || viewHeight"
+        :viewport-width="trackViewWidth" :viewport-height="viewHeight - (trackHeaderHeight || 0)"
         :x-transform="xTransform" :y-transform="yTransform"
-        :real-right="realLeft"
-        :real-left="realRight"
-        line-color="#000000"
-        cursor="crosshair"
-        :enabled="true"
-        :min-color="minColor"
-        :max-color="maxColor"
-        :type-fill-color="typeFillColor"
-        :pallete="pallete"
-        :fill-pattern-list="fillPatternList"
-        :custom-fill-values="customFillValues"  
-        :foreground-color-list="foregroundColorList"
-        :background-color-list="backgroundColorList">
-    </v-shading>
-    <v-path :real-path="realLeft" :view-width="trackWidth"
-        :symbol-color="colorPathList[0] || '0x0000F0'">
-    </v-path>
-    <v-path :real-path="realRight" :view-width="trackWidth"
-        :symbol-color="colorPathList[1] || '0x0000F0'">
-    </v-path>
-    <slot />
+        line-color="0x000000" :line-width="1"
+        :real-min-x="realMinX" :real-max-x="realMaxX"
+        :real-min-y="realMinY" :real-max-y="realMaxY">
+        <v-cartersian
+            :view-pos-x="0" :view-pos-y="0"
+            :view-width="trackViewWidth" :view-height="trackBodyHeight || viewHeight"
+            :real-min-x="realMinX" :real-max-x="realMaxX"
+            :real-min-y="realMinY" :real-max-y="realMaxY"
+            :fill-color="checkShading ? '0xF0F000' : '0xFFFFFF'"
+            :fill-transparency="checkShading ? 0.2 : 1"
+            :enabled="true"
+            :onmousedown="trackMouseDown" cursor="crosshair"
+            :x-transform="xTransform" :y-transform="yTransform"
+            line-color="0x000000" :line-width="1"
+            :major-ticks-y="Math.floor((trackBodyHeight || viewHeight) / 150)" :minor-ticks-y="5"
+            :major-ticks-x="1" :minor-ticks-x="5"
+            :grid="true">
+            <v-rect :view-pos-x="0" :view-pos-y="0"
+                ref="trackChildren"
+                :view-width="trackViewWidth" :view-height="trackBodyHeight || viewHeight"
+                :x-transform="xTransform" :y-transform="yTransform"
+                :real-min-x="realMinX" :real-max-x="realMaxX"
+                :real-min-y="realMinY" :real-max-y="realMaxY"
+                fill-color="0xFFFFFF" :fill-transparency="0.001">
+                <slot />
+            </v-rect>
+            <v-path v-for="(path, idx) in pathList" :key="idx"
+                :symbol-color="shadingColor" :view-width="trackViewWidth"
+                :real-path="path" :line-width="3" 
+                :line-transparency="0.3" 
+                :shading-offset-x="-2" :shading-offset-y="-2">
+            </v-path>
+        </v-cartersian>
+    </v-viewport>
 </v-resizable>

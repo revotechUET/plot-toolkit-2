@@ -16,8 +16,7 @@ import template from './template.html';
 import { Texture, utils } from "pixi.js";
 
 async function draw(obj) {
-    console.log("shading draw");
-    this.shadingColorList = [];
+    console.log("isShading draw");
     this.shadingPathLeft = [];
     this.shadingPathRight = [];
     obj.clear();
@@ -181,7 +180,6 @@ async function draw(obj) {
         let posXFillColor;
         if (polygon.length === 4) { // this polygon is quadrilateral
             posXFillColor = Math.max(polygon[0]["x"], polygon[1]["x"]);
-
             if (i === 0) {
                 if (polygon[0]["x"] > polygon[1]["x"]) {
                     this.shadingPathLeft.push(polygon[1], polygon[2]);
@@ -213,19 +211,23 @@ async function draw(obj) {
                     this.shadingPathRight.push(polygon[0], polygon[2]);
                 }
             } else {
-                if (polygon[0]["x"] < polygon[1]["x"]) {
-                    this.shadingPathLeft.push(polygon[0]);
-                    this.shadingPathRight.push(polygon[1]);
+                if (this.checkTriangle[i]) {
+                    this.shadingPathLeft.push(polygon[2]);
+                    this.shadingPathRight.push(polygon[2]);
                 } else {
-                    this.shadingPathLeft.push(polygon[1]);
-                    this.shadingPathRight.push(polygon[0]);
+                    if (polygon[0]["x"] < polygon[1]["x"]) {
+                        this.shadingPathLeft.push(polygon[0]);
+                        this.shadingPathRight.push(polygon[1]);
+                    } else {
+                        this.shadingPathLeft.push(polygon[1]);
+                        this.shadingPathRight.push(polygon[0]);
+                    }
                 }
             }
         }
         switch (this.typeFillColor) {
             case "Gradient":
                 myFillColor = processColorStr(transformColor(posXFillColor));
-                this.shadingColorList.push(myFillColor.color);
                 obj.beginFill(
                     myFillColor.color,
                     myFillColor.transparency
@@ -245,7 +247,6 @@ async function draw(obj) {
                     let srcUrl = `https://users.i2g.cloud/pattern/${pattern[fillPatterns[index]]}_.png?service=WI_BACKEND`;
                     let myFgColor = convert2rgbColor(fgColors[index]),
                         myBgColor = convert2rgbColor(transformColor(xScale));
-                    this.shadingColorList.push((processColorStr(transformColor(xScale)).color));
                     let imagePattern = await getImagePattern(srcUrl);
                     let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
                     const texture = Texture.from(canvas);
@@ -256,7 +257,6 @@ async function draw(obj) {
                 break;
             case "Pallete":
                 myFillColor = processColorStr(transformColor(posXFillColor));
-                this.shadingColorList.push(myFillColor.color);
                 obj.beginFill(
                     myFillColor.color,
                     myFillColor.transparency
@@ -282,7 +282,7 @@ function getLinearLine(point1, point2, num = 0) {
 }
 
 function generatePolygons(path, bothIsArr) {
-    let polygonArr = [];
+    let polygonArr = [], checkArr = [];
     if (!bothIsArr) {
         let x = path[0]["x"];
         let polygon;
@@ -293,7 +293,9 @@ function generatePolygons(path, bothIsArr) {
                 let { a, b } = getLinearLine(polygon[1], polygon[2]);
                 polygonArr.push([...polygon.slice(0, 2), { x, y: a * x + b }]);
                 polygonArr.push([...polygon.slice(2, 4), { x, y: a * x + b }]);
+                checkArr.push(true, false);
             } else {
+                checkArr.push(false);
                 polygonArr.push(polygon);
             }
             i += 1;
@@ -336,27 +338,17 @@ function generatePolygons(path, bothIsArr) {
             if (x && y) {
                 polygonArr.push([...arr[i], { x, y }]);
                 polygonArr.push([...arr[i + 1], { x, y }]);
+                checkArr.push(true, false);
             } else {
                 polygonArr.push([...arr[i], ...secondPath]);
+                checkArr.push(false);
             }
         }
     }
-    return polygonArr;
-}
-
-function registerEvents(_pixiObj) {
-    let pixiObj = _pixiObj || this.getPixiObj();
-    pixiObj.interactive = true;
-
-    const handleMouseDown = async evt => {
-        this.isShading = !this.isShading;
-        this.$children.length > 0 && this.$children.forEach(child => {
-            child.cleanUp();
-            child.makeScene();
-        });
-    }
-
-    pixiObj.on("mousedown", handleMouseDown);
+    return {
+        arr: polygonArr,
+        checkArr
+    };
 }
 
 let component = {
@@ -370,15 +362,15 @@ let component = {
         "foregroundColorList",
         "backgroundColorList",
         "fillPatternList",
-        "pallete"
+        "pallete",
+        "isShading"
     ],
     template,
     data: function () {
         return {
-            isShading: false,
             shadingPathLeft: [],
             shadingPathRight: [],
-            shadingColorList: [],
+            checkTriangle: [],
         }
     },
     computed: {
@@ -409,21 +401,36 @@ let component = {
                 }
                 path = [begin, ...path, end];
             }
-            return generatePolygons(path, bothIsArr);
+            let { arr, checkArr } = generatePolygons(path, bothIsArr);
+            this.checkTriangle = checkArr;
+            return arr;
         },
         componentType: function () {
             return "VShading";
+        },
+        watchedKeys: function () {
+            let arr = Object.keys(this.$props);
+            let shadingIdx = arr.indexOf("isShading");
+            if (shadingIdx >= 0) {
+                arr.splice(shadingIdx, 1);
+                return arr;
+            }
+            return arr;
         }
     },
     methods: {
         draw,
-        registerEvents,
         myDrawPolygon: function (obj, polygon) {
             let res = [];
             polygon.forEach(item => {
                 res.push(this._getX(item.x), this._getY(item.y));
             });
             obj.drawPolygon(res);
+        }
+    },
+    watch: {
+        isShading: function () {
+            this.$children.forEach(child => child.makeScene());
         }
     },
     components: {

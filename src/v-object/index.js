@@ -41,7 +41,7 @@ function getPixiObj() {
             this.pixiObj = this.createPixiObj();
             this.pixiObj.sortableChildren = true;
             this.pixiObj.hostComponent = this;
-            this.pixiObj.cursor = this.cursor || this.kursor || 'default';
+            this.pixiObj.cursor = this.kursor || this.cursor || 'default';
             let parentObj = this.getParent().getPixiObj();
             this.pixiObj.mask = this.getParent().getMaskObj();
             parentObj.addChild(this.pixiObj);
