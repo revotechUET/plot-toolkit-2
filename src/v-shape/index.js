@@ -113,6 +113,7 @@ function dragStart(target, localPos, globalPos, oriEvent) {
     this.onDrag && this.onDrag(target);
 }
 function dragEnd(evtData, target) {
+    console.log('drag in shape')
     if (!this.dragging) return;
     this.dragging = false;
     //this.pixiObj.zIndex        =        this.draggingData.zIndex;
@@ -214,6 +215,7 @@ const propKeys = [
     "lineColor",
     "lineTransparency",
     "fillColor",
+    "noFill",
     "fillTransparency",
     'imagePatternUrl', 'foregroundColor', 'backgroundColor',
     "onmousedown",
@@ -277,6 +279,9 @@ let component = {
                 this.makeScene();
             });
         }
+    },
+    mounted() {
+        // console.log(this.$vnode);
     }
 };
 

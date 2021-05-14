@@ -15,8 +15,7 @@ const app = new Vue({
         <v-scene :transparent="true" :view-width="width" :view-height="height" 
 				x-transform="linear" y-transform="linear" :view-pos-x="0" :view-pos-y="0"
         		:real-min-x="0" :real-max-x="5" :real-min-y="10" :real-max-y="500">
-
-			<v-rect :line-width="1" line-color="red" :view-pos-x="100"
+			<v-rect :line-width="1" line-color="red" :view-pos-x="50"
 				:view-pos-y="50" 
 				:clipped="false"
 				:view-width="width-400" :view-height="height-100"
@@ -25,12 +24,10 @@ const app = new Vue({
 				x-transform='linear'
 				y-transform='linear'
 			>
-		
 				<v-path :real-path="path" :enabled="true" :symbol-shape="symbolShape" 
 					:symbol-size="symbolSize" :symbol-color="symbolColor" :line-dash="lineDash">
 				</v-path>
 			</v-rect>
-
         </v-scene>
         <button v-on:click="double">Click me</button>
     </fragment>
@@ -58,7 +55,7 @@ const app = new Vue({
 			{ x: 5.0, y: 300 },
 			{ x: 2.50, y: 350 },
 			{ x: 1.50, y: 400 },
-			{ x: 5.60, y: 500 },
+			{ x: 4.60, y: 500 },
 		],
 	},
 	methods: {

@@ -18,10 +18,13 @@ new Vue({
                     :enabled="true" :draggable="true"
                     :clipped="true"
                     :fill-color="0xFFFFFF" :line-width="1" :line-color="0x010101"
-                    :real-min-x="0.1" :real-max-x="1500"
-                    :real-min-y="30" :real-max-y="1000" x-transform="loga" y-transform="linear"
-                    :major-ticks-y="5" :minor-ticks-y="5" 
-                    :grid="false" tick-label-position-x="sticky" tick-label-position-y="sticky" tick-precision="1">
+                    :real-min-x="0" :real-max-x="1000"
+                    :real-min-y="0" :real-max-y="1000"
+                    x-transform="linear" 
+                    y-transform="linear"
+                    :major-ticks-y="5" :minor-ticks-y="5"
+                    :major-ticks-x="5" :minor-ticks-x="10" 
+                    :grid="true" tick-label-position-x="sticky" tick-label-position-y="sticky" tick-precision="1">
                         <v-rect :view-width="30" :view-height="100" :line-width="1" 
                             :view-pos-x="itemX"
                             :view-pos-y="itemY"

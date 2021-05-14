@@ -19,7 +19,7 @@ const app = new Vue({
                     :constrained="true"
                     :fill-color="r.color" />
                 
-                <v-resizable direction="horizontal"
+                <v-resizable direction="vertical"
                     :constrained="true"
                     :on-resize="resize"
                     :clipped="true"

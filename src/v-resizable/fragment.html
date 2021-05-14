@@ -1,7 +1,8 @@
 <fragment v-if="direction === 'vertical'">
     <v-rect v-for="(knob,index) in knobs" :key="index"
         v-if="_knobFlags[index]"
-        :view-pos-x="0" :view-pos-y="index*(height - knobSize)" 
+        :view-pos-x="0" 
+        :view-pos-y="index * (height - knobSize)"
         :view-width="width" :view-height="knobSize" 
         :enabled="true" :draggable="true" drag-constraint="y" 
         :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
@@ -14,9 +15,10 @@
         cursor="row-resize"></v-rect>
 </fragment>
 <fragment v-if="direction === 'horizontal'">
-    <v-rect v-for="(knob, index) in knobs"
-        v-if="_knobFlags[index]" :key="index"
-        :view-pos-x="index * (width - knobSize)" :view-pos-y="0" 
+    <v-rect v-for="(knob, index) in knobs" :key="index"
+        v-if="_knobFlags[index]"
+        :view-pos-x="index * (width - knobSize)" 
+        :view-pos-y="0" 
         :view-width="knobSize" :view-height="height" 
         :enabled="true" :draggable="true" drag-constraint="x" 
         :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"

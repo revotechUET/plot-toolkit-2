@@ -9,7 +9,37 @@ const KNOB_FILL_TRANS = 0.2;
 const KNOB_OUTLINE_TRANS_HIGHTLIGHT = 0.01;
 const KNOB_FILL_TRANS_HIGHTLIGHT = 1;
 let component = {
-    props: ['direction', 'size', 'onResize', 'knobFlags'],
+    props: {
+        direction: {
+            default: 'vertical',
+            type: String
+        }, 
+        size: {
+            default: '10',
+            type: String
+        },
+        onResize: {
+            type: Function
+        }, 
+        knobFlags: {
+            default: () => ([true, true]),
+            type: Array
+        },
+        viewPosX: {
+            default: 0,
+            type: Number
+        },
+        viewPosY: {
+            default: 0,
+            type: Number
+        },
+        realMinY: {
+            type: Number
+        },
+        realMaxY: {
+            type: Number
+        }
+    },
     components: {
         VRect
     },
@@ -24,7 +54,10 @@ let component = {
                 outline: KNOB_OUTLINE_TRANS,
                 fill: KNOB_FILL_TRANS,
                 mask: null
-            }]
+            }],
+            // New
+            topPosY: 0,
+            bottomPosY: 190,
         }
     },
     computed: {
@@ -45,8 +78,8 @@ let component = {
                 case "horizontal":
                     return this.$parent.width - (getPosX(this.coordinate, this.posX || 0));
             }
-            return 0;
-        }
+        },
+        
     },
     methods: {
         hightlight: function(knob) {
@@ -70,6 +103,7 @@ let component = {
                         height -= pos.y;
                         height = Math.max(height, this.minSize);
                         height = Math.min(height, this.maxSize);
+                        this.$emit('topPosYChange', pos.y);
                     }
                     else if (this.direction === 'horizontal') {
                         width -= pos.x;
@@ -80,6 +114,8 @@ let component = {
                 }
                 case 1: {
                     if (this.direction === 'vertical') {
+                        let bYc = pos.y + this.knobSize - height;
+                        this.$emit('bottomPosYChange', bYc);
                         height = pos.y + this.knobSize;
                         height = Math.max(height, this.minSize);
                         height = Math.min(height, this.maxSize);
@@ -96,37 +132,37 @@ let component = {
             this.knobs[knobIdx].mask = null;
             this.onResize && this.onResize({width, height}, this);
         },
-        validateDrag: function(knobIdx, pPos) {
+        validateDrag: function(knobIdx, pPos, targetComp) {
             let v1, v2;
             switch(this.direction) {
-            case "vertical":
-                switch(knobIdx) {
-                case 0:
-                    v1 = -getPosY(this.coordinate, this.posY);
-                    v2 = this.height - 2*this.knobSize;
+                case "vertical":
+                    switch(knobIdx) {
+                        case 0:
+                            v1 = -getPosY(this.coordinate, this.posY);
+                            v2 = this.height - 2*this.knobSize;
+                            break;
+                        case 1:
+                            v1 = 2*this.knobSize;
+                            v2 = this.$parent.height - getPosY(this.coordinate, this.posY);
+                            break;
+                        }
+                        if (pPos.y < v1) return {x: pPos.x, y: v1};
+                        if (pPos.y > v2) return {x: pPos.x, y: v2};
                     break;
-                case 1:
-                    v1 = 2*this.knobSize;
-                    v2 = this.$parent.height - getPosY(this.coordinate, this.posY);
+                case "horizontal":
+                    switch(knobIdx) {
+                        case 0:
+                            v1 = -getPosX(this.coordinate, this.posX);
+                            v2 = this.width - 2*this.knobSize;
+                            break;
+                        case 1:
+                            v1 = 2*this.knobSize;
+                            v2 = this.$parent.width - getPosX(this.coordinate,this.posX);
+                            break;
+                        }
+                        if (pPos.x < v1) return {x: v1, y: pPos.y};
+                        if (pPos.x > v2) return {x: v2, y: pPos.y};
                     break;
-                }
-                if (pPos.y < v1) return {x: pPos.x, y: v1};
-                if (pPos.y > v2) return {x: pPos.x, y: v2};
-                break;
-            case "horizontal":
-                switch(knobIdx) {
-                case 0:
-                    v1 = -getPosX(this.coordinate, this.posX);
-                    v2 = this.width - 2*this.knobSize;
-                    break;
-                case 1:
-                    v1 = 2*this.knobSize;
-                    v2 = this.$parent.width - getPosX(this.coordinate,this.posX);
-                    break;
-                }
-                if (pPos.x < v1) return {x: v1, y: pPos.y};
-                if (pPos.x > v2) return {x: v2, y: pPos.y};
-                break;
             }
             return pPos;
         },
@@ -137,29 +173,16 @@ let component = {
             let lt = this.lineTransparency || 1.0;
             obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
             obj.beginFill(this.cFillColor.color, this.cFillColor.transparency);
-            obj.drawRect(0,0, this.width, this.height);
-            /*
-            switch(this.direction) {
-            case 'vertical':
-                obj.drawRect(
-                    0, (this._knobFlags[0])*this.knobSize, this.width, 
-                    this.height - (this._knobFlags[0] + this._knobFlags[1])*this.knobSize
-                );
-                break;
-            case 'horizontal':
-                obj.drawRect(
-                    this._knobFlags[0]*this.knobSize, 0, 
-                    this.width - (this._knobFlags[0] + this._knobFlags[1])*this.knobSize, 
-                    this.height
-                );
-                break;
-            }
-            */
+            obj.drawRect(0, 0, this.width, this.height);
+
             obj.endFill();
             obj.x = getPosX(this.coordinate, this.posX);
             obj.y = getPosY(this.coordinate, this.posY);
             obj.rotation = this.rotation || 0;
         }
+    },
+    mounted() {
+        // console.log(typeof(this.direction))
     },
     mixins: [layoutMixin]
 }

@@ -1,0 +1,53 @@
+<fragment>
+    <div v-if="debug" style="padding-left:12px;">{{compProps}}
+        <v-text-box v-if="noLabel == true"
+            :line-width="1"
+            line-color="red"
+            :line-transparency="1"
+            :content="content" :content-style="contentStyle"
+            :view-pos-x="textPosX"
+            :view-pos-y="textPosY"
+        />
+        ${require('../v-resizable/fragment.html')}
+    </div>
+
+    
+
+    <fragment v-if="!debug" :props="compProps">
+        <v-text-box
+            :content="content"
+            :view-pos-x="textPosX"
+            :view-pos-y="textPosY"
+            :content-style="contentStyle"
+        />
+        ${require('../v-resizable/fragment.html')}
+        
+        <!-- <v-container :view-width="cWidth" :view-height="cHeight" 
+            :line-width="1" :line-color="lineColor"
+            :real-min-y="realMinYComputed"
+            :real-max-y="realMaxYComputed"
+        >
+            <v-text-box v-if="!noLabel"
+                :content="content" :content-style="contentStyle"
+                :view-pos-x="textPosX"
+                :view-pos-y="textPosY"
+                :rotation="labelRotation"
+            />
+            <v-rect v-for="(knob,index) in knobs" :key="index"
+                v-if="_knobFlags[index]"
+                :view-pos-x="0" 
+                :view-pos-y="index * (height - knobSize)"
+                :view-width="width" :view-height="knobSize" 
+                :enabled="true" :draggable="true" drag-constraint="y" 
+                :drag-limits="(pos, targetComp) => validateDrag(index, pos, targetComp)"
+                :line-transparency="knob.outline"
+                :fill-transparency="knob.fill"
+                :onmouseover="() => hightlight(knob)"
+                :onmouseout="() => dehightlight(knob)"
+                :on-drag="(target) => knobDragStart(index, target)"
+                :on-drop="(target, pos) => knobDragEnd(index, pos, target)"
+                cursor="row-resize">
+            </v-rect>
+        </v-container> -->
+    </fragment>
+</fragment>

@@ -35,6 +35,7 @@ async function makeScene() {
 function createPixiObj() {
     console.log("abstract createPixiObj");
 }
+
 function getPixiObj() {
     if (!this.pixiObj) {
         if (this.getParent()) {
@@ -66,6 +67,7 @@ function registerEvents(pixiObj) {
 function draw(obj) {
     console.log('abstract draw function');
 }
+
 let component = {
     props: ["name", "viewPosX", "viewPosY", "viewWidth", "viewHeight", 'rotation', 'cursor', 'constrained', 'expanded',
         'realMinX', 'realMaxX', 'realMinY', 'realMaxY', 'xTransform', 'yTransform'
@@ -117,7 +119,8 @@ let component = {
                 getTransparency(this.lineTransparency));
         },
         cFillColor: function () {
-            let cFc = processColorStr(this.fillColor, DefaultValues.fillColor,
+            let color = this.fillColor;
+            let cFc = processColorStr(color, DefaultValues.fillColor,
                 getTransparency(this.fillTransparency || this.intFillTransparency));
             return cFc;
         },

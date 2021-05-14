@@ -16,7 +16,7 @@ const app = new Vue({
                 :line-width="1" :line-color="0x888888"
                 :on-resize="resize"
 				:view-pos-x="40" :view-pos-y="0" :view-width="width1" :view-height="height1" size="10"
-				content="Troifds dsff dsf sd" :content-style="style" margin-top="50" margin-left="15"  :clipped="true"
+				content="asdf asf af" :content-style="style" margin-top="50" margin-left="15"  :clipped="true"
 				>
             </v-zone>
         </v-scene>
