@@ -1,7 +1,7 @@
 import VShape from '../v-shape';
 import VRect from '../v-rect';
 import layoutMixin from "../mixins/layout";
-import {getColor, getPosX, getPosY, getTransparency, DefaultValues} from "../utils";
+import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from "../utils";
 import template from './template.html';
 
 const KNOB_OUTLINE_TRANS = 0.01;
@@ -13,14 +13,13 @@ let component = {
         direction: {
             default: 'vertical',
             type: String
-        }, 
+        },
         size: {
-            default: '10',
-            type: String
+            default: 10,
         },
         onResize: {
             type: Function
-        }, 
+        },
         knobFlags: {
             default: () => ([true, true]),
             type: Array
@@ -44,13 +43,13 @@ let component = {
         VRect
     },
     template,
-    data: function() {
+    data: function () {
         return {
             knobs: [{
                 outline: KNOB_OUTLINE_TRANS,
                 fill: KNOB_FILL_TRANS,
                 mask: null
-            },{
+            }, {
                 outline: KNOB_OUTLINE_TRANS,
                 fill: KNOB_FILL_TRANS,
                 mask: null
@@ -61,43 +60,43 @@ let component = {
         }
     },
     computed: {
-        componentType: function() { return "VResizable" },
-        _knobFlags: function() {
-            return (this.knobFlags || [true, true]).map(f => f?1:0);
+        componentType: function () { return "VResizable" },
+        _knobFlags: function () {
+            return (this.knobFlags || [true, true]).map(f => f ? 1 : 0);
         },
-        knobSize: function() {
+        knobSize: function () {
             return parseInt(this.size) || 10;
         },
         minSize: function () {
             return 2 * this.knobSize;
         },
-        maxSize: function() {
-            switch(this.direction) {
+        maxSize: function () {
+            switch (this.direction) {
                 case "vertical":
                     return this.$parent.height - (getPosY(this.coordinate, this.posY || 0));
                 case "horizontal":
                     return this.$parent.width - (getPosX(this.coordinate, this.posX || 0));
             }
         },
-        
+
     },
     methods: {
-        hightlight: function(knob) {
+        hightlight: function (knob) {
             knob.outline = KNOB_OUTLINE_TRANS_HIGHTLIGHT;
             knob.fill = KNOB_FILL_TRANS_HIGHTLIGHT;
         },
-        dehightlight: function(knob) {
+        dehightlight: function (knob) {
             knob.outline = KNOB_OUTLINE_TRANS;
             knob.fill = KNOB_FILL_TRANS;
         },
-        knobDragStart: function(knobIdx, target) {
+        knobDragStart: function (knobIdx, target) {
             this.knobs[knobIdx].mask = target.mask;
             target.mask = null;
         },
-        knobDragEnd: function(knobIdx, pos, target) {
+        knobDragEnd: function (knobIdx, pos, target) {
             let width = this.width;
             let height = this.height;
-            switch(knobIdx) {
+            switch (knobIdx) {
                 case 0: {
                     if (this.direction === 'vertical') {
                         height -= pos.y;
@@ -130,46 +129,46 @@ let component = {
             }
             target.mask = this.knobs[knobIdx].mask;
             this.knobs[knobIdx].mask = null;
-            this.onResize && this.onResize({width, height}, this);
+            this.onResize && this.onResize({ width, height }, this);
         },
-        validateDrag: function(knobIdx, pPos, targetComp) {
+        validateDrag: function (knobIdx, pPos, targetComp) {
             let v1, v2;
-            switch(this.direction) {
+            switch (this.direction) {
                 case "vertical":
-                    switch(knobIdx) {
+                    switch (knobIdx) {
                         case 0:
                             v1 = -getPosY(this.coordinate, this.posY);
-                            v2 = this.height - 2*this.knobSize;
+                            v2 = this.height - 2 * this.knobSize;
                             break;
                         case 1:
-                            v1 = 2*this.knobSize;
+                            v1 = 2 * this.knobSize;
                             v2 = this.$parent.height - getPosY(this.coordinate, this.posY);
                             break;
-                        }
-                        if (pPos.y < v1) return {x: pPos.x, y: v1};
-                        if (pPos.y > v2) return {x: pPos.x, y: v2};
+                    }
+                    if (pPos.y < v1) return { x: pPos.x, y: v1 };
+                    if (pPos.y > v2) return { x: pPos.x, y: v2 };
                     break;
                 case "horizontal":
-                    switch(knobIdx) {
+                    switch (knobIdx) {
                         case 0:
                             v1 = -getPosX(this.coordinate, this.posX);
-                            v2 = this.width - 2*this.knobSize;
+                            v2 = this.width - 2 * this.knobSize;
                             break;
                         case 1:
-                            v1 = 2*this.knobSize;
-                            v2 = this.$parent.width - getPosX(this.coordinate,this.posX);
+                            v1 = 2 * this.knobSize;
+                            v2 = this.$parent.width - getPosX(this.coordinate, this.posX);
                             break;
-                        }
-                        if (pPos.x < v1) return {x: v1, y: pPos.y};
-                        if (pPos.x > v2) return {x: v2, y: pPos.y};
+                    }
+                    if (pPos.x < v1) return { x: v1, y: pPos.y };
+                    if (pPos.x > v2) return { x: v2, y: pPos.y };
                     break;
             }
             return pPos;
         },
-        draw: function(obj) {
+        draw: function (obj) {
             obj.clear();
             let lw = parseInt(this.lineWidth);
-            lw = isNaN(lw)?0:lw;
+            lw = isNaN(lw) ? 0 : lw;
             let lt = this.lineTransparency || 1.0;
             obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
             obj.beginFill(this.cFillColor.color, this.cFillColor.transparency);

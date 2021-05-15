@@ -180,6 +180,19 @@ async function draw(obj) {
         let posXFillColor;
         if (polygon.length === 4) { // this polygon is quadrilateral
             posXFillColor = Math.max(polygon[0]["x"], polygon[1]["x"]);
+            if (this.notIsArray) {
+                switch (this.notIsArray) {
+                    case "Real Right":
+                        if (this.realRight >= posXFillColor) {
+                            posXFillColor = Math.min(polygon[0]["x"], polygon[1]["x"]);
+                        }
+                        break;
+                    case "Real Left":
+                        if (this.realLeft >= posXFillColor) {
+                            posXFillColor = Math.min(polygon[0]["x"], polygon[1]["x"]);
+                        }
+                }
+            }
             if (i === 0) {
                 if (polygon[0]["x"] > polygon[1]["x"]) {
                     this.shadingPathLeft.push(polygon[1], polygon[2]);
@@ -371,13 +384,14 @@ let component = {
             shadingPathLeft: [],
             shadingPathRight: [],
             checkTriangle: [],
+            notIsArray: '',
         }
     },
     computed: {
         cPolygonList: function () {
             let begin, end, path = [];
-            let bothIsArr = Array.isArray(this.realLeft) && Array.isArray(this.realRight);
-            if (bothIsArr) {
+            let bothIsArray = Array.isArray(this.realLeft) && Array.isArray(this.realRight);
+            if (bothIsArray) {
                 let pathLeft = this.realLeft;
                 let pathRight = this.realRight;
                 let i = 0, j = 0;
@@ -391,17 +405,19 @@ let component = {
             }
             else {
                 if (Array.isArray(this.realLeft) && !Array.isArray(this.realRight)) {
+                    this.notIsArray = "Real Right";
                     path = this.realLeft;
                     begin = { x: this.realRight, y: path[0]["y"] };
                     end = { x: this.realRight, y: path[path.length - 1]["y"] };
                 } else if (!Array.isArray(this.realLeft) && Array.isArray(this.realRight)) {
+                    this.notIsArray = "Real Left";
                     path = this.realRight;
                     begin = { x: this.realLeft, y: path[0]["y"] };
                     end = { x: this.realLeft, y: path[path.length - 1]["y"] };
                 }
                 path = [begin, ...path, end];
             }
-            let { arr, checkArr } = generatePolygons(path, bothIsArr);
+            let { arr, checkArr } = generatePolygons(path, bothIsArray);
             this.checkTriangle = checkArr;
             return arr;
         },

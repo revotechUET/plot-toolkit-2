@@ -20,25 +20,45 @@
             :viewport-width="trackViewWidth" :viewport-height="trackHeaderHeight"
             x-transform="none" y-transform="none"
             line-color="0x000000" :line-width="1">
-            <v-rect v-for="(child, idx) in shadingList"
+            <v-rect v-for="(child, idx) in visualizeItems"
                 :key = "child.name + ' ' + idx" :name="child.comp + ' ' + idx"
-                :view-pos-x="0" :view-pos-y="idx * 50"
+                :view-pos-x="0" :view-pos-y="childrenHeaderPosYList[idx]"
                 :enabled="true"
-                :view-width="trackViewWidth" :view-height="50"
-                fill-color="0xFFFFFF" 
-                :fill-transparency="shadingList[idx].shading ? 0.5 : 1"
+                :type-fill-color="child.typeFillColor"
+                :min-color="child.minColor" :max-color="child.maxColor"
+                :pallete="child.pallete"
+                :view-width="trackViewWidth" :view-height="child.height"
+                :fill-color="0xFFFFFF" 
+                x-transform="none" y-transform="none"
+                :fill-transparency="1"
                 line-color="0x080808" :line-width="1"
+                :line-transparency="child.comp === 'VCurve' ? 0 : 1"
                 :onmousedown="childHighlight">
-                <v-text-box
-                    :content="child.name" :fill-color="shadingList[idx].shading ? '0xF00000' : '0xFFFFFF'"
-                    :fill-transparency="shadingList[idx].shading ? 0.5 : 1"
-                    line-color="0x010101" :line-width="1"
-                    :view-width="12/ 26 * textWidth(child.name) + 10"
-                    :view-height="12/ 26 * textHeight(child.name) + 10"
-                    :content-style="headerContentStyle"
-                    :view-pos-x="trackViewWidth/2 - (12/ 26 * textWidth(child.name) + 10) / 2"
-                    :view-pos-y="25 - (12/ 26 * textHeight(child.name) + 10) / 2"
-                />
+                    <v-textbox
+                        v-if="child.comp === 'VShading' || child.comp === 'VPath'"
+                        :content="child.name" :fill-color="child.shading ? '0xF00000' : '0xFFFFFF'"
+                        :fill-transparency="1"
+                        line-color="0x010101" :line-width="1"
+                        :view-width="13/ 26 * textWidth(child.name) + 10"
+                        :view-height="13/ 26 * textHeight(child.name)"
+                        :content-style="headerContentStyle"
+                        :view-pos-x="trackViewWidth/2 - (13/ 26 * textWidth(child.name) + 10) / 2"
+                        :view-pos-y="child.height/2 - (13/ 26 * textHeight(child.name)) / 2"
+                        />
+                    <v-header-curve 
+                        v-if="child.comp === 'VCurve'"
+                        :curve-name="child.name"
+                        :view-pos-x="0" :view-pos-y="0"
+                        :fill-color="child.comp === 'VCurve' && child.shading ? child.color : '0xFFFFFF'" 
+                        :fill-transparency="child.shading ? 0.2 : 1"
+                        :view-width="trackViewWidth" :view-height="child.height"
+                        :content-style="{...headerContentStyle, fill: child.color}"
+                        :unit="child.unit"
+                        :left-value="child.leftValue"
+                        :right-value="child.rightValue"
+                        :line-dash="child.lineDash"
+                        :path-color="child.color"
+                    />
             </v-rect>
         </v-viewport>
     </v-resizable>

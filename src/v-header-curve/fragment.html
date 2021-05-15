@@ -1,0 +1,32 @@
+<fragment>
+    <v-textbox
+        :content="curveName"
+        :content-style="contentStyle"
+        :view-pos-x="viewWidth/2 - contentStyle.fontSize/ 26 * textWidth(curveName) / 2"
+        :view-pos-y="5"
+    />
+    <v-path
+        :line-dash="lineDash"
+        :symbol-color="pathColor"
+        :view-width="viewWidth"
+        :view-path="viewPath"
+        />
+    <v-textbox
+        :content="leftValue"
+        :content-style="contentStyle"
+        :view-pos-x="5"
+        :view-pos-y="viewHeight - contentStyle.fontSize/26 * textHeight(leftValue)"
+    />
+    <v-textbox
+        :content="unit"
+        :content-style="contentStyle"
+        :view-pos-x="viewWidth/2 - contentStyle.fontSize/ 26 * textWidth(unit) / 2"
+        :view-pos-y="viewHeight -contentStyle.fontSize/26 * textHeight(unit)"
+    />
+    <v-textbox
+        :content="rightValue"
+        :content-style="contentStyle"
+        :view-pos-x="viewWidth - contentStyle.fontSize/26 * textWidth(rightValue) - 5"
+        :view-pos-y="viewHeight - contentStyle.fontSize/26 * textHeight(rightValue)"
+    />
+</fragment>
