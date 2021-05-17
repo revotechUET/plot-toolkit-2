@@ -56,7 +56,9 @@ new Vue({
                 hit = hit || ((localPos.x - 0) * (localPos.x - comp.width) < 0);
             }
             if (!hit) comp.signal('tooltip-off', comp);
-            else comp.signal('tooltip-on', comp, `x: ${localPos.x.toFixed(2)} - y: ${localPos.y.toFixed(2)}`);
+            else comp.signal('tooltip-on', comp, {
+                content: `x: ${localPos.x.toFixed(2)} - y: ${localPos.y.toFixed(2)}`,
+            });
         }
     },
     components: {

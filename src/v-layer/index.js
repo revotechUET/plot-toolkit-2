@@ -85,7 +85,7 @@ let component = {
                     viewWidth: message.viewWidth,
                     viewHeight: message.viewHeight,
                     viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y,
+                    viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
                     tooltipStyle: this.tooltipStyle,
                     fillColor: message.fillColor,
                     fillTransparency: message.fillTransparency
@@ -98,7 +98,7 @@ let component = {
                     viewWidth: message.viewWidth,
                     viewHeight: message.viewHeight,
                     viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y,
+                    viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
                     tooltipStyle: this.tooltipStyle,
                     fillColor: message.fillColor,
                     fillTransparency: message.fillTransparency
@@ -112,6 +112,14 @@ let component = {
             this.tooltips.splice(tooltipIdx, 1);
         },
         processMouseEvent: function (target, globalPos, localPos) {
+            if (localPos.y < 0 || localPos.x > this.viewWidth) {
+                this.tooltips.splice(0);
+                requestAnimationFrame(() => {
+                    this.getLayerObj().clear();
+                    this.rawRenderGraphic();
+                });
+                return;
+            };
             this.mouseGlobalX = globalPos.x;
             this.mouseGlobalY = globalPos.y;
             eventManager.emit('ext-mousepos', target, globalPos, localPos, {
@@ -148,7 +156,6 @@ let component = {
                 let currentTarget = evt.currentTarget;
                 let globalPos = evt.data.global;
                 let localPos = currentTarget.toLocal(globalPos);
-
                 this.processMouseEvent(currentTarget, globalPos, localPos);
                 this.onmousemove &&
                     this.onmousemove(

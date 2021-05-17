@@ -5,7 +5,7 @@ import VRect from '../v-rect';
 import VContainer from '../v-container';
 import VResizable from '../v-resizable';
 import VViewport from '../v-viewport';
-import VCartersian from '../v-cartersian';
+import VCartersian, { VCartersianFactory } from '../v-cartersian';
 import VTextbox from '../v-textbox';
 import VHeaderCurve from '../v-header-curve';
 import template from './template.html';
@@ -18,7 +18,9 @@ let component = {
         "trackViewWidth",
         "trackBodyHeight",
         "trackResize",
+        "trackKnobFlags",
         "trackHeaderResize",
+        "genTooltip"
     ],
     computed: {
         componentType: function () {
@@ -53,7 +55,8 @@ let component = {
     template,
     components: {
         VPath, VRect, VResizable, VViewport, VHeaderCurve,
-        VContainer, VCartersian, Fragment, VTextbox
+        VContainer, VCartersian, Fragment, VTextbox,
+        VCartersianExtMouse: VCartersianFactory({ extMouseListener: true })
     },
     methods: {
         childHighlight: function (target, localPos, globalPos, evt) {
@@ -87,22 +90,25 @@ let component = {
         },
         textWidth: function (content) {
             let text = new Text(content);
-            let textWidth = text.getLocalBounds().width;
+            let textWidth = text.getLocalBounds().width * this.headerContentStyle.fontSize / 26;
             return textWidth;
         },
         textHeight: function (content) {
             let text = new Text(content);
-            let textHeight = text.getLocalBounds().height;
+            let textHeight = text.getLocalBounds().height * this.headerContentStyle.fontSize / 26;
             return textHeight;
         },
-        trackMouseDown: function (target, localPos, globalPos, evt) {
-            this.visualizeItems = this.visualizeItems.map(item => {
-                return {
-                    ...item,
-                    shading: false
-                }
-            });
-            this.pathList = [];
+        // trackMouseDown: function (target, localPos, globalPos, evt) {
+        //     this.visualizeItems = this.visualizeItems.map(item => {
+        //         return {
+        //             ...item,
+        //             shading: false
+        //         }
+        //     });
+        //     this.pathList = [];
+        // },
+        generateRandomStr: function () {
+            return Math.floor(Math.random() * 100000);
         }
     },
     watch: {
@@ -123,7 +129,7 @@ let component = {
         };
         let compProp = "", height = 0, obj;
         this.visualizeItems.push(...children.map((child, idx) => {
-            compProp = child.compProps.split(":")[0];
+            compProp = child.componentType;
             height = compProp === "VShading" ? 30 : 60;
             this.trackHeaderChildrenHeight += height;
             idx === 0 ? this.childrenHeaderPosYList.push(height) : this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[idx]);
@@ -150,13 +156,15 @@ let component = {
                 }
             }
             if (compProp === "VShading") {
-                let { minColor, maxColor, typeFillColor, pallete } = child;
+                let { minColor, maxColor, typeFillColor, pallete, curveLowValue, curveHighValue } = child;
                 return {
                     ...obj,
                     minColor,
                     maxColor,
                     typeFillColor,
-                    pallete
+                    pallete,
+                    curveLowValue: curveLowValue || 0,
+                    curveHighValue: curveHighValue || 1
                 }
             }
             return obj;

@@ -66,12 +66,12 @@ let component = {
     methods: {
         textWidth: function (content) {
             let text = new Text(content);
-            let textWidth = text.getLocalBounds().width;
+            let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
             return textWidth;
         },
         textHeight: function (content) {
             let text = new Text(content);
-            let textHeight = text.getLocalBounds().height;
+            let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
             return textHeight;
         },
     }

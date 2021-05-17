@@ -44,9 +44,17 @@ new Vue({
     methods: {
         genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
             let localPos = comp.pixiObj.toLocal(globalPos);
+            const width = comp.$children[0].viewWidth;
             let xCoord = comp.transformX.invert(localPos.x);
             let yCoord = comp.transformY.invert(localPos.y);
-            comp.signal('tooltip-on', comp, `x:${xCoord.toFixed(4)} - y: ${yCoord.toFixed(4)}`);
+            comp.signal('tooltip-on', comp, {
+                content: `x: ${xCoord.toFixed(4)}`,
+                viewWidth: width,
+                viewHeight: 50,
+                fillColor: '#F0F000',
+                fillTransparency: 0.3,
+                tooltipPosY: comp.$children[0].viewPosY + 10
+            });
         }
     },
     components: {

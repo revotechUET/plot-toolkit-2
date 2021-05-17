@@ -376,7 +376,9 @@ let component = {
         "backgroundColorList",
         "fillPatternList",
         "pallete",
-        "isShading"
+        "isShading",
+        "curveLowValue",
+        "curveHighValue"
     ],
     template,
     data: function () {

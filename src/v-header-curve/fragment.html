@@ -2,8 +2,8 @@
     <v-textbox
         :content="curveName"
         :content-style="contentStyle"
-        :view-pos-x="viewWidth/2 - contentStyle.fontSize/ 26 * textWidth(curveName) / 2"
-        :view-pos-y="5"
+        :view-pos-x="viewWidth/2 - textWidth(curveName) / 2"
+        :view-pos-y="3"
     />
     <v-path
         :line-dash="lineDash"
@@ -15,18 +15,18 @@
         :content="leftValue"
         :content-style="contentStyle"
         :view-pos-x="5"
-        :view-pos-y="viewHeight - contentStyle.fontSize/26 * textHeight(leftValue)"
+        :view-pos-y="viewHeight - textHeight(leftValue) - 3"
     />
     <v-textbox
         :content="unit"
         :content-style="contentStyle"
-        :view-pos-x="viewWidth/2 - contentStyle.fontSize/ 26 * textWidth(unit) / 2"
-        :view-pos-y="viewHeight -contentStyle.fontSize/26 * textHeight(unit)"
+        :view-pos-x="viewWidth/2 - textWidth(unit) / 2"
+        :view-pos-y="viewHeight -textHeight(unit) - 3"
     />
     <v-textbox
         :content="rightValue"
         :content-style="contentStyle"
-        :view-pos-x="viewWidth - contentStyle.fontSize/26 * textWidth(rightValue) - 5"
-        :view-pos-y="viewHeight - contentStyle.fontSize/26 * textHeight(rightValue)"
+        :view-pos-x="viewWidth - textWidth(rightValue) - 5"
+        :view-pos-y="viewHeight - textHeight(rightValue) - 3"
     />
 </fragment>
