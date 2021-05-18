@@ -32,6 +32,7 @@ import { Text } from "pixi.js";
 import { getTransparency, DefaultValues, processColorStr } from "../utils";
 import VContainer from '../v-container';
 import { scaleLinear, scaleLog } from 'd3-scale';
+import factoryFn from '../mixins';
 
 let component = {
     props: {
@@ -50,7 +51,6 @@ let component = {
     },
     data: function() {
         return {
-            width1: this.$parent.viewWidth,
             height1: null,
             // horizontal
             topPosX: null,
@@ -67,6 +67,9 @@ let component = {
         }
     },
     computed: {
+        width1: function() {
+            return this.viewWidth;
+        },
         textPosX: function() {
             let text = new Text(this.content);
             let textHeight = text.getLocalBounds().height;
@@ -164,7 +167,6 @@ let component = {
             this.handleRealY(this.topPosY, this.bottomPosY);
         },
         resize: function({ width, height }) {
-            this.width1 = width;
             this.height1 = height;
             this.viewWidth = width;
             this.viewHeight = height;
@@ -190,7 +192,6 @@ let component = {
         let zoneHeight = (this.realMaxY - this.realMinY) / (this.$parent.realMaxY - this.$parent.realMinY) * this.$parent.viewHeight;
         this.height1 = zoneHeight;
         this.viewHeight = zoneHeight;
-        this.viewWidth = this.$parent.viewWidth;
 
         let view = scaleLinear()
                 .domain([this.$parent.realMinY, this.$parent.realMaxY])
@@ -201,4 +202,10 @@ let component = {
     }
 }
 
-export default VResizable.extend(component);
+let VXone = VResizable.extend(component);
+
+export function VXoneFactory(opts) {
+    return factoryFn(VXone, opts);
+}
+
+export default VXone;

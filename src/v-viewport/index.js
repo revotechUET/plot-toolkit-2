@@ -4,6 +4,8 @@ import VContainer from "../v-container";
 import VRect from "../v-rect";
 import eventManager from '../event-manager';
 import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from '../utils';
+import factoryFn from '../mixins';
+
 console.log('Load v-viewport');
 let component = {
     props: ["viewportWidth", "viewportHeight", "pan", "onPan", "onZoom"],
@@ -164,4 +166,11 @@ let component = {
         VContainer, VRect
     }
 }
-export default VContainer.extend(component);
+
+let VViewport = VContainer.extend(component);
+
+export function VViewportFactory(opts) {
+    return factoryFn(VViewport, opts);
+}
+
+export default VViewport;

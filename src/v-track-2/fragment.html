@@ -1,0 +1,87 @@
+<v-resizable 
+    :view-pos-x="0" :view-pos-y="0"
+    :view-width="trackViewWidth" :view-height="viewHeight"
+    direction="horizontal" :knob-flags="trackKnobFlags || [false, true]"
+    line-color="0x010101" :line-width="1"
+    :fill-color="fillColor" :fill-transparency="fillTransparency"
+    :size="5" :x-transform="xTransform" :y-transform="yTransform"
+    :real-min-x="realMinX" :real-max-x="realMaxX"
+    :real-min-y="realMinY" :real-max-y="realMaxY"
+    :on-resize="trackResize"
+>
+    <v-rect :view-pos-x="0" :view-pos-y="0"
+        :view-width="trackViewWidth" :view-height="20"
+        :line-width="0.5" line-color="0x010101"
+        :fill-color="0x3366ff"
+    >
+        <v-textbox :content="name"
+            :content-style="headerContentStyle"
+            :view-pos-x="trackViewWidth/2 - textWidth(name)/2"
+            :view-pos-y="10 - textHeight(name) / 2"
+        />
+    </v-rect>
+    <v-resizable :view-pos-x="0" :view-pos-y="20"
+        :view-height="trackHeaderHeight" :view-width="trackViewWidth"
+        direction="vertical" :knob-flags="trackKnobFlags || [false, true]"
+        :fill-color="trackHeaderFillColor || '0xFFFFFF'" :fill-transparency="fillTransparency"
+        :size="5" :on-resize="trackHeaderResize"
+        x-transform="none" y-transform="none"
+    >
+        <v-viewport :view-pos-x="0" :view-pos-y="0"
+            :view-width="trackViewWidth" :view-height="Math.max(trackHeaderHeight, trackHeaderChildrenHeight)"
+            :viewport-width="trackViewWidth" :viewport-height="trackHeaderHeight"
+            x-transform="none" y-transform="none"
+            line-color="0x000000" :line-width="1"
+        >
+            <v-rect
+                :view-pos-x="0" :view-pos-y="0"
+                :enabled="true"
+                :view-width="trackViewWidth" :view-height="trackHeaderHeight"
+                :fill-color="0xFFFFFF" 
+                x-transform="none" y-transform="none"
+                :fill-transparency="0"
+                line-color="0x080808" :line-width="1"
+                :line-transparency="1"
+            >
+                <v-textbox
+                    :content="zoneHeaderLabel" fill-color="'0xFFFFFF'"
+                    :fill-transparency="1"
+                    line-color="0x010101" :line-width="1"
+                    :view-width="textWidth(zoneHeaderLabel) + 10"
+                    :view-height="textHeight(zoneHeaderLabel) + 5"
+                    :content-style="headerContentStyle"
+                    :view-pos-x="trackViewWidth/2 - textWidth(zoneHeaderLabel) / 2"
+                    :view-pos-y="trackHeaderHeight/2 - textHeight(zoneHeaderLabel) / 2"
+                />
+            </v-rect>
+        </v-viewport>
+    </v-resizable>
+    <v-viewport-ext-mouse :view-pos-x="0" :view-pos-y="(trackHeaderHeight || 0) + 20"
+        :view-width="trackViewWidth" :view-height="trackBodyHeight || viewHeight"
+        :viewport-width="trackViewWidth" :viewport-height="viewHeight - (trackHeaderHeight || 0) - 20"
+        :x-transform="xTransform" :y-transform="yTransform"
+        line-color="0x000000" :line-width="1"
+        :real-min-x="realMinX" :real-max-x="realMaxX"
+        :real-min-y="realMinY" :real-max-y="realMaxY"
+        :on-ext-mouse-pos="genTooltip"
+    >
+        <v-xone v-for="(zone, idx) in zoneList"
+            :key="idx"
+            :knob-flags="[true, true]"
+            fill-color="0xCCFFCC"
+            :name="zone.label" 
+            direction="vertical"
+            :real-min-y="zone.realMinY"
+            :real-max-y="zone.realMaxY"
+            y-transform="linear"
+            :line-width="1"
+            :line-color="0x888888"
+            size="10"
+            :content="zone.label"
+            :no-label="false"
+            :no-fill="false"
+            x-transform="none"
+            :view-width="trackViewWidth"
+        />
+    </v-viewport-ext-mouse>
+</v-resizable>
