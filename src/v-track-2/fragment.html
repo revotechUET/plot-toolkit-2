@@ -36,7 +36,7 @@
             <v-rect
                 :view-pos-x="0" :view-pos-y="0"
                 :enabled="true"
-                :view-width="trackViewWidth" :view-height="trackHeaderHeight"
+                :view-width="trackViewWidth" :view-height="textHeight(zoneHeaderLabel) + 15"
                 :fill-color="0xFFFFFF" 
                 x-transform="none" y-transform="none"
                 :fill-transparency="0"
@@ -51,7 +51,7 @@
                     :view-height="textHeight(zoneHeaderLabel) + 5"
                     :content-style="headerContentStyle"
                     :view-pos-x="trackViewWidth/2 - textWidth(zoneHeaderLabel) / 2"
-                    :view-pos-y="trackHeaderHeight/2 - textHeight(zoneHeaderLabel) / 2"
+                    :view-pos-y="5  "
                 />
             </v-rect>
         </v-viewport>
@@ -68,7 +68,7 @@
         <v-xone v-for="(zone, idx) in zoneList"
             :key="idx"
             :knob-flags="[true, true]"
-            fill-color="0xCCFFCC"
+            :fill-color="zone.fillColor"
             :name="zone.label" 
             direction="vertical"
             :real-min-y="zone.realMinY"
@@ -76,8 +76,8 @@
             y-transform="linear"
             :line-width="1"
             :line-color="0x888888"
-            size="10"
             :content="zone.label"
+            :content-style="labelStyle"
             :no-label="false"
             :no-fill="false"
             x-transform="none"
