@@ -16,179 +16,162 @@ new Vue({
     template: `<fragment>
         <v-scene :transparent="true" :view-width="1000" :view-height="viewHeight"
             :view-pos-x="0" :view-pos-y="0">
-                <v-rect :view-pos-x="0" :view-pos-y="0"
-                    :view-width="trackViewWidth + trackViewWidth2 + width + trackViewWidth3"
-                    :view-height="viewHeight"
-                    :fill-color="0xFFFFFF" :fill-transparency="0"
-                    :line-transparency="0"
-                    >
-                <v-layer :view-width="trackViewWidth + trackViewWidth2 + width + trackViewWidth3" 
-                :view-height="viewHeight - trackHeaderHeight"
-                x-transform="none" y-transform="none"
-                :view-pos-x="0" :view-pos-y="trackHeaderHeight + 20"
-                :enabled="true" :clipped="false"
-                :tooltip-style="tooltipStyle"
-                line-dash="3 2"
-                ref="myLayer"
-                :line-width="0.75" line-color="red"
-                :viewport-pos-y="trackHeaderHeight"
-                :ref-line-x="true" :ref-line-y="false">
-                <v-track
-                    name="vtrack0"
-                    :gen-tooltip="genTooltip"
-                    :track-view-width="trackViewWidth"
-                    :view-width="viewWidth" :view-height="viewHeight"
-                    :track-resize="trackResize" :track-body-height="trackBodyHeight"
-                    :track-header-resize="trackHeaderResize"
-                    :trackHeaderHeight="trackHeaderHeight" 
-                    trackHeaderFillColor="0xFFFFFF"
-                    :is-shading="isShading"
-                    :view-pos-x="0" :view-pos-y="-trackHeaderHeight - 20"
-                    fill-color="0xFFFFFF" :fill-transparency="1"
-                    :real-min-x="realMinX" :real-max-x="realMaxX"
-                    :real-min-y="realMinY" :real-max-y="realMaxY"
-                    x-transform="linear" y-transform="linear"
-                    :color-path-list="['0xFF0000', '0x00FF00']"
-                    :real-right="realPath2"
-                    :real-left="realPath1"
-                    cursor="crosshair"
-                    :enabled="true"
-                    >
-                    <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
-                        name="HIHIHI"
-                        :view-width="trackViewWidth">
-                    </v-curve>
-                    <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
-                        :onmousedown="mousedown" :enabled="true"
-                        :left-value="10" :right-value="20" unit="V/V"
-                        :view-width="trackViewWidth">
-                    </v-curve>
-                    <v-shading
-                        :view-pos-x="0" :view-pos-y="0"
-                        name="Sang" :is-shading="shading"
-                        :curve-low-value="9" :curve-high-value="10"
+                <v-layer :view-width="900" 
+                    :view-height="viewHeight - trackHeaderHeight"
+                    x-transform="none" y-transform="none"
+                    :view-pos-x="0" :view-pos-y="trackHeaderHeight"
+                    :enabled="true" :clipped="false"
+                    :tooltip-style="tooltipStyle"
+                    line-dash="3 2"
+                    ref="myLayer"
+                    :line-width="0.75" line-color="red"
+                    :viewport-pos-y="trackHeaderHeight"
+                    :ref-line-x="true" :ref-line-y="false">
+                    <v-track
+                        name="vtrack0"
+                        :gen-tooltip="genTooltip"
+                        :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
+                        :view-width="trackViewWidth" :view-height="viewHeight"
+                        :on-resize="trackResize"
+                        :track-header-resize="trackHeaderResize"
+                        :track-header-height="trackHeaderHeight" 
+                        track-header-fill-color="0xFFFFFF"
+                        :view-pos-x="0" :view-pos-y="-trackHeaderHeight"
+                        fill-color="0xFFFFFF" :fill-transparency="1"
                         :real-min-x="realMinX" :real-max-x="realMaxX"
                         :real-min-y="realMinY" :real-max-y="realMaxY"
-                        :view-width="trackViewWidth" :view-height="trackBodyHeight"
                         x-transform="linear" y-transform="linear"
-                        :real-right="realPath1" :real-left="realPath2"
+                        :real-right="realPath2"
+                        :real-left="realPath1"
                         cursor="crosshair"
                         :enabled="true"
-                        min-color="#ffff00"
-                        max-color="#33CC33"
-                        type-fill-color="Gradient"
-                        :pallete="myPallete['BGR']"
-                        :onmousedown="shadingMouseDown"
-                        :fill-pattern-list="fillPatternList"
-                        :custom-fill-values="fillValues"  
-                        :foreground-color-list="foregroundColorList"
-                        :background-color-list="backgroundColorList">
-                    </v-shading>
-                </v-track>
-                <v-track
-                    name="vtrack1"
-                    :gen-tooltip="genTooltip"
-                    :track-view-width="trackViewWidth2"
-                    :view-width="viewWidth" :view-height="viewHeight"
-                    :track-resize="trackResize2" :track-body-height="trackBodyHeight"
-                    :track-header-resize="trackHeaderResize"
-                    :trackHeaderHeight="trackHeaderHeight" 
-                    trackHeaderFillColor="0xFFFFFF"
-                    :is-shading="isShading2"
-                    :view-pos-x="trackViewWidth" :view-pos-y="-trackHeaderHeight - 20"
-                    fill-color="0xFFFFFF" :fill-transparency="1"
-                    :real-min-x="realMinX" :real-max-x="realMaxX"
-                    :real-min-y="realMinY" :real-max-y="realMaxY"
-                    x-transform="linear" y-transform="linear"
-                    :color-path-list="['0xFF0000', '0x00FF00']"
-                    :real-right="realPath2"
-                    :real-left="realPath1"
-                    cursor="crosshair"
-                    :enabled="true"
-                    >
-                    <v-curve :real-path="realPath2" :symbol-color="0xFF0000"
-                        :onmousedown="mousedown" :enabled="true"
-                        name="hehe"
-                        :left-value="1.95" :right-value="2.95" unit="g/cm3"
-                        :view-width="trackViewWidth2">
-                    </v-curve>
-                    <v-shading
-                        :view-pos-x="0" :view-pos-y="0"
-                        name="Sang" :is-shading="shading2"
-                        :curve-low-value="9" :curve-high-value="10"
+                        >
+                        <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
+                            name="HIHIHI"
+                            :view-width="trackViewWidth">
+                        </v-curve>
+                        <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
+                            :onmousedown="mousedown" :enabled="true"
+                            :left-value="10" :right-value="20" unit="V/V"
+                            :view-width="trackViewWidth">
+                        </v-curve>
+                        <v-shading
+                            :view-pos-x="0" :view-pos-y="0"
+                            name="Sang" :is-shading="shading"
+                            :curve-low-value="9" :curve-high-value="10"
+                            :real-min-x="realMinX" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            :view-width="trackViewWidth"
+                            x-transform="linear" y-transform="linear"
+                            :real-right="realPath1" :real-left="14.01"
+                            cursor="crosshair"
+                            :enabled="true"
+                            min-color="#ffff00"
+                            max-color="#33CC33"
+                            type-fill-color="Gradient"
+                            :pallete="myPallete['BGR']"
+                            :fill-pattern-list="['Limestone']"
+                            :custom-fill-values="[{ lowVal: 0, highVal: 1 }]"  
+                            :foreground-color-list="['white']"
+                            :background-color-list="['red']">
+                        </v-shading>
+                    </v-track>
+                    <v-track
+                        name="vtrack1" 
+                        :gen-tooltip="genTooltip"
+                        :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
+                        :view-width="trackViewWidth2" :view-height="viewHeight"
+                        :on-resize="trackResize2"
+                        :track-header-resize="trackHeaderResize"
+                        :track-header-height="trackHeaderHeight" 
+                        track-header-fill-color="0xFFFFFF"
+                        :view-pos-x="trackViewWidth" :view-pos-y="-trackHeaderHeight"
+                        fill-color="0xFFFFFF" :fill-transparency="1"
                         :real-min-x="realMinX" :real-max-x="realMaxX"
                         :real-min-y="realMinY" :real-max-y="realMaxY"
-                        :view-width="trackViewWidth2" :view-height="trackBodyHeight"
                         x-transform="linear" y-transform="linear"
-                        :real-right="realPath1" :real-left="realPath2"
+                        :real-right="realPath2"
+                        :real-left="realPath1"
                         cursor="crosshair"
                         :enabled="true"
-                        min-color="#ffff00"
-                        max-color="#33CC33"
-                        type-fill-color="Pallete"
-                        :pallete="myPallete['BGR']"
-                        :onmousedown="shadingMouseDown2"
-                        :fill-pattern-list="fillPatternList"
-                        :custom-fill-values="fillValues"  
-                        :foreground-color-list="foregroundColorList"
-                        :background-color-list="backgroundColorList">
-                    </v-shading>
-                </v-track>
-                <v-resizable
-                    :view-pos-x="trackViewWidth + trackViewWidth2" :view-pos-y="-trackHeaderHeight - 20"
-                    direction="horizontal"
-                    :view-width="width" :view-height="viewHeight"
-                    :knob-flags="[false, true]" :size="5"
-                    :fill-color="0xf2f2f2" :fill-transparency="1"
-                    :on-resize="resize">
-                </v-resizable>
-                <v-track
-                    name="vtrack3"
-                    :gen-tooltip="genTooltip"
-                    :track-view-width="trackViewWidth3"
-                    :view-width="viewWidth" :view-height="viewHeight"
-                    :track-resize="trackResize3" :track-body-height="trackBodyHeight"
-                    :track-header-resize="trackHeaderResize"
-                    :trackHeaderHeight="trackHeaderHeight" 
-                    trackHeaderFillColor="0xFFFFFF"
-                    :is-shading="isShading3"
-                    :view-pos-x="trackViewWidth + width + trackViewWidth2" :view-pos-y="-trackHeaderHeight - 20"
-                    fill-color="0xFFFFFF" :fill-transparency="1"
-                    :real-min-x="6" :real-max-x="realMaxX"
-                    :real-min-y="realMinY" :real-max-y="realMaxY"
-                    x-transform="linear" y-transform="linear"
-                    :color-path-list="['0xFF0000', '0x00FF00']"
-                    :real-right="realPath2"
-                    :real-left="realPath1"
-                    cursor="crosshair"
-                    :enabled="true"
-                    >
-                    <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
-                        :onmousedown="mousedown" :enabled="true"
-                        name="hehe"
-                        :left-value="1.95" :right-value="2.95" unit="g/cm3"
-                        :view-width="trackViewWidth3">
-                    </v-curve>
-                </v-track>
-            </v-layer>
-            </v-rect>
+                        >
+                        <v-shading
+                            :view-pos-x="0" :view-pos-y="0"
+                            name="Test" :is-shading="shading2"
+                            :real-min-x="realMinX" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            :view-width="trackViewWidth2"
+                            x-transform="linear" y-transform="linear"
+                            :real-right="realPath1" :real-left="realPath2"
+                            cursor="crosshair"
+                            :enabled="true"
+                            min-color="#ffff00"
+                            max-color="#33CC33"
+                            type-fill-color="Pallete"
+                            :pallete="myPallete['BGR']"
+                            :fill-pattern-list="fillPatternList"
+                            :custom-fill-values="fillValues"  
+                            :foreground-color-list="foregroundColorList"
+                            :background-color-list="backgroundColorList">
+                        </v-shading>
+                        <v-curve :real-path="realPath2" :symbol-color="0xFF0000"
+                            :onmousedown="mousedown" :enabled="true"
+                            name="hehe"
+                            :left-value="1.95" :right-value="2.95" unit="g/cm3"
+                            :view-width="trackViewWidth2">
+                        </v-curve>
+                    </v-track>
+                    <v-resizable
+                        :view-pos-x="trackViewWidth + trackViewWidth2" :view-pos-y="-trackHeaderHeight"
+                        direction="horizontal"
+                        :view-width="width" :view-height="viewHeight"
+                        :knob-flags="[false, true]" :size="5"
+                        :fill-color="0xf2f2f2" :fill-transparency="1"
+                        :on-resize="resize">
+                    </v-resizable>
+                    <v-track
+                        name="vtrack3"
+                        :gen-tooltip="genTooltip"
+                        :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
+                        :view-width="trackViewWidth3" :view-height="viewHeight"
+                        :on-resize="trackResize3"
+                        :track-header-resize="trackHeaderResize"
+                        :track-header-height="trackHeaderHeight" 
+                        track-header-fill-color="0xFFFFFF"
+                        :view-pos-x="trackViewWidth + width + trackViewWidth2" :view-pos-y="-trackHeaderHeight"
+                        fill-color="0xFFFFFF" :fill-transparency="1"
+                        :real-min-x="6" :real-max-x="realMaxX"
+                        :real-min-y="realMinY" :real-max-y="realMaxY"
+                        x-transform="linear" y-transform="linear"
+                        :real-right="realPath2"
+                        :real-left="realPath1"
+                        cursor="crosshair"
+                        :enabled="true"
+                        >
+                        <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
+                            :onmousedown="mousedown" :enabled="true"
+                            name="hehe"
+                            :left-value="1.95" :right-value="2.95" unit="g/cm3"
+                            :view-width="trackViewWidth3">
+                        </v-curve>
+                    </v-track>
+                </v-layer>
         </v-scene>
     </fragment>`,
     data: function () {
         return {
             shading: false,
             shading2: false,
-            isShading: [false, false, false],
-            isShading2: [false, false],
-            isShading3: [false],
-            viewWidth: 600,
+            trackRealMinY: 1000,
+            trackRealMaxY: 4662,
+            viewWidth: 200,
             viewHeight: 700,
             width: 50,
             trackBodyHeight: 1400,
             trackViewWidth: 200,
             trackViewWidth2: 200,
             trackViewWidth3: 300,
-            trackHeaderHeight: 100,
+            trackHeaderHeight: 120,
             realMinX: 14,
             realMaxX: 30,
             realMinY: 325,
@@ -335,12 +318,12 @@ new Vue({
         },
         shadingMouseDown: function (target, localPos, globalPos, evt) {
             this.shading = !this.shading;
-            this.isShading = this.isShading.map((child, idx) => child = idx === 0 ? !child : child);
+            // this.isShading = this.isShading.map((child, idx) => child = idx === 2 ? !child : child);
             this.$refs.myLayer.tooltips.splice(0);
         },
         shadingMouseDown2: function (target, localPos, globalPos, evt) {
             this.shading2 = !this.shading2;
-            this.isShading2 = this.isShading2.map((child, idx) => child = idx === 0 ? !child : child);
+            // this.isShading2 = this.isShading2.map((child, idx) => child = idx === 0 ? !child : child);
             this.$refs.myLayer.tooltips.splice(0);
         },
         genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
@@ -351,7 +334,6 @@ new Vue({
             comp.signal('tooltip-on', comp, {
                 content: ` y: ${yCoord.toFixed(4)}`,
                 viewWidth: width,
-                viewPosY: 20,
                 viewHeight: 50,
                 fillColor: '#F0F000',
                 fillTransparency: 0.3,
