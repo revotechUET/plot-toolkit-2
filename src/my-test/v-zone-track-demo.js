@@ -54,7 +54,7 @@ new Vue({
                         :color-path-list="['0xFF0000', '0x00FF00']"
                         :real-right="realPath2"
                         :real-left="realPath1"
-                        cursor="crosshair"
+                        cursor="pointer"
                         :enabled="true"
                         :zones="listZone"
                         zone-header-label="zone"
@@ -211,8 +211,8 @@ new Vue({
                 { x: 20, y: 8800 },
             ],
             listZone: [
-                {label: 'abc', realMinY: 0, realMaxY: 500},
-                {label: 'cde', realMinY: 500, realMaxY: 1500},
+                {label: 'abc', realMinY: 0, realMaxY: 500, fillColor: '0xCCFFCC'},
+                {label: 'cde', realMinY: 500, realMaxY: 1500, fillColor: '0xAABBFF'},
             ]
         }
     },

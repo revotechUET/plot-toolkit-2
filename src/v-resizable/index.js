@@ -15,7 +15,7 @@ let component = {
             type: String
         },
         size: {
-            default: 10,
+            default: 5,
         },
         onResize: {
             type: Function
