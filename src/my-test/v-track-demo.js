@@ -51,7 +51,6 @@ new Vue({
                             :view-width="trackViewWidth">
                         </v-curve>
                         <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
-                            :onmousedown="mousedown" :enabled="true"
                             :left-value="10" :right-value="20" unit="V/V"
                             :view-width="trackViewWidth">
                         </v-curve>
@@ -68,12 +67,12 @@ new Vue({
                             :enabled="true"
                             min-color="#ffff00"
                             max-color="#33CC33"
-                            type-fill-color="Gradient"
+                            type-fill-color="Pallete"
                             :pallete="myPallete['BGR']"
                             :fill-pattern-list="['Limestone']"
                             :custom-fill-values="[{ lowVal: 0, highVal: 1 }]"  
                             :foreground-color-list="['white']"
-                            :background-color-list="['red']">
+                            :background-color-list="['green']">
                         </v-shading>
                     </v-track>
                     <v-track
@@ -102,7 +101,7 @@ new Vue({
                             :real-min-y="realMinY" :real-max-y="realMaxY"
                             :view-width="trackViewWidth2"
                             x-transform="linear" y-transform="linear"
-                            :real-right="realPath1" :real-left="realPath2"
+                            :real-right="14.01" :real-left="realPath1"
                             cursor="crosshair"
                             :enabled="true"
                             min-color="#ffff00"
@@ -114,8 +113,26 @@ new Vue({
                             :foreground-color-list="foregroundColorList"
                             :background-color-list="backgroundColorList">
                         </v-shading>
+                        <v-shading
+                            :view-pos-x="0" :view-pos-y="0"
+                            name="Test 2" :is-shading="shading2"
+                            :real-min-x="realMinX" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            :view-width="trackViewWidth2"
+                            x-transform="linear" y-transform="linear"
+                            :real-right="realPath2" :real-left="realPath1"
+                            cursor="crosshair"
+                            :enabled="true"
+                            min-color="#F0F000"
+                            max-color="#0000FF"
+                            type-fill-color="Gradient"
+                            :pallete="myPallete['BGR']"
+                            :fill-pattern-list="fillPatternList"
+                            :custom-fill-values="fillValues"  
+                            :foreground-color-list="foregroundColorList"
+                            :background-color-list="backgroundColorList">
+                        </v-shading>
                         <v-curve :real-path="realPath2" :symbol-color="0xFF0000"
-                            :onmousedown="mousedown" :enabled="true"
                             name="hehe"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
                             :view-width="trackViewWidth2">
@@ -149,7 +166,6 @@ new Vue({
                         :enabled="true"
                         >
                         <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
-                            :onmousedown="mousedown" :enabled="true"
                             name="hehe"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
                             :view-width="trackViewWidth3">
@@ -312,19 +328,6 @@ new Vue({
         },
         trackHeaderResize: function ({ width, height }, comp) {
             this.trackHeaderHeight = height;
-        },
-        mousedown: function (target, localPos, globalPos, evt) {
-            console.log("component", target.hostComponent.name)
-        },
-        shadingMouseDown: function (target, localPos, globalPos, evt) {
-            this.shading = !this.shading;
-            // this.isShading = this.isShading.map((child, idx) => child = idx === 2 ? !child : child);
-            this.$refs.myLayer.tooltips.splice(0);
-        },
-        shadingMouseDown2: function (target, localPos, globalPos, evt) {
-            this.shading2 = !this.shading2;
-            // this.isShading2 = this.isShading2.map((child, idx) => child = idx === 0 ? !child : child);
-            this.$refs.myLayer.tooltips.splice(0);
         },
         genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
             let localPos = comp.pixiObj.toLocal(globalPos);

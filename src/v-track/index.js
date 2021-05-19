@@ -10,6 +10,7 @@ import VTextbox from '../v-textbox';
 import VHeaderCurve from '../v-header-curve';
 import template from './template.html';
 import VShape from '../v-shape';
+import pattern from '../main/pattern_sample.json';
 import { scaleLinear } from 'd3';
 
 let component = {
@@ -121,9 +122,8 @@ let component = {
         },
         onTrackMouseDown: function (target, localPos, globalPos, evt) {
             let { x, y } = localPos;
-            let xLeft = x - 2, xRight = x + 2, yLeft = y - 2, yRight = y + 2;
             let pixelPathLeft, pixelPathRight, pixelPath, child;
-            let xPos, check = false;
+            let xPos;
             for (let i = 0; i < this.$refs.trackChildren.$children.length; i++) {
                 child = this.$refs.trackChildren.$children[i];
                 switch (child.componentType) {
@@ -142,15 +142,15 @@ let component = {
                                 let { a, b } = this.getLinearLine(pixelPathRight[idx], pixelPathRight[idx + 1]);
                                 let x1 = (y - b) / a;
                                 if ((xPos < x && x < x1) || (xPos > x && x > x1)) {
-                                    if (!this.visualizeItems[i].shading) {
-                                        this.visualizeItems[i].shading = true;
-                                        this.pathList.push([
-                                            { x: child.realLeft, y: child.realRight[0].y },
-                                            { x: child.realLeft, y: child.realRight[child.realRight.length - 1].y }
-                                        ], child.realRight);
-                                        check = true;
-                                        return;
-                                    }
+                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                        return { ...child, shading: idx === i ? true : false }
+                                    });
+                                    this.pathList.splice(0, this.pathList.length, [
+                                        { x: child.realLeft, y: child.realRight[0].y },
+                                        { x: child.realLeft, y: child.realRight[child.realRight.length - 1].y }
+                                    ], child.realRight);
+                                    this.shadingColor = this.visualizeItems[i].color;
+                                    return;
                                 }
                             }
                         } else if (!Array.isArray(child.realRight)) {
@@ -166,14 +166,14 @@ let component = {
                                 let { a, b } = this.getLinearLine(pixelPathLeft[idx], pixelPathLeft[idx + 1]);
                                 let x1 = (y - b) / a;
                                 if (xPos < x && x < x1 || (xPos > x && x > x1)) {
-                                    if (!this.visualizeItems[i].shading) {
-                                        this.visualizeItems[i].shading = true;
-                                        this.pathList.push([
-                                            { x: child.realRight, y: child.realLeft[0].y },
-                                            { x: child.realRight, y: child.realLeft[child.realLeft.length - 1].y }
-                                        ], child.realRight);
-                                        check = true;
-                                    }
+                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                        return { ...child, shading: idx === i ? true : false }
+                                    });
+                                    this.pathList.splice(0, this.pathList.length, [
+                                        { x: child.realRight, y: child.realLeft[0].y },
+                                        { x: child.realRight, y: child.realLeft[child.realLeft.length - 1].y }
+                                    ], child.realLeft);
+                                    this.shadingColor = this.visualizeItems[i].color;
                                     return;
                                 }
                             }
@@ -189,17 +189,15 @@ let component = {
                             if (idx !== null) {
                                 let { a1, b1 } = this.getLinearLine(pixelPathLeft[idx], pixelPathLeft[idx + 1], 1);
                                 let { a2, b2 } = this.getLinearLine(pixelPathRight[idx], pixelPathRight[idx + 1], 2);
-                                console.log(a1, b1, a2, b2)
                                 let x1 = Math.min((y - b1) / a1, (y - b2) / a2);
                                 let x2 = Math.max((y - b1) / a1, (y - b2) / a2);
-                                console.log(x, x1, x2);
                                 if (x1 < x && x < x2) {
-                                    if (!this.visualizeItems[i].shading) {
-                                        this.visualizeItems[i].shading = true;
-                                        this.pathList.push(child.realLeft, child.realRight);
-                                        check = true;
-                                        return;
-                                    }
+                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                        return { ...child, shading: idx === i ? true : false }
+                                    });
+                                    this.pathList.splice(0, this.pathList.length, child.realLeft, child.realRight);
+                                    this.shadingColor = this.visualizeItems[i].color;
+                                    return;
                                 }
                             }
                         }
@@ -214,29 +212,28 @@ let component = {
                             }
                         }
                         if (index !== null) {
-                            let { a, b } = this.getLinearLine(pixelPath[index], pixelPath[index + 1]);
-                            let distance = Math.abs(a * x - y + b) / Math.sqrt(a * a + b * b);
-                            if ((a * x + b === y) || distance < 2) {
-                                if (!this.visualizeItems[i].shading) {
-                                    this.visualizeItems[i].shading = true;
-                                    this.pathList.push(child.realPath);
-                                    check = true;
-                                    return;
-                                }
+                            let distance1 = Math.sqrt(Math.pow(x - pixelPath[index].x, 2) + Math.pow(y - pixelPath[index].y, 2));
+                            let distance2 = Math.sqrt(Math.pow(x - pixelPath[index + 1].x, 2) + Math.pow(y - pixelPath[index + 1].y, 2));
+                            console.log(distance1, distance2);
+                            if (distance1 <= 4 || distance2 <= 4) {
+                                this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                    return { ...child, shading: idx === i ? true : false }
+                                });
+                                this.pathList.splice(0, this.pathList.length, child.realPath);
+                                this.shadingColor = this.visualizeItems[i].color;
+                                return;
                             }
                         }
                         break;
                 }
             }
-            if (!check) {
-                this.visualizeItems = this.visualizeItems.map(item => {
-                    return {
-                        ...item,
-                        shading: false
-                    }
-                });
-                this.pathList = [];
-            }
+            this.visualizeItems = this.visualizeItems.map(item => {
+                return {
+                    ...item,
+                    shading: false
+                }
+            });
+            this.pathList = [];
         },
         getPosX: function (posX) {
             return this.$refs.viewportBody.transformX(posX);
@@ -283,7 +280,7 @@ let component = {
                 comp: compProp,
                 height,
                 name: child.name || compProp,
-                color: child.symbolColor || 255,
+                color: child.symbolColor,
                 shading: false
             }
             if (compProp === "VCurve") {
@@ -298,8 +295,11 @@ let component = {
                 }
             }
             if (compProp === "VShading") {
-                let { minColor, maxColor, typeFillColor, pallete, curveLowValue, curveHighValue } = child;
-                return {
+                let { minColor, maxColor, typeFillColor, pallete,
+                    customFillValues, foregroundColorList,
+                    backgroundColorList, fillPatternList,
+                    curveLowValue, curveHighValue } = child;
+                obj = {
                     ...obj,
                     minColor,
                     maxColor,
@@ -307,6 +307,15 @@ let component = {
                     pallete,
                     curveLowValue,
                     curveHighValue
+                }
+                if (typeFillColor === "Custom Fills" && foregroundColorList.length === 1
+                    && backgroundColorList.length === 1 && fillPatternList.length === 1) {
+                    obj = {
+                        ...obj,
+                        foregroundColor: foregroundColorList[0],
+                        backgroundColor: backgroundColorList[0],
+                        imagePatternUrl: `https://users.i2g.cloud/pattern/${pattern[fillPatternList[0]]}_.png?service=WI_BACKEND`
+                    }
                 }
             }
             return obj;

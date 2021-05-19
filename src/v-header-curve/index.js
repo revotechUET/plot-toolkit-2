@@ -32,7 +32,7 @@ let component = {
             type: String
         },
         pathColor: {
-            type: Number,
+            default: 0x101010
         },
         unit: {
             type: String,
