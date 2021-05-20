@@ -4,11 +4,9 @@ const component = {
     <div class="Parent">
       <slot></slot>
 
-      <button v-for="(child, idx) in $children" :key="'$childrent-'+idx" 
-        @click="child.isSelected = !child.isSelected"
-      >{{child.isSelected}}</button>
-
-      {{childrenChanged}} {{nChildren}}
+      <button v-for="idx in [...Array(nChildren).keys()]" :key="'$children-'+idx" 
+        @click="$children[idx].isSelected = !$children[idx].isSelected"
+      >{{$children[idx].isSelected}}</button>
     </div>
   `,
   data: function() {
