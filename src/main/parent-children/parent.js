@@ -8,13 +8,16 @@ const component = {
         @click="child.isSelected = !child.isSelected"
       >{{child.isSelected}}</button>
 
-      {{childrenChanged}}
+      {{childrenChanged}} {{nChildren}}
     </div>
   `,
   data: function() {
     return {
       nChildren: 0
     }
+  },
+  mounted: function() {
+    this.nChildren = this.$children.length;
   },
   methods: {
     itemClick(state, idx) {
@@ -27,9 +30,6 @@ const component = {
       console.log('Children changed', this.childrenChanged);
       this.nChildren = this.$children.length;
     }
-  },
-  mounted: function() {
-    this.nChildren = this.$children.length;
   }
 }
 export default component;

@@ -13,7 +13,11 @@ const component = {
   },
   mounted: function() {
     console.log(this.name + " child Mounted");
-    this.$emit("ccchanged");
+    this.$emit("myEvent");
+  },
+  destroyed: function() {
+    console.log(this.name + " child UNMounted");
+    this.$emit("myEvent");
   }
 }
 export default component;
