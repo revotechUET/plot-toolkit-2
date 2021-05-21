@@ -1,9 +1,10 @@
 import sticky from './stick-to-root';
 import layout from './layout';
 import extMouseListener from './mouse-listener';
+import selectable from './selectable';
 
 const features = {
-    sticky, layout, extMouseListener
+    sticky, layout, extMouseListener, selectable
 }
 export default function factoryFn(baseComp, opts) {
     let outComponent = baseComp;

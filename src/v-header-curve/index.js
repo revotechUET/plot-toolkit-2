@@ -3,6 +3,7 @@ import { Text } from 'pixi.js';
 import VPath from '../v-path';
 import VTextbox from '../v-textbox';
 import VRect from '../v-rect';
+import selectable from '../mixins/selectable';
 import template from './template.html';
 
 let component = {
@@ -74,7 +75,8 @@ let component = {
             let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
             return textHeight;
         },
-    }
+    },
+    mixins: [selectable]
 }
 
 export default VRect.extend(component);

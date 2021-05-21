@@ -3,7 +3,7 @@
     <v-rect :view-pos-x="0" :view-pos-y="0"
         :view-width="viewWidth" :view-height="20"
         :line-width="0.5" line-color="0x010101"
-        :fill-color="0x3366ff">
+        :fill-color="0x3366ff"> <!-- TO BE CHANGED  -->
         <v-textbox :content="name"
             :content-style="headerContentStyle"
             :view-pos-x="viewWidth/2 - textWidth(name)/2"
@@ -13,7 +13,7 @@
     <v-resizable :view-pos-x="0" :view-pos-y="20"
         :view-height="trackHeaderHeight - 20" :view-width="viewWidth"
         direction="vertical" :knob-flags="[false, true]"
-        :fill-color="trackHeaderFillColor || '0xFFFFFF'" :fill-transparency="fillTransparency"
+        :fill-color="fillColor || 0xFFFFFF" :fill-transparency="fillTransparency"
         :size="5" :on-resize="trackHeaderResize"
         x-transform="none" y-transform="none">
         <v-viewport :view-pos-x="0" :view-pos-y="0"
@@ -21,7 +21,8 @@
             :viewport-width="viewWidth" :viewport-height="trackHeaderHeight - 20"
             x-transform="none" y-transform="none"
             line-color="0x000000" :line-width="1">
-            <v-rect v-for="(child, idx) in visualizeItems"
+            <!-- TO BE CHANGED: tao 1 class moi v-item-header => track header visualize items -->
+            <v-rect v-for="(child, idx) in visualizeItems" 
                 :key = "child.name + ' ' + idx" :name="child.comp + ' ' + idx"
                 :view-pos-x="0" :view-pos-y="childrenHeaderPosYList[idx]"
                 :enabled="true"
@@ -51,7 +52,7 @@
                             :view-pos-y="child.height/2 - textHeight(child.curveLowValue) / 2"
                         />
                         <v-textbox
-                            :content="child.name" :fill-color="child.shading ? '0xffc2b3' : '0xFFFFFF'"
+                            :content="child.name" :fill-color="child.selected ? '0xffc2b3' : '0xFFFFFF'"
                             :fill-transparency="1"
                             line-color="0x010101" :line-width="1"
                             :view-width="textWidth(child.name) + 10"
@@ -74,7 +75,7 @@
                     </fragment>
                     <v-textbox
                         v-if="child.comp === 'VPath'"
-                        :content="child.name" :fill-color="child.shading ? '0xffc2b3' : '0xFFFFFF'"
+                        :content="child.name" :fill-color="child.selected ? '0xffc2b3' : '0xFFFFFF'"
                         :fill-transparency="1"
                         line-color="0x010101" :line-width="1"
                         :view-width="textWidth(child.name) + 10"
@@ -87,8 +88,8 @@
                         v-if="child.comp === 'VCurve'"
                         :curve-name="child.name"
                         :view-pos-x="0" :view-pos-y="0"
-                        :fill-color="child.comp === 'VCurve' && child.shading ? child.color : '0xFFFFFF'" 
-                        :fill-transparency="child.shading ? 0.2 : 1"
+                        :fill-color="child.comp === 'VCurve' && child.selected ? child.color : '0xFFFFFF'" 
+                        :fill-transparency="child.selected ? 0.2 : 1"
                         :view-width="viewWidth" :view-height="child.height"
                         :content-style="{...headerContentStyle, fill: child.color}"
                         :unit="child.unit"
@@ -133,12 +134,12 @@
                 fill-color="0xFFFFFF" :fill-transparency="0.001">
                 <slot />
             </v-rect>
-            <v-path v-for="(path, idx) in pathList" :key="idx"
+            <!-- <v-path v-for="(path, idx) in pathList" :key="idx"
                 :symbol-color="shadingColor" :view-width="viewWidth"
                 :real-path="path" :line-width="3" 
                 :line-transparency="0.3" 
-                :shading-offset-x="-2" :shading-offset-y="-2">
-            </v-path>
+                :selected-offset-x="-2" :selected-offset-y="-2">
+            </v-path> -->
         </v-cartersian-ext-mouse>
     </v-viewport>
 </fragment>
