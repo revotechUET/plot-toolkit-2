@@ -10,21 +10,27 @@ import VTextbox from '../v-textbox';
 import VHeaderCurve from '../v-header-curve';
 import template from './template.html';
 import VXone, { VXoneFactory } from '../v-xone';
+import { scaleLinear, scaleLog } from 'd3-scale';
 
 let component = {
-    props: [
-        "isShading",
-        "trackHeaderFillColor",
-        "trackHeaderHeight",
-        "trackViewWidth",
-        "trackBodyHeight",
-        "trackResize",
-        "trackKnobFlags",
-        "trackHeaderResize",
-        "genTooltip",
-        "zones",
-        "zoneHeaderLabel"
-    ],
+    props: {
+        trackHeaderHeight: Number,
+        trackBodyHeight: Number,
+        trackResize: Function,
+        direction: {
+            type: String,
+            default: 'horizontal'
+        },
+        trackKnobFlags: {
+            type: Array,
+            default: () => [false, true]
+        },
+        trackHeaderResize: Function,
+        genTooltip: Function,
+        zoneHeaderLabel: String,
+        viewPortRealMinY: String,
+        viewPortRealMaxY: String,
+    },
     computed: {
         componentType: function () {
             return "VTrack2";
@@ -33,8 +39,6 @@ let component = {
     data: function () {
         return {
             kursor: "default",
-            trackChilren: null,
-            trackHeaderChildrenHeight: 0,
             headerContentStyle: {
                 fontFamily: 'Arial',
                 fontStyle: 'italic',
@@ -50,10 +54,8 @@ let component = {
                 fontSize: 19,
             },
             childrenHeaderPosYList: [0],
-            shadingColor: '',
-            visualizeItems: [],
-            pathList: [],
-            zoneList: this.zones
+            zoneList: [],
+            listZoneHeaderHeight: 0,
         }
     },
     template,
@@ -65,6 +67,12 @@ let component = {
         VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
         VXone, VXoneExtMouse: VXoneFactory({ extMouseListener: true })
     },
+    computed: {
+        scaleViewHeight: function() {
+            let baseHeight = this.viewHeight - this.trackHeaderHeight;
+            return baseHeight * (this.realMaxY - this.realMinY) / (this.viewPortRealMaxY - this.viewPortRealMinY)
+        }
+    },
     methods: {
         textWidth: function (content) {
             let text = new Text(content);
@@ -75,11 +83,22 @@ let component = {
             let text = new Text(content);
             let textHeight = text.getLocalBounds().height * this.headerContentStyle.fontSize / 26;
             return textHeight;
+        },
+        scaleRealToView: function(value) {
+            let view = scaleLinear()
+                .domain([this.realMinY, this.realMaxY])
+                .range([0, this.scaleViewHeight]);
+            return view(value);
         }
     },
     mounted: function () {
-    
+        this.zoneList = this.$refs.zoneTrackList.$children.slice(1);
+        console.log(this.zoneList);
+        for(let zone in this.zoneList) {
+            this.listZoneHeaderHeight += (this.textHeight(zone.name) + 15)
+        };
+        this.$refs.trackBodyViewPort.offsetY -= this.scaleRealToView(this.viewPortRealMinY);
     }
 }
 
-export default VRect.extend(component);
+export default VResizable.extend(component);
