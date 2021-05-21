@@ -2,6 +2,7 @@ import { Fragment } from 'vue-fragment';
 import { Text } from 'pixi.js';
 import VPath from '../v-path';
 import VRect from '../v-rect';
+import { VRectFactory } from '../v-rect';
 import VContainer from '../v-container';
 import VResizable from '../v-resizable';
 import VViewport from '../v-viewport';
@@ -51,12 +52,12 @@ let component = {
         componentType: function () {
             return "VTrack";
         },
+        getTrackChildren: function () {
+            console.log(this.$refs);
+            return this.$refs.trackChildren.$children;
+        },
         checkShading: function () {
-            let check = false;
-            this.visualizeItems.forEach(item => {
-                item.selected ? check = item.selected : check; // selected => selected(prop of abstract class)
-            })
-            return check;
+            return this.selectionStates.some(item => item);
         }
     },
     data: function () {
@@ -71,9 +72,8 @@ let component = {
                 padding: 5,
                 fontSize: 13,
             },
-            // selectionStates: [],
+            selectionStates: [],
             childrenHeaderPosYList: [0],
-            visualizeItems: [],
             nChildren: 0
         }
     },
@@ -81,27 +81,29 @@ let component = {
     components: {
         VPath, VRect, VResizable, VViewport, VHeaderCurve,
         VContainer, VCartersian, Fragment, VTextbox, VShape,
-        VCartersianExtMouse: VCartersianFactory({ extMouseListener: true })
+        VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
+        VRectWithMountedEvent: VRectFactory({ onMounted: true })
     },
     methods: {
         childHighlight: function (target, localPos, globalPos, evt) {
             let name = target.hostComponent.name.split(" ");
             let idx = Number(name[name.length - 1]);
-            let compType = this.visualizeItems[idx]["comp"];
-            console.log(compType);
-            if (!this.visualizeItems[idx].selected) {
-                this.visualizeItems = this.visualizeItems.map((item, index) => {
+            if (!this.selectionStates[idx]) {
+                this.selectionStates = this.selectionStates.map((item, index) => {
                     this.$refs.trackChildren.$children[index].isSelected = index !== idx ? false : true;
-                    return {
-                        ...item,
-                        selected: index !== idx ? false : true
-                    }
-                });
+                    return index === idx ? true : false
+                })
 
             } else {
-                this.visualizeItems[idx].selected = false;
+                this.selectionStates.splice(idx, 1, false);
                 this.$refs.trackChildren.$children[idx].isSelected = false;
             }
+        },
+        onRefsReady: function () {
+            if (this.$refs.trackChildren) {
+                return this.$refs.trackChildren.$children;
+            }
+            return []
         },
         textWidth: function (content) {
             let text = new Text(content);
@@ -135,9 +137,9 @@ let component = {
                                 let { a, b } = this.getLinearLine(pixelPathRight[idx], pixelPathRight[idx + 1]);
                                 let x1 = (y - b) / a;
                                 if ((xPos < x && x < x1) || (xPos > x && x > x1)) {
-                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                    this.selectionStates = this.selectionStates.map((child, idx) => {
                                         this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
-                                        return { ...child, selected: idx === i ? true : false }
+                                        return idx === i ? true : false
                                     });
                                     return;
                                 }
@@ -155,9 +157,9 @@ let component = {
                                 let { a, b } = this.getLinearLine(pixelPathLeft[idx], pixelPathLeft[idx + 1]);
                                 let x1 = (y - b) / a;
                                 if (xPos < x && x < x1 || (xPos > x && x > x1)) {
-                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                    this.selectionStates = this.selectionStates.map((child, idx) => {
                                         this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
-                                        return { ...child, selected: idx === i ? true : false }
+                                        return idx === i ? true : false
                                     });
                                     return;
                                 }
@@ -177,9 +179,9 @@ let component = {
                                 let x1 = Math.min((y - b1) / a1, (y - b2) / a2);
                                 let x2 = Math.max((y - b1) / a1, (y - b2) / a2);
                                 if (x1 < x && x < x2) {
-                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
-                                        this.$refs.trackChildren.$children[idx].isSelected = idx !== i ? false : true;
-                                        return { ...child, selected: idx === i ? true : false }
+                                    this.selectionStates = this.selectionStates.map((child, idx) => {
+                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
+                                        return idx === i ? true : false
                                     });
                                     return;
                                 }
@@ -200,9 +202,9 @@ let component = {
                             let distance2 = Math.sqrt(Math.pow(x - pixelPath[index + 1].x, 2) + Math.pow(y - pixelPath[index + 1].y, 2));
                             console.log(distance1, distance2);
                             if (distance1 <= 4 || distance2 <= 4) {
-                                this.visualizeItems = this.visualizeItems.map((child, idx) => {
+                                this.selectionStates = this.selectionStates.map((child, idx) => {
                                     this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
-                                    return { ...child, selected: idx === i ? true : false }
+                                    return idx === i ? true : false
                                 });
                                 return;
                             }
@@ -210,12 +212,9 @@ let component = {
                         break;
                 }
             }
-            this.visualizeItems = this.visualizeItems.map((item, index) => {
-                this.$refs.trackChildren.$children[index].isSelected = false;
-                return {
-                    ...item,
-                    selected: false
-                }
+            this.selectionStates = this.selectionStates.map((child, idx) => {
+                this.$refs.trackChildren.$children[idx].isSelected = false;
+                return false;
             });
         },
         getPosX: function (posX) {
@@ -298,6 +297,7 @@ let component = {
         console.log("Track draw");
         let children = this.$refs.trackChildren.$children;
         this.nChildren = children.length;
+        this.selectionStates.push(...children.map(child => false));
         //calculate offset for viewport
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
             / (this.trackRealMaxY - this.trackRealMinY);
@@ -306,20 +306,31 @@ let component = {
         let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
         this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
 
-        // this.selectionStates.push(...children.map(item => true));
-        this.visualizeItems.push(...children.map((child, idx) => {
-            return this.getVisualizeItem(child, idx);
-        }));
+        let height;
+        for (let i = 0; i < children.length; i++) {
+            height = children[i].componentType === 'VCurve' ? 60 : 30;
+            this.trackHeaderChildrenHeight += height;
+            i === 0 ? this.childrenHeaderPosYList.push(height) :
+                this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[i]);
+        };
         this.childrenHeaderPosYList.pop();
     },
     watch: {
         trackChildren: function (newValue, oldValue) {
             this.nChildren = this.$refs.trackChildren.$children.length;
+            let height;
             if (newValue > oldValue) {
                 let newChild = this.$refs.trackChildren.$children[this.nChildren - 1];
-                this.visualizeItems.push(this.getVisualizeItem(newChild, oldValue - 1));
+                height = newChild.componentType === 'VCurve' ? 60 : 30;
+                this.trackHeaderChildrenHeight += height;
+                oldValue !== 0 && this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[oldValue - 1]);
+                this.selectionStates.push(false);
             } else {
-                this.visualizeItems.pop();
+                this.trackHeaderChildrenHeight = this.childrenHeaderPosYList[oldValue - 1];
+                if (this.childrenHeaderPosYList.length !== 1) {
+                    this.childrenHeaderPosYList.pop();
+                }
+                this.selectionStates.pop();
             }
         }
     },
