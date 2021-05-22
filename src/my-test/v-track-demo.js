@@ -10,6 +10,7 @@ import VCurve from '../v-curve';
 import Pallete from '../main/pallete.json';
 import VLayer from '../v-layer';
 import dataPolygon from '../main/data-polygon';
+import VXone from '../v-xone';
 
 new Vue({
     el: "#vue-app",
@@ -28,7 +29,7 @@ new Vue({
                     :viewport-pos-y="trackHeaderHeight"
                     :ref-line-x="true" :ref-line-y="false">
                     <v-track
-                        name="vtrack0"
+                        name="Zone Track" :grid="false"
                         :gen-tooltip="genTooltip"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth" :view-height="viewHeight"
@@ -46,34 +47,60 @@ new Vue({
                         cursor="crosshair"
                         :enabled="true"
                         >
-                        <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
-                            name="HIHIHI"
-                            :view-height="scaleTrackHeight"
-                            :view-width="trackViewWidth">
-                        </v-curve>
-                        <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
-                            :left-value="10" :right-value="20" unit="V/V"
-                            :view-width="trackViewWidth" :view-height="scaleTrackHeight">
-                        </v-curve>
-                        <v-shading
-                            :view-pos-x="0" :view-pos-y="0"
-                            name="Sang" :is-shading="shading"
-                            :curve-low-value="9" :curve-high-value="10"
-                            :real-min-x="realMinX" :real-max-x="realMaxX"
-                            :real-min-y="realMinY" :real-max-y="realMaxY"
-                            :view-width="trackViewWidth" :view-height="scaleTrackHeight"
-                            x-transform="linear" y-transform="linear"
-                            :real-right="realPath1" :real-left="14.01"
-                            cursor="crosshair"
-                            :enabled="true"
-                            min-color="#ffff00"
-                            max-color="#33CC33"
-                            type-fill-color="Pallete"
-                            :pallete="myPallete['BGR']"
-                            :fill-pattern-list="['Limestone']"
-                            :custom-fill-values="[{ lowVal: 0, highVal: 1 }]"  
-                            :foreground-color-list="['white']"
-                            :background-color-list="['green']">
+                        <v-xone
+                            :knob-flags="[true, true]"
+                            :fill-color="fillColor1"
+                            :name="label1" 
+                            direction="vertical"
+                            :real-min-y="realMinY1"
+                            :real-max-y="realMaxY1"
+                            x-transform="none"
+                            y-transform="linear"
+                            :handleRealY="handleRealY1"
+                            :view-width="trackViewWidth"
+                            :line-width="1"
+                            :line-color="0x888888"
+                            :content="label1"
+                            :content-style="style"
+                            :no-label="false"
+                            :no-fill="false"
+                        />
+                        <v-xone
+                            :knob-flags="[true, true]"
+                            :fill-color="fillColor2"
+                            :name="label2" 
+                            direction="vertical"
+                            :real-min-y="realMinY2"
+                            :real-max-y="realMaxY2"
+                            x-transform="none"
+                            y-transform="linear"
+                            :handleRealY="handleRealY2"
+                            :view-width="trackViewWidth"
+                            :line-width="2"
+                            :line-color="0x888888"
+                            :content="label2"
+                            :content-style="style"
+                            :no-label="false"
+                            :no-fill="false"
+                        />
+                        <v-xone
+                            :knob-flags="[true, true]"
+                            :fill-color="fillColor3"
+                            :name="label3" 
+                            direction="vertical"
+                            :real-min-y="realMinY3"
+                            :real-max-y="realMaxY3"
+                            x-transform="none"
+                            y-transform="linear"
+                            :handleRealY="handleRealY3"
+                            :view-width="trackViewWidth"
+                            :line-width="3"
+                            :line-color="0x888888"
+                            :content="label3"
+                            :content-style="style"
+                            :no-label="false"
+                            :no-fill="false"
+                        />
                         </v-shading>
                     </v-track>
                     <v-track
@@ -185,8 +212,11 @@ new Vue({
         return {
             shading: false,
             shading2: false,
+            style: {
+                fontSize: 13
+            },
             trackRealMinY: 1000,
-            trackRealMaxY: 4662,
+            trackRealMaxY: 3000,
             viewWidth: 200,
             viewHeight: 700,
             width: 50,
@@ -306,7 +336,21 @@ new Vue({
                 ]
             ],
             childCount: 1,
-            scaleTrackHeight: 0
+            scaleTrackHeight: 0,
+            label1: 'abc',
+            realMinY1: 350,
+            realMaxY1: 1500,
+            fillColor1: '0xCCFFCC',
+
+            label2: 'def',
+            realMinY2: 2000,
+            realMaxY2: 2500,
+            fillColor2: '0xCCAA00',
+
+            label3: 'ghi',
+            realMinY3: 2500,
+            realMaxY3: 5000,
+            fillColor3: '0xCCFF00'
         }
     },
     computed: {
@@ -391,6 +435,18 @@ new Vue({
         childrenChanged: function () {
             console.log("child changed");
             this.childCount = this.pathList.length;
+        },
+        handleRealY1: function (realMinY, realMaxY) {
+            this.realMinY1 = realMinY;
+            this.realMaxY1 = realMaxY;
+        },
+        handleRealY2: function (realMinY, realMaxY) {
+            this.realMinY2 = realMinY;
+            this.realMaxY2 = realMaxY;
+        },
+        handleRealY3: function (realMinY, realMaxY) {
+            this.realMinY3 = realMinY;
+            this.realMaxY3 = realMaxY;
         }
     },
     mounted: function () {
@@ -400,6 +456,6 @@ new Vue({
     },
     components: {
         Fragment, VScene, VTrack, VRect,
-        VShading, VPath, VCurve, VLayer, VResizable
+        VShading, VPath, VCurve, VLayer, VResizable, VXone
     }
 })

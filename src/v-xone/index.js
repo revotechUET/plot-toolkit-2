@@ -33,6 +33,7 @@ import { getTransparency, DefaultValues, processColorStr } from "../utils";
 import VContainer from '../v-container';
 import { scaleLinear, scaleLog } from 'd3-scale';
 import factoryFn from '../mixins';
+import selectable from '../mixins/selectable';
 
 let component = {
     props: {
@@ -47,7 +48,7 @@ let component = {
     components: {
         Fragment, VTextBox, VResizable, VContainer
     },
-    data: function() {
+    data: function () {
         return {
             // horizontal
             topPosX: null,
@@ -61,7 +62,10 @@ let component = {
         }
     },
     computed: {
-        textPosX: function() {
+        componentType: function () {
+            return "VZone";
+        },
+        textPosX: function () {
             let text = new Text(this.content);
             let textHeight = text.getLocalBounds().height;
             let textWidth = text.getLocalBounds().width;
@@ -71,7 +75,7 @@ let component = {
                 return this.viewWidth / 2 - textWidth / 2;
             }
         },
-        textPosY: function() {
+        textPosY: function () {
             let text = new Text(this.content);
             let textHeight = text.getLocalBounds().height;
             let textWidth = text.getLocalBounds().width;
@@ -91,7 +95,7 @@ let component = {
             );
             return cFc;
         },
-        labelRotation: function() {
+        labelRotation: function () {
             let text = new Text(this.content);
             let textWidth = text.getLocalBounds().width;
             if (textWidth > this.viewWidth) {
@@ -101,11 +105,11 @@ let component = {
         }
     },
     methods: {
-        knobDragEnd: function(knobIdx, pos, target) {
+        knobDragEnd: function (knobIdx, pos, target) {
             let width = this.viewWidth;
             let height = this.height;
             console.log(pos.x, pos.y, this.minSize);
-            switch(knobIdx) {
+            switch (knobIdx) {
                 case 0: {
                     if (this.direction === 'vertical') {
                         if (height - pos.y > this.minSize) {
@@ -158,31 +162,42 @@ let component = {
             let newRealMaxY = this.scaleViewToReal(this.bottomPosY);
             this.handleRealY && this.handleRealY(newRealMinY, newRealMaxY);
         },
-        scaleViewToReal: function(value) {
+        scaleViewToReal: function (value) {
             let real = scaleLinear()
                 .domain([0, this.$parent.viewHeight])
                 .range([this.$parent.realMinY, this.$parent.realMaxY]);
             return real(value);
         },
-        scaleRealToView: function(value) {
+        scaleRealToView: function (value) {
             let view = scaleLinear()
                 .domain([this.$parent.realMinY, this.$parent.realMaxY])
                 .range([0, this.$parent.viewHeight]);
             return view(value);
         }
     },
-    mounted() {
-        let zoneHeight = (this.realMaxY - this.realMinY) / (this.$parent.realMaxY - this.$parent.realMinY) * this.$parent.viewHeight;
-
-        let view = scaleLinear()
-                .domain([this.$parent.realMinY, this.$parent.realMaxY])
-                .range([0, this.$parent.viewHeight]);
-
-        //  Vue warn
-        
-        this.topPosY = view(this.realMinY);
-        this.bottomPosY = this.topPosY + this.height;
-    }
+    watch: {
+        '$parent.viewHeight': function () {
+            this.topPosY = this.$parent.transformY(this.realMinY);
+            this.bottomPosY = this.topPosY + this.height;
+            console.log(this.$parent.viewHeight);
+        },
+        isSelected: function (newValue, oldValue) {
+            console.log("VXone", newValue, oldValue);
+            let pixiObj = this.getPixiObj();
+            pixiObj.clear();
+            let lw = parseInt(this.lineWidth);
+            lw = isNaN(lw) ? 0 : lw;
+            pixiObj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
+            if (newValue) {
+                pixiObj.beginFill(this.cFillColor.color, 0.7);
+            } else {
+                pixiObj.beginFill(this.cFillColor.color, this.cFillColor.transparency);
+            }
+            pixiObj.drawRect(0, 0, this.width, this.height);
+            pixiObj.endFill();
+        }
+    },
+    mixins: [selectable]
 }
 
 let VXone = VResizable.extend(component);
