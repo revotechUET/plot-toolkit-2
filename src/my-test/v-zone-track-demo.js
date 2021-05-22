@@ -60,23 +60,59 @@ new Vue({
                         :enabled="true"
                         zone-header-label="zone"
                     >
-                        <v-xone v-for="(zone, idx) in listZone"
-                            :key="idx"
+                        <v-xone
                             :knob-flags="[true, true]"
-                            :fill-color="zone.fillColor"
-                            :name="zone.label" 
+                            :fill-color="fillColor1"
+                            :name="label1" 
                             direction="vertical"
-                            :real-min-y="zone.realMinY"
-                            :real-max-y="zone.realMaxY"
+                            :real-min-y="realMinY1"
+                            :real-max-y="realMaxY1"
+                            x-transform="none"
                             y-transform="linear"
+                            :handleRealY="handleRealY1"
+                            :view-width="trackViewWidth"
                             :line-width="1"
                             :line-color="0x888888"
-                            :content="zone.label"
+                            :content="label1"
                             :content-style="style"
                             :no-label="false"
                             :no-fill="false"
+                        />
+                        <v-xone
+                            :knob-flags="[true, true]"
+                            :fill-color="fillColor3"
+                            :name="label3" 
+                            direction="vertical"
+                            :real-min-y="realMinY3"
+                            :real-max-y="realMaxY3"
                             x-transform="none"
+                            y-transform="linear"
+                            :handleRealY="handleRealY3"
                             :view-width="trackViewWidth"
+                            :line-width="3"
+                            :line-color="0x888888"
+                            :content="label3"
+                            :content-style="style"
+                            :no-label="false"
+                            :no-fill="false"
+                        />
+                        <v-xone
+                            :knob-flags="[true, true]"
+                            :fill-color="fillColor2"
+                            :name="label2" 
+                            direction="vertical"
+                            :real-min-y="realMinY2"
+                            :real-max-y="realMaxY2"
+                            x-transform="none"
+                            y-transform="linear"
+                            :handleRealY="handleRealY2"
+                            :view-width="trackViewWidth"
+                            :line-width="2"
+                            :line-color="0x888888"
+                            :content="label2"
+                            :content-style="style"
+                            :no-label="false"
+                            :no-fill="false"
                         />
                     </v-track-2>
                 </v-layer>
@@ -106,53 +142,24 @@ new Vue({
             tooltipStyle: {
                 fontSize: 13,
             },
-            listZone: [
-                {label: 'abc', realMinY: 0, realMaxY: 1000, fillColor: '0xCCFFCC'},
-                {label: 'def', realMinY: 2000, realMaxY: 3000, fillColor: '0xAABBFF'},
-                {label: 'ghi', realMinY: 4000, realMaxY: 4500, fillColor: '0xAABBFF'},
-            ]
+            label1: 'abc',
+            realMinY1: 0,
+            realMaxY1: 1500,
+            fillColor1: '0xCCFFCC',
+
+            label2: 'def',
+            realMinY2: 2000,
+            realMaxY2: 2500,
+            fillColor2: '0xCCAA00',
+
+            label3: 'ghi',
+            realMinY3: 2500,
+            realMaxY3: 5000,
+            fillColor3: '0xCCFF00'
         }
     },
     computed: {
-        realPathObjFormat1: function () {
-            if (this.realPath1[0].x || this.realPath2[0].y) {
-                return this.realPath1;
-            }
-            let res = [];
-            for (let i = 0; i < this.realPath1.length; i += 2) {
-                res.push({
-                    x: this.realPath1[i],
-                    y: this.realPath1[i + 1]
-                })
-            }
-            return res;
-        },
-        realPathObjFormat2: function () {
-            if (this.realPath2[0].x || this.realPath2[x].y) {
-                return this.realPath2;
-            }
-            let res = [];
-            for (let i = 0; i < this.realPath2.length; i += 2) {
-                res.push({
-                    x: this.realPath2[i],
-                    y: this.realPath2[i + 1]
-                });
-            }
-            return res;
-        },
-        myPallete: function () {
-            return Pallete["content"];
-        },
-        myData1: function () {
-            let res = [];
-            for (let i = 0; i < dataPolygon.length; i += 2) {
-                res.push({
-                    x: dataPolygon[i],
-                    y: dataPolygon[i + 1]
-                });
-            }
-            return res;
-        }
+
     },
     methods: {
         trackResize: function ({ width, height }, comp) {
@@ -174,6 +181,18 @@ new Vue({
                 fillTransparency: 0.3,
                 tooltipPosY: this.trackHeaderHeight
             });
+        },
+        handleRealY1: function(realMinY, realMaxY) {
+            this.realMinY1 = realMinY;
+            this.realMaxY1 = realMaxY;
+        },
+        handleRealY2: function(realMinY, realMaxY) {
+            this.realMinY2 = realMinY;
+            this.realMaxY2 = realMaxY;
+        },
+        handleRealY3: function(realMinY, realMaxY) {
+            this.realMinY3 = realMinY;
+            this.realMaxY3 = realMaxY;
         }
     },
     components: {

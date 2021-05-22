@@ -28,8 +28,8 @@ let component = {
         trackHeaderResize: Function,
         genTooltip: Function,
         zoneHeaderLabel: String,
-        viewPortRealMinY: String,
-        viewPortRealMaxY: String,
+        viewPortRealMinY: Number,
+        viewPortRealMaxY: Number,
     },
     computed: {
         componentType: function () {
