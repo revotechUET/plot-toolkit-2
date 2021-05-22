@@ -13,6 +13,7 @@ import {
     getPosY
 } from "../utils";
 import template from './template.html';
+import selectable from '../mixins/selectable';
 import { Texture, utils } from "pixi.js";
 
 async function draw(obj) {
@@ -376,7 +377,6 @@ let component = {
         "backgroundColorList",
         "fillPatternList",
         "pallete",
-        "isShading",
         "curveLowValue",
         "curveHighValue"
     ],
@@ -426,15 +426,6 @@ let component = {
         componentType: function () {
             return "VShading";
         },
-        watchedKeys: function () {
-            let arr = Object.keys(this.$props);
-            let shadingIdx = arr.indexOf("isShading");
-            if (shadingIdx >= 0) {
-                arr.splice(shadingIdx, 1);
-                return arr;
-            }
-            return arr;
-        }
     },
     methods: {
         draw,
@@ -446,14 +437,10 @@ let component = {
             obj.drawPolygon(res);
         }
     },
-    watch: {
-        isShading: function () {
-            this.$children.forEach(child => child.makeScene());
-        }
-    },
     components: {
         VRect, VPath
-    }
+    },
+    mixins: [selectable]
 };
 
 export default VShape.extend(component);

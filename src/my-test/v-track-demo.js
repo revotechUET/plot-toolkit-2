@@ -48,11 +48,12 @@ new Vue({
                         >
                         <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
                             name="HIHIHI"
+                            :view-height="scaleTrackHeight"
                             :view-width="trackViewWidth">
                         </v-curve>
                         <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
                             :left-value="10" :right-value="20" unit="V/V"
-                            :view-width="trackViewWidth">
+                            :view-width="trackViewWidth" :view-height="scaleTrackHeight">
                         </v-curve>
                         <v-shading
                             :view-pos-x="0" :view-pos-y="0"
@@ -60,7 +61,7 @@ new Vue({
                             :curve-low-value="9" :curve-high-value="10"
                             :real-min-x="realMinX" :real-max-x="realMaxX"
                             :real-min-y="realMinY" :real-max-y="realMaxY"
-                            :view-width="trackViewWidth"
+                            :view-width="trackViewWidth" :view-height="scaleTrackHeight"
                             x-transform="linear" y-transform="linear"
                             :real-right="realPath1" :real-left="14.01"
                             cursor="crosshair"
@@ -99,7 +100,7 @@ new Vue({
                             name="Test" :is-shading="shading2"
                             :real-min-x="realMinX" :real-max-x="realMaxX"
                             :real-min-y="realMinY" :real-max-y="realMaxY"
-                            :view-width="trackViewWidth2"
+                            :view-width="trackViewWidth2" :view-height="scaleTrackHeight"
                             x-transform="linear" y-transform="linear"
                             :real-right="14.01" :real-left="realPath1"
                             cursor="crosshair"
@@ -118,7 +119,7 @@ new Vue({
                             name="Test 2" :is-shading="shading2"
                             :real-min-x="realMinX" :real-max-x="realMaxX"
                             :real-min-y="realMinY" :real-max-y="realMaxY"
-                            :view-width="trackViewWidth2"
+                            :view-width="trackViewWidth2" :view-height="scaleTrackHeight"
                             x-transform="linear" y-transform="linear"
                             :real-right="realPath2" :real-left="realPath1"
                             cursor="crosshair"
@@ -135,7 +136,7 @@ new Vue({
                         <v-curve :real-path="realPath2" :symbol-color="0xFF0000"
                             name="hehe"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
-                            :view-width="trackViewWidth2">
+                            :view-width="trackViewWidth2" :view-height="scaleTrackHeight">
                         </v-curve>
                     </v-track>
                     <v-resizable
@@ -148,6 +149,7 @@ new Vue({
                     </v-resizable>
                     <v-track
                         name="vtrack3"
+                        :track-children="childCount"
                         :gen-tooltip="genTooltip"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth3" :view-height="viewHeight"
@@ -165,14 +167,19 @@ new Vue({
                         cursor="crosshair"
                         :enabled="true"
                         >
-                        <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
-                            name="hehe"
+                        <v-curve v-for="(path, idx) in pathList"
+                            :key="idx" :real-path="path" :symbol-color="0xFF0000"
+                            :name="idx % 2 === 0 ? 'Alice' : 'Bob'"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
-                            :view-width="trackViewWidth3">
+                            :view-width="trackViewWidth3" :view-height="scaleTrackHeight"
+                            @vMounted="childrenChanged"
+                            @vDestroyed="childrenChanged">
                         </v-curve>
                     </v-track>
                 </v-layer>
         </v-scene>
+        <button @click="addPath">Add Path to Track 3</button>
+        <button @click="removePath">Remove Path to Track 3</button>
     </fragment>`,
     data: function () {
         return {
@@ -266,6 +273,40 @@ new Vue({
                 { x: 29, y: 8500 },
                 { x: 20, y: 8800 },
             ],
+            pathList: [
+                [
+                    { x: 19, y: 400 },
+                    { x: 22.05, y: 620 },
+                    { x: 23, y: 900 },
+                    { x: 25, y: 1000 },
+                    { x: 28.32, y: 1200 },
+                    { x: 23, y: 1600 },
+                    { x: 18.5, y: 2000 },
+                    { x: 20.32, y: 2500 },
+                    { x: 21.32, y: 2800 },
+                    { x: 18.32, y: 3200 },
+                    { x: 21.32, y: 3400 },
+                    { x: 17, y: 3700 },
+                    { x: 29, y: 4000 },
+                    { x: 20, y: 4300 },
+                    { x: 15, y: 4900 },
+                    { x: 23.32, y: 5150 },
+                    { x: 18.5, y: 5350 },
+                    { x: 25, y: 5500 },
+                    { x: 28.32, y: 5700 },
+                    { x: 23, y: 6100 },
+                    { x: 18.5, y: 6500 },
+                    { x: 20.32, y: 7000 },
+                    { x: 21.32, y: 7300 },
+                    { x: 18.32, y: 7700 },
+                    { x: 21.32, y: 7900 },
+                    { x: 17, y: 8200 },
+                    { x: 29, y: 8500 },
+                    { x: 20, y: 8800 },
+                ]
+            ],
+            childCount: 1,
+            scaleTrackHeight: 0
         }
     },
     computed: {
@@ -298,16 +339,6 @@ new Vue({
         myPallete: function () {
             return Pallete["content"];
         },
-        myData1: function () {
-            let res = [];
-            for (let i = 0; i < dataPolygon.length; i += 2) {
-                res.push({
-                    x: dataPolygon[i],
-                    y: dataPolygon[i + 1]
-                });
-            }
-            return res;
-        }
     },
     methods: {
         trackResize: function ({ width, height }, comp) {
@@ -343,6 +374,29 @@ new Vue({
                 tooltipPosY: comp.$children[0].viewPosY + 10
             });
         },
+        addPath: function () {
+            let arr = [];
+            for (let i = 0; i < 28; i++) {
+                arr.push({
+                    x: this.realMinX + Math.random() * (this.realMaxX - this.realMinX),
+                    y: this.realPath1[i].y
+                })
+            }
+            this.pathList.push(arr);
+        },
+        removePath: function () {
+            if (this.pathList.length === 0) return;
+            this.pathList.pop();
+        },
+        childrenChanged: function () {
+            console.log("child changed");
+            this.childCount = this.pathList.length;
+        }
+    },
+    mounted: function () {
+        const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
+            / (this.trackRealMaxY - this.trackRealMinY);
+        this.scaleTrackHeight = y;
     },
     components: {
         Fragment, VScene, VTrack, VRect,

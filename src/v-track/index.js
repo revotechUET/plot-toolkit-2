@@ -2,6 +2,7 @@ import { Fragment } from 'vue-fragment';
 import { Text } from 'pixi.js';
 import VPath from '../v-path';
 import VRect from '../v-rect';
+import { VRectFactory } from '../v-rect';
 import VContainer from '../v-container';
 import VResizable from '../v-resizable';
 import VViewport from '../v-viewport';
@@ -10,6 +11,7 @@ import VTextbox from '../v-textbox';
 import VHeaderCurve from '../v-header-curve';
 import template from './template.html';
 import VShape from '../v-shape';
+import selectable from '../mixins/selectable';
 import pattern from '../main/pattern_sample.json';
 import { scaleLinear } from 'd3';
 
@@ -21,9 +23,9 @@ let component = {
         trackRealMaxY: {
             type: Number
         },
-        trackHeaderFillColor: {
-            default: 0xFFFFFF
-        },
+        // trackHeaderFillColor: {
+        //     default: 0xFFFFFF
+        // },
         trackHeaderHeight: {
             type: Number,
             default: 100
@@ -41,25 +43,27 @@ let component = {
         direction: {
             type: String,
             default: "horizontal"
+        },
+        trackChildren: {
+            type: Number
         }
     },
     computed: {
         componentType: function () {
             return "VTrack";
         },
-        checkShading: function () {
-            let check = false;
-            this.visualizeItems.forEach(item => {
-                item.shading ? check = item.shading : check;
-            })
-            return check;
+        getTrackChildren: function () {
+            console.log(this.$refs);
+            return this.$refs.trackChildren.$children;
         },
+        checkShading: function () {
+            return this.selectionStates.some(item => item);
+        }
     },
     data: function () {
         return {
             kursor: "default",
             scaleTrackHeight: 0,
-            trackChilren: null,
             trackHeaderChildrenHeight: 0,
             headerContentStyle: {
                 fontFamily: 'Arial',
@@ -68,47 +72,38 @@ let component = {
                 padding: 5,
                 fontSize: 13,
             },
+            selectionStates: [],
             childrenHeaderPosYList: [0],
-            shadingColor: '',
-            visualizeItems: [],
-            pathList: []
+            nChildren: 0
         }
     },
     template,
     components: {
         VPath, VRect, VResizable, VViewport, VHeaderCurve,
         VContainer, VCartersian, Fragment, VTextbox, VShape,
-        VCartersianExtMouse: VCartersianFactory({ extMouseListener: true })
+        VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
+        VRectWithMountedEvent: VRectFactory({ onMounted: true })
     },
     methods: {
         childHighlight: function (target, localPos, globalPos, evt) {
             let name = target.hostComponent.name.split(" ");
             let idx = Number(name[name.length - 1]);
-            let compType = this.visualizeItems[idx]["comp"];
-            console.log(compType);
-            let comp = this.$refs.trackChildren.$children[idx];
-            if (!this.visualizeItems[idx].shading) {
-                this.visualizeItems = this.visualizeItems.map((item, index) => {
-                    return {
-                        ...item,
-                        shading: index !== idx ? false : true
-                    }
-                });
-                this.shadingColor = this.visualizeItems[idx].color;
-                this.pathList = [];
-                switch (compType) {
-                    case "VShading":
-                        this.pathList.push(comp.shadingPathLeft, comp.shadingPathRight);
-                        break;
-                    case "VPath":
-                    case "VCurve":
-                        this.pathList.push(comp.realPath);
-                        break;
-                }
+            if (!this.selectionStates[idx]) {
+                this.selectionStates = this.selectionStates.map((item, index) => {
+                    this.$refs.trackChildren.$children[index].isSelected = index !== idx ? false : true;
+                    return index === idx ? true : false
+                })
+
             } else {
-                this.visualizeItems[idx].shading = false;
-                this.pathList = [];
+                this.selectionStates.splice(idx, 1, false);
+                this.$refs.trackChildren.$children[idx].isSelected = false;
             }
+        },
+        onRefsReady: function () {
+            if (this.$refs.trackChildren) {
+                return this.$refs.trackChildren.$children;
+            }
+            return []
         },
         textWidth: function (content) {
             let text = new Text(content);
@@ -123,9 +118,9 @@ let component = {
         onTrackMouseDown: function (target, localPos, globalPos, evt) {
             let { x, y } = localPos;
             let pixelPathLeft, pixelPathRight, pixelPath, child;
-            let xPos;
-            for (let i = 0; i < this.$refs.trackChildren.$children.length; i++) {
-                child = this.$refs.trackChildren.$children[i];
+            let xPos, children = this.$refs.trackChildren.$children;
+            for (let i = 0; i < children.length; i++) {
+                child = children[i];
                 switch (child.componentType) {
                     case "VShading":
                         let idx = null;
@@ -142,14 +137,10 @@ let component = {
                                 let { a, b } = this.getLinearLine(pixelPathRight[idx], pixelPathRight[idx + 1]);
                                 let x1 = (y - b) / a;
                                 if ((xPos < x && x < x1) || (xPos > x && x > x1)) {
-                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
-                                        return { ...child, shading: idx === i ? true : false }
+                                    this.selectionStates = this.selectionStates.map((child, idx) => {
+                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
+                                        return idx === i ? true : false
                                     });
-                                    this.pathList.splice(0, this.pathList.length, [
-                                        { x: child.realLeft, y: child.realRight[0].y },
-                                        { x: child.realLeft, y: child.realRight[child.realRight.length - 1].y }
-                                    ], child.realRight);
-                                    this.shadingColor = this.visualizeItems[i].color;
                                     return;
                                 }
                             }
@@ -166,14 +157,10 @@ let component = {
                                 let { a, b } = this.getLinearLine(pixelPathLeft[idx], pixelPathLeft[idx + 1]);
                                 let x1 = (y - b) / a;
                                 if (xPos < x && x < x1 || (xPos > x && x > x1)) {
-                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
-                                        return { ...child, shading: idx === i ? true : false }
+                                    this.selectionStates = this.selectionStates.map((child, idx) => {
+                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
+                                        return idx === i ? true : false
                                     });
-                                    this.pathList.splice(0, this.pathList.length, [
-                                        { x: child.realRight, y: child.realLeft[0].y },
-                                        { x: child.realRight, y: child.realLeft[child.realLeft.length - 1].y }
-                                    ], child.realLeft);
-                                    this.shadingColor = this.visualizeItems[i].color;
                                     return;
                                 }
                             }
@@ -192,11 +179,10 @@ let component = {
                                 let x1 = Math.min((y - b1) / a1, (y - b2) / a2);
                                 let x2 = Math.max((y - b1) / a1, (y - b2) / a2);
                                 if (x1 < x && x < x2) {
-                                    this.visualizeItems = this.visualizeItems.map((child, idx) => {
-                                        return { ...child, shading: idx === i ? true : false }
+                                    this.selectionStates = this.selectionStates.map((child, idx) => {
+                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
+                                        return idx === i ? true : false
                                     });
-                                    this.pathList.splice(0, this.pathList.length, child.realLeft, child.realRight);
-                                    this.shadingColor = this.visualizeItems[i].color;
                                     return;
                                 }
                             }
@@ -216,24 +202,20 @@ let component = {
                             let distance2 = Math.sqrt(Math.pow(x - pixelPath[index + 1].x, 2) + Math.pow(y - pixelPath[index + 1].y, 2));
                             console.log(distance1, distance2);
                             if (distance1 <= 4 || distance2 <= 4) {
-                                this.visualizeItems = this.visualizeItems.map((child, idx) => {
-                                    return { ...child, shading: idx === i ? true : false }
+                                this.selectionStates = this.selectionStates.map((child, idx) => {
+                                    this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
+                                    return idx === i ? true : false
                                 });
-                                this.pathList.splice(0, this.pathList.length, child.realPath);
-                                this.shadingColor = this.visualizeItems[i].color;
                                 return;
                             }
                         }
                         break;
                 }
             }
-            this.visualizeItems = this.visualizeItems.map(item => {
-                return {
-                    ...item,
-                    shading: false
-                }
+            this.selectionStates = this.selectionStates.map((child, idx) => {
+                this.$refs.trackChildren.$children[idx].isSelected = false;
+                return false;
             });
-            this.pathList = [];
         },
         getPosX: function (posX) {
             return this.$refs.viewportBody.transformX(posX);
@@ -256,35 +238,22 @@ let component = {
             num ? res[`a${num}`] = a : res['a'] = a;
             num ? res[`b${num}`] = b : res['b'] = b;
             return res;
-        }
-    },
-    mounted: function () {
-        if (this.trackRealMinY >= this.trackRealMaxY) {
-            throw new Error(`Error in VTrack with range: ${this.trackRealMinY} and ${this.trackRealMaxY}`);
-        }
-        console.log("Track draw");
-        let children = this.$refs.trackChildren.$children;
-        const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
-            / (this.trackRealMaxY - this.trackRealMinY);
-        this.scaleTrackHeight = y;
-        let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
-        this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
-
-        let compProp = "", height = 0, obj;
-        this.visualizeItems.push(...children.map((child, idx) => {
-            compProp = child.componentType;
-            height = compProp === "VShading" ? 30 : 60;
+        },
+        getVisualizeItem: function (component, idx) {
+            let compProp = component.componentType;
+            let height = compProp === "VShading" ? 30 : 60;
             this.trackHeaderChildrenHeight += height;
-            idx === 0 ? this.childrenHeaderPosYList.push(height) : this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[idx]);
-            obj = {
+            idx === 0 ? this.childrenHeaderPosYList.push(height) :
+                this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[idx]);
+            let obj = {
                 comp: compProp,
                 height,
-                name: child.name || compProp,
-                color: child.symbolColor,
-                shading: false
+                name: component.name || compProp,
+                color: component.symbolColor,
+                selected: false
             }
             if (compProp === "VCurve") {
-                let { lineDash, leftValue, rightValue, unit } = child;
+                let { lineDash, leftValue, rightValue, unit } = component;
                 return {
                     ...obj,
                     leftValue,
@@ -295,10 +264,10 @@ let component = {
                 }
             }
             if (compProp === "VShading") {
-                let { minColor, maxColor, typeFillColor, pallete,
-                    customFillValues, foregroundColorList,
+                let { minColor, maxColor, typeFillColor,
+                    pallete, foregroundColorList,
                     backgroundColorList, fillPatternList,
-                    curveLowValue, curveHighValue } = child;
+                    curveLowValue, curveHighValue } = component;
                 obj = {
                     ...obj,
                     minColor,
@@ -319,10 +288,53 @@ let component = {
                 }
             }
             return obj;
-        }));
-        this.childrenHeaderPosYList.pop();
+        }
+    },
+    mounted: function () {
+        if (this.trackRealMinY >= this.trackRealMaxY) {
+            throw new Error(`Error in VTrack with range: ${this.trackRealMinY} and ${this.trackRealMaxY}`);
+        }
+        console.log("Track draw");
+        let children = this.$refs.trackChildren.$children;
+        this.nChildren = children.length;
+        this.selectionStates.push(...children.map(child => false));
+        //calculate offset for viewport
+        const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
+            / (this.trackRealMaxY - this.trackRealMinY);
+        this.scaleTrackHeight = y;
 
-    }
+        let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
+        this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
+
+        let height;
+        for (let i = 0; i < children.length; i++) {
+            height = children[i].componentType === 'VCurve' ? 60 : 30;
+            this.trackHeaderChildrenHeight += height;
+            i === 0 ? this.childrenHeaderPosYList.push(height) :
+                this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[i]);
+        };
+        this.childrenHeaderPosYList.pop();
+    },
+    watch: {
+        trackChildren: function (newValue, oldValue) {
+            this.nChildren = this.$refs.trackChildren.$children.length;
+            let height;
+            if (newValue > oldValue) {
+                let newChild = this.$refs.trackChildren.$children[this.nChildren - 1];
+                height = newChild.componentType === 'VCurve' ? 60 : 30;
+                this.trackHeaderChildrenHeight += height;
+                oldValue !== 0 && this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[oldValue - 1]);
+                this.selectionStates.push(false);
+            } else {
+                this.trackHeaderChildrenHeight = this.childrenHeaderPosYList[oldValue - 1];
+                if (this.childrenHeaderPosYList.length !== 1) {
+                    this.childrenHeaderPosYList.pop();
+                }
+                this.selectionStates.pop();
+            }
+        }
+    },
+    mixins: [selectable]
 }
 
 export default VResizable.extend(component);

@@ -92,6 +92,7 @@ let component = {
             await this.makeScene();
             this.registerEvents();
         });
+        this.$emit('vMounted')
     },
     beforeDestroy: function () {
         this.cleanUp();
@@ -100,6 +101,7 @@ let component = {
         if (this.constrained) {
             this.$parent.relayout();
         }
+        this.$emit('vDestroyed');
     },
     computed: {
         watchedKeys: function () {
