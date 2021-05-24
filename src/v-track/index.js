@@ -23,9 +23,10 @@ let component = {
         trackRealMaxY: {
             type: Number
         },
-        // trackHeaderFillColor: {
-        //     default: 0xFFFFFF
-        // },
+        grid: {
+            type: Boolean,
+            default: true
+        },
         trackHeaderHeight: {
             type: Number,
             default: 100
@@ -208,6 +209,17 @@ let component = {
                                 });
                                 return;
                             }
+                        }
+                        break;
+                    case "VZone":
+                        let topPosY = this.getPosY(child.realMinY);
+                        let bottomPosY = this.getPosY(child.realMaxY);
+                        if (topPosY < y && y < bottomPosY) {
+                            this.selectionStates = this.selectionStates.map((child, idx) => {
+                                this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
+                                return idx === i ? true : false
+                            });
+                            return;
                         }
                         break;
                 }
