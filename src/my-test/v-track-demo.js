@@ -9,7 +9,7 @@ import VPath from '../v-path';
 import VCurve from '../v-curve';
 import Pallete from '../main/pallete.json';
 import VLayer from '../v-layer';
-import dataPolygon from '../main/data-polygon';
+import ContextMenu from '../context-menu';
 import VXone from '../v-xone';
 
 new Vue({
@@ -31,6 +31,7 @@ new Vue({
                     <v-track
                         name="Zone Track" :grid="false"
                         :gen-tooltip="genTooltip"
+                        :after-mouse-down="contextMenuHandler"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth" :view-height="viewHeight"
                         :on-resize="trackResize"
@@ -104,8 +105,8 @@ new Vue({
                         </v-shading>
                     </v-track>
                     <v-track
-                        name="vtrack1" 
-                        :gen-tooltip="genTooltip"
+                        name="vtrack1" :after-mouse-down="contextMenuHandler"
+                        :gen-tooltip="genTooltip" :track-title-fill-color="0xF0F0F0"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth2" :view-height="viewHeight"
                         :on-resize="trackResize2"
@@ -168,15 +169,16 @@ new Vue({
                     </v-track>
                     <v-resizable
                         :view-pos-x="trackViewWidth + trackViewWidth2" :view-pos-y="-trackHeaderHeight"
-                        direction="horizontal"
+                        direction="horizontal" :enabled="true"
+                        :onmousedown="onDeleteContext"
                         :view-width="width" :view-height="viewHeight"
                         :knob-flags="[false, true]" :size="5"
                         :fill-color="0xf2f2f2" :fill-transparency="1"
                         :on-resize="resize">
                     </v-resizable>
                     <v-track
-                        name="vtrack3"
-                        :track-children="childCount"
+                        name="vtrack3" :after-mouse-down="contextMenuHandler"
+                        :track-children="childCount" :track-title-fill-color="0xF0F000"
                         :gen-tooltip="genTooltip"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth3" :view-height="viewHeight"
@@ -207,6 +209,10 @@ new Vue({
         </v-scene>
         <button @click="addPath">Add Path to Track 3</button>
         <button @click="removePath">Remove Path to Track 3</button>
+        <context-menu 
+            v-if="contextFlag" :context-type="contextType"
+            :context-pos-x="contextMenuPosX" :context-pos-y="contextMenuPosY"
+        />
     </fragment>`,
     data: function () {
         return {
@@ -215,6 +221,10 @@ new Vue({
             style: {
                 fontSize: 13
             },
+            contextFlag: false,
+            contextType: '',
+            contextMenuPosX: 0,
+            contextMenuPosY: 0,
             trackRealMinY: 1000,
             trackRealMaxY: 3000,
             viewWidth: 200,
@@ -385,6 +395,19 @@ new Vue({
         },
     },
     methods: {
+        contextMenuHandler: function (evt, contextType, typeMouseDown) {
+            if (typeMouseDown === 0) {
+                this.contextFlag = false;
+                return;
+            }
+            this.contextFlag = true;
+            this.contextType = contextType;
+            this.contextMenuPosX = evt.data.global.x;
+            this.contextMenuPosY = evt.data.global.y;
+        },
+        onDeleteContext: function () {
+            this.contextFlag = false;
+        },
         trackResize: function ({ width, height }, comp) {
             this.trackViewWidth = width;
             this.$refs.myLayer.tooltips.splice(0);
@@ -406,8 +429,7 @@ new Vue({
         },
         genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
             let localPos = comp.pixiObj.toLocal(globalPos);
-            const width = comp.$children[0].viewWidth;
-            let xCoord = comp.transformX.invert(localPos.x);
+            const width = comp.viewWidth;
             let yCoord = comp.transformY.invert(localPos.y);
             comp.signal('tooltip-on', comp, {
                 content: ` y: ${yCoord.toFixed(4)}`,
@@ -455,7 +477,7 @@ new Vue({
         this.scaleTrackHeight = y;
     },
     components: {
-        Fragment, VScene, VTrack, VRect,
-        VShading, VPath, VCurve, VLayer, VResizable, VXone
+        Fragment, VScene, VTrack, VRect, ContextMenu,
+        VShading, VPath, VCurve, VLayer, VResizable, VXone,
     }
 })

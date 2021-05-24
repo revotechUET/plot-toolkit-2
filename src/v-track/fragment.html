@@ -3,7 +3,7 @@
     <v-rect :view-pos-x="0" :view-pos-y="0"
         :view-width="viewWidth" :view-height="20"
         :line-width="0.5" line-color="0x010101"
-        :fill-color="0x3366ff"> <!-- TO BE CHANGED  -->
+        :fill-color="trackTitleFillColor"> <!-- TO BE CHANGED  -->
         <v-textbox :content="name"
             :content-style="headerContentStyle"
             :view-pos-x="viewWidth/2 - textWidth(name)/2"
@@ -23,6 +23,7 @@
             line-color="0x000000" :line-width="1">
             <!-- TO BE CHANGED: tao 1 class moi v-item-header => track header visualize items -->
             <v-rect
+                v-if="trackType !== 'Depth Track'"
                 v-for="(child, idx) in onRefsReady()" 
                 :key = "child.name + ' ' + idx" :name="child.componentType + ' ' + idx"
                 :view-pos-x="0" :view-pos-y="childrenHeaderPosYList[idx]"
@@ -92,7 +93,7 @@
                     <v-textbox
                         v-if="child.componentType === 'VZone'"
                         :content="child.name || child.componentType + ' ' + idx" :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
-                        :fill-transparency="1"selected
+                        :fill-transparency="1"
                         line-color="0x010101" :line-width="1"
                         :view-width="textWidth(child.name || child.componentType + ' ' + idx) + 10"
                         :view-height="textHeight(child.name || child.componentType + ' ' + idx)"
@@ -101,6 +102,24 @@
                         :view-pos-y="15 - textHeight(child.name || child.componentType + ' ' + idx) / 2"
                     />
             </v-rect>
+            <fragment v-if="trackType === 'Depth Track'">
+                <v-textbox
+                    :content="unit || 'M'"
+                    :view-width="textWidth(unit || 'M')"
+                    :view-height="textHeight(unit || 'M')"
+                    :content-style="headerContentStyle"
+                    :view-pos-x="viewWidth/2 - textWidth(unit || 'M')/2"
+                    :view-pos-y="5"
+                />
+                <v-textbox
+                    :content="cRatioScreen"
+                    :view-width="textWidth(cRatioScreen)"
+                    :view-height="textHeight(cRatioScreen)"
+                    :content-style="headerContentStyle"
+                    :view-pos-x="viewWidth/2 - textWidth(cRatioScreen)/2"
+                    :view-pos-y="textHeight(unit || 'M') + 10"
+                />
+            </fragment>
         </v-viewport>
     </v-resizable>
     <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight"
@@ -112,13 +131,14 @@
         :real-min-x="realMinX" :real-max-x="realMaxX"
         :real-min-y="realMinY" :real-max-y="realMaxY">
         <v-cartersian-ext-mouse
+            v-if="trackType !== 'Depth Track'"
             :view-pos-x="0" :view-pos-y="0"
             :name="name" :grid="grid"
             :view-width="viewWidth" :view-height="scaleTrackHeight"
             :real-min-x="realMinX" :real-max-x="realMaxX"
             :real-min-y="realMinY" :real-max-y="realMaxY"
-            :fill-color="checkShading ? '0xF0F000' : '0xFFFFFF'"
-            :fill-transparency="checkShading ? 0.2 : 1"
+            :fill-color="checkSelected ? '0xF0F000' : '0xFFFFFF'"
+            :fill-transparency="checkSelected ? 0.2 : 1"
             :enabled="true" cursor="crosshair"
             :x-transform="xTransform" :y-transform="yTransform"
             line-color="0x000000" :line-width="1"
@@ -136,12 +156,19 @@
                 fill-color="0xFFFFFF" :fill-transparency="0.001">
                 <slot />
             </v-rect-with-mounted-event>
-            <!-- <v-path v-for="(path, idx) in pathList" :key="idx"
-                :symbol-color="shadingColor" :view-width="viewWidth"
-                :real-path="path" :line-width="3" 
-                :line-transparency="0.3" 
-                :selected-offset-x="-2" :selected-offset-y="-2">
-            </v-path> -->
         </v-cartersian-ext-mouse>
+        <v-axis-ext-mouse
+            v-if="trackType === 'Depth Track'"
+            clipped="true" axis="y" 
+            :view-width="viewWidth" :view-height="scaleTrackHeight" 
+            :real-min-y="realMinY" :real-max-y="realMaxY" 
+            :y-transform="yTransform" :x-transform="xTransform"
+            :grid="false" :on-ext-mouse-pos="genTooltip"
+            :major-tick-length="majorTickLength/minorTicks || 5" :minor-ticks="1" 
+            :line-width="lineWidth" :line-color="lineColor"
+            :fill-color="fillColor || 0xFFFFFF" :tick-precision="1"
+            tick-label-position="middle"
+            cursor="crosshair" :enabled="true"
+            />
     </v-viewport>
 </fragment>

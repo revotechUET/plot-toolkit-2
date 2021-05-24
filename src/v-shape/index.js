@@ -88,7 +88,7 @@ function registerEvents(_pixiObj) {
     pixiObj
         .on("mouseover", handleMouseOver)
         .on("mouseout", handleMouseOut)
-        .on("mousedown", handleMouseDown)
+        .on("pointerdown", handleMouseDown)
         .on("mouseup", handleMouseUp)
         .on("mouseupoutside", handleMouseUp)
         .on("mousemove", handleMouseMove);
