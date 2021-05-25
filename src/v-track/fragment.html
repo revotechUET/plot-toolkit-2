@@ -3,6 +3,10 @@
     <v-rect :view-pos-x="0" :view-pos-y="0"
         :view-width="viewWidth" :view-height="20"
         :line-width="0.5" line-color="0x010101"
+        :enabled="true" :draggable="true"
+        cursor="all-scroll"
+        :on-drag="onTitleDrag"
+        :onmousemove="onTitleDragMove"
         :fill-color="trackTitleFillColor"> <!-- TO BE CHANGED  -->
         <v-textbox :content="name"
             :content-style="headerContentStyle"
@@ -28,12 +32,6 @@
                 :key = "child.name + ' ' + idx" :name="child.componentType + ' ' + idx"
                 :view-pos-x="0" :view-pos-y="childrenHeaderPosYList[idx]"
                 :enabled="true"
-                :type-fill-color="child.typeFillColor"
-                :foreground-color="child.foregroundColor"
-                :background-color="child.backgroundColor"
-                :image-pattern-url="child.imagePatternUrl"
-                :min-color="child.minColor" :max-color="child.maxColor"
-                :pallete="child.pallete"
                 :view-width="viewWidth" :view-height="child.componentType === 'Curve' ? 60: 30"
                 :fill-color="child.componentType !== 'VZone' ? '0xFFFFFF' : child.fillColor" 
                 x-transform="none" y-transform="none"
@@ -41,41 +39,24 @@
                 line-color="0x080808" :line-width="1"
                 :line-transparency="child.componentType !== 'VCurve' ? 1 : 0"
                 :onmousedown="childHighlight">
-                    <fragment v-if="child.componentType === 'VShading'">
-                        <v-textbox 
-                            v-if="child.curveLowValue"
-                            :content="child.curveLowValue" :fill-color="0xFFFFFF"
-                            :fill-transparency="1" 
-                            :line-color="0x101010" :line-width="1"
-                            :content-style="headerContentStyle"
-                            :view-width="textWidth(child.curveLowValue) + 5"
-                            :view-height="textHeight(child.curveLowValue)"
-                            :view-pos-x="5"
-                            :view-pos-y="15 - textHeight(child.curveLowValue) / 2"
-                        />
-                        <v-textbox
-                            :content="child.name || child.componentType + ' ' + idx"
-                            :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
-                            :fill-transparency="1"selected
-                            line-color="0x010101" :line-width="1"
-                            :view-width="textWidth(child.name || child.componentType + ' ' + idx) + 10"
-                            :view-height="textHeight(child.name || child.componentType + ' ' + idx)"
-                            :content-style="headerContentStyle"
-                            :view-pos-x="viewWidth/2 - (textWidth(child.name || child.componentType + ' ' + idx) + 10) / 2"
-                            :view-pos-y="15 - textHeight(child.name || child.componentType + ' ' + idx) / 2"
-                        />
-                        <v-textbox 
-                            v-if="child.curveHighValue"
-                            :content="child.curveHighValue" :fill-color="0xFFFFFF"
-                            :fill-transparency="1" 
-                            :line-color="0x101010" :line-width="1"
-                            :content-style="headerContentStyle"
-                            :view-width="textWidth(child.curveHighValue) + 5"
-                            :view-height="textHeight(child.curveHighValue)"
-                            :view-pos-x="viewWidth - textHeight(child.curveHighValue) - 10"
-                            :view-pos-y="15 - textHeight(child.curveHighValue) / 2"
-                        />
-                    </fragment>
+                    <v-header-shading
+                        v-if="child.componentType === 'VShading'"
+                        :shading-name="child.name || child.componentType + ' ' + idx"
+                        :line-color="0x101010" :line-width="1"
+                        :view-pos-x="0" :view-pos-y="0"
+                        :type-fill-color="child.typeFillColor"
+                        :foreground-color="child.foregroundColor"
+                        :background-color="child.backgroundColor"
+                        :image-pattern-url="child.imagePatternUrl"
+                        :min-color="child.minColor" :max-color="child.maxColor"
+                        :pallete="child.pallete"
+                        :view-width="viewWidth" :view-height="30"
+                        :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
+                        :fill-transparency="0" :content-style="headerContentStyle"
+                        :curve-low-value="child.curveLowValue"
+                        :curve-high-value="child.curveHighValue"
+                        x-transform="none" y-transform="none"
+                    />
                     <v-header-curve 
                         v-if="child.componentType === 'VCurve'"
                         :curve-name="child.name || child.componentType + ' ' + idx"
@@ -123,7 +104,7 @@
         </v-viewport>
     </v-resizable>
     <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight"
-        ref="viewportBody"
+        ref="viewportBody" :clipped="true"
         :view-width="viewWidth" :view-height="scaleTrackHeight"
         :viewport-width="viewWidth" :viewport-height="viewHeight - trackHeaderHeight"
         :x-transform="xTransform" :y-transform="yTransform"
