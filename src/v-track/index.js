@@ -23,6 +23,9 @@ let component = {
         afterMouseDown: {
             type: Function
         },
+        trackBodyOffsetY: {
+            type: Number
+        },
         trackTitleFillColor: {
             default: 0x3366ff
         },
@@ -81,7 +84,7 @@ let component = {
             let ratio = this.getCentimeterFromPixel() *
                 (this.viewHeight - Math.max(this.trackHeaderHeight - 20, this.trackHeaderChildrenHeight)) / (this.trackRealMaxY - this.trackRealMinY);
             return `1:${Math.floor(ratio)}`;
-        }
+        },
     },
     data: function () {
         return {
@@ -324,6 +327,14 @@ let component = {
         }
         let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
         this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
+        this.$watch(
+            () => {
+                return this.$refs.viewportBody.offsetY;
+            },
+            (val) => {
+                this.$emit("trackBodyScroll", val);
+            }
+        )
     },
     watch: {
         trackChildren: function (newValue, oldValue) {
@@ -342,6 +353,9 @@ let component = {
                 }
                 this.selectionStates.pop();
             }
+        },
+        trackBodyOffsetY: function (val) {
+            this.$refs.viewportBody.offsetY = val;
         }
     },
     mixins: [selectable]

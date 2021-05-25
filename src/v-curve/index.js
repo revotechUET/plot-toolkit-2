@@ -27,7 +27,6 @@ let component = {
     },
     watch: {
         isSelected: function (newValue, oldValue) {
-            console.log(oldValue, newValue);
             let obj = this.getPixiObj();
             if (newValue) {
                 let points = this.getShadingPath();
