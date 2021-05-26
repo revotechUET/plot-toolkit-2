@@ -1,7 +1,6 @@
 import template from './template.html';
 import { Fragment } from 'vue-fragment';
 import VTrack from '../v-track';
-import options from '../stores/logplot-store.js';
 
 const component = {
     name: 'v-plot',
@@ -18,14 +17,14 @@ const component = {
             return `plot${this.idPlot}`;
         },
         cName: function() {
-            return ((this.$store.state[this.moduleName] || {}).plot || {}).name; 
+            return (this.$store.state.plot || {}).name; 
         },
     },
     mounted: function() {
-        if (!this.$store.hasModule(this.moduleName)) {
-            this.$store.registerModule(this.moduleName, options);
-        };
-        this.$store.dispatch(`${this.moduleName}/getData`, { idProject: this.idProject, idPlot: this.idPlot });
+        // if (!this.$store.hasModule(this.moduleName)) {
+        //     this.$store.registerModule(this.moduleName, options);
+        // };
+        this.$store.dispatch("getData", { idProject: this.idProject, idPlot: this.idPlot });
     },
 }
 
