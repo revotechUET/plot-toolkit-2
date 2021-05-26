@@ -1,17 +1,17 @@
 import Vue from 'vue';
 import Vuex from 'vuex'
 import VPlot from '../v-plot';
-import createStore from '../stores/logplot-store.js';
-import VTrack from '../v-track';
 
 Vue.use(Vuex);
+Vue.config.devtools = true
 
-const store = createStore(1, 1);
+const store = new Vuex.Store({});
 
 let app = new Vue({
     el: "#vue-app",
     template: `<div>
-        <v-plot />
+        <v-plot :id-plot="0" :id-project="0" />
+        <v-plot :id-plot="1" :id-project="1" />
     </div>
     `,
     data: function() {
@@ -20,7 +20,7 @@ let app = new Vue({
         }
     },
     components: {
-        VPlot, VTrack
+        VPlot
     },
     store: store
 });
