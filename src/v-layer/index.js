@@ -78,6 +78,27 @@ let component = {
             if (message.tooltipPosY) {
                 tooltipGlobalPos.y = message.tooltipPosY;
             }
+            let tooltips = [];
+            if (message.curveInfoList) {
+                let viewHeight;
+                tooltips = message.curveInfoList.map((item, idx) => {
+                    viewHeight = item.viewHeight * 26 / (this.tooltipStyle.fontSize || 1) + (idx === message.curveInfoList.length - 1 ? 10 : 0);
+                    return {
+                        key: key + idx,
+                        content: item.content,
+                        viewWidth: message.viewWidth,
+                        viewHeight,
+                        viewPosX: tooltipGlobalPos.x,
+                        viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0) + message.viewHeight + idx * item.viewHeight,
+                        tooltipStyle: {
+                            ...this.tooltipStyle,
+                            fill: item.color,
+                        },
+                        fillColor: message.fillColor,
+                        fillTransparency: message.fillTransparency
+                    }
+                });
+            }
             if (tooltipIdx < 0) {
                 this.tooltips.push({
                     key: key,
@@ -90,19 +111,36 @@ let component = {
                     fillColor: message.fillColor,
                     fillTransparency: message.fillTransparency
                 });
+                if (tooltips.length > 0) {
+                    this.tooltips.push(...tooltips);
+                }
             }
             else {
-                this.tooltips.splice(tooltipIdx, 1, {
-                    key: key,
-                    content: message.content,
-                    viewWidth: message.viewWidth,
-                    viewHeight: message.viewHeight,
-                    viewPosX: tooltipGlobalPos.x,
-                    viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
-                    tooltipStyle: this.tooltipStyle,
-                    fillColor: message.fillColor,
-                    fillTransparency: message.fillTransparency
-                });
+                if (tooltips.length > 0) {
+                    this.tooltips.splice(tooltipIdx, 1 + tooltips.length, {
+                        key: key,
+                        content: message.content,
+                        viewWidth: message.viewWidth,
+                        viewHeight: message.viewHeight,
+                        viewPosX: tooltipGlobalPos.x,
+                        viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
+                        tooltipStyle: this.tooltipStyle,
+                        fillColor: message.fillColor,
+                        fillTransparency: message.fillTransparency
+                    }, ...tooltips);
+                } else {
+                    this.tooltips.splice(tooltipIdx, 1, {
+                        key: key,
+                        content: message.content,
+                        viewWidth: message.viewWidth,
+                        viewHeight: message.viewHeight,
+                        viewPosX: tooltipGlobalPos.x,
+                        viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
+                        tooltipStyle: this.tooltipStyle,
+                        fillColor: message.fillColor,
+                        fillTransparency: message.fillTransparency
+                    });
+                }
             }
         },
         removeTooltip: function (srcComp, message) {

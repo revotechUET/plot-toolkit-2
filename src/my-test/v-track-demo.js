@@ -11,6 +11,7 @@ import Pallete from '../main/pallete.json';
 import VLayer from '../v-layer';
 import ContextMenu from '../context-menu';
 import VXone from '../v-xone';
+import { scaleLinear } from 'd3';
 
 new Vue({
     el: "#vue-app",
@@ -30,7 +31,6 @@ new Vue({
                     :ref-line-x="true" :ref-line-y="false">
                     <v-track
                         name="Zone Track" :grid="false"
-                        :gen-tooltip="genTooltip"
                         :after-mouse-down="contextMenuHandler"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth" :view-height="viewHeight"
@@ -106,7 +106,7 @@ new Vue({
                     </v-track>
                     <v-track
                         name="vtrack1" :after-mouse-down="contextMenuHandler"
-                        :gen-tooltip="genTooltip" :track-title-fill-color="0xF0F0F0"
+                        :track-title-fill-color="0xF0F0F0"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth2" :view-height="viewHeight"
                         :on-resize="trackResize2"
@@ -132,6 +132,7 @@ new Vue({
                             x-transform="linear" y-transform="linear"
                             :real-right="14.01" :real-left="realPath1"
                             cursor="crosshair"
+                            :curve-low-value="0" :curve-high-value="1"
                             :enabled="true"
                             min-color="#ffff00"
                             max-color="#33CC33"
@@ -162,7 +163,12 @@ new Vue({
                             :background-color-list="backgroundColorList">
                         </v-shading>
                         <v-curve :real-path="realPath2" :symbol-color="0xFF0000"
-                            name="hehe"
+                            name="C1"
+                            :left-value="1.95" :right-value="2.95" unit="g/cm3"
+                            :view-width="trackViewWidth2" :view-height="scaleTrackHeight">
+                        </v-curve>
+                        <v-curve :real-path="realPath1" :symbol-color="0x996600"
+                            name="C2"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
                             :view-width="trackViewWidth2" :view-height="scaleTrackHeight">
                         </v-curve>
@@ -179,7 +185,6 @@ new Vue({
                     <v-track
                         name="vtrack3" :after-mouse-down="contextMenuHandler"
                         :track-children="childCount" :track-title-fill-color="0xF0F000"
-                        :gen-tooltip="genTooltip"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth3" :view-height="viewHeight"
                         :on-resize="trackResize3"
@@ -205,6 +210,36 @@ new Vue({
                             @vDestroyed="childrenChanged">
                         </v-curve>
                     </v-track>
+                    <v-track
+                        name="vtrack4" :after-mouse-down="contextMenuHandler"
+                        :track-title-fill-color="0xF00000"
+                        :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
+                        :view-width="trackViewWidth4" :view-height="viewHeight"
+                        :on-resize="trackResize4"
+                        :track-header-resize="trackHeaderResize"
+                        :track-header-height="trackHeaderHeight" 
+                        track-header-fill-color="0xFFFFFF"
+                        :view-pos-x="trackViewWidth + width + trackViewWidth2 + trackViewWidth3" :view-pos-y="-trackHeaderHeight"
+                        fill-color="0xFFFFFF" :fill-transparency="1"
+                        :real-min-x="6" :real-max-x="realMaxX"
+                        :real-min-y="realMinY" :real-max-y="realMaxY"
+                        x-transform="linear" y-transform="linear"
+                        :real-right="realPath2"
+                        :real-left="realPath1"
+                        cursor="crosshair"
+                        :enabled="true"
+                        >
+                        <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
+                            name="bob1"
+                            :left-value="1.95" :right-value="2.95" unit="g/cm3"
+                            :view-width="trackViewWidth4" :view-height="scaleTrackHeight">
+                        </v-curve>
+                        <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
+                            name="bob2"
+                            :left-value="0" :right-value="1" unit="V/ V"
+                            :view-width="trackViewWidth4" :view-height="scaleTrackHeight">
+                        </v-curve>
+                    </v-track>
                 </v-layer>
         </v-scene>
         <button @click="addPath">Add Path to Track 3</button>
@@ -219,7 +254,7 @@ new Vue({
             shading: false,
             shading2: false,
             style: {
-                fontSize: 13
+                fontSize: 18
             },
             contextFlag: false,
             contextType: '',
@@ -231,9 +266,10 @@ new Vue({
             viewHeight: 700,
             width: 50,
             trackBodyHeight: 1400,
-            trackViewWidth: 200,
-            trackViewWidth2: 200,
-            trackViewWidth3: 300,
+            trackViewWidth: 150,
+            trackViewWidth2: 150,
+            trackViewWidth3: 150,
+            trackViewWidth4: 150,
             trackHeaderHeight: 120,
             realMinX: 14,
             realMaxX: 30,
@@ -242,6 +278,7 @@ new Vue({
             tooltipStyle: {
                 fontSize: 13,
             },
+            trackBodyOffsetY: 0,
             fillValues: [
                 { lowVal: 0.3, highVal: 0.6 },
                 { lowVal: 0.3, highVal: 0 },
@@ -420,25 +457,16 @@ new Vue({
             this.trackViewWidth3 = width;
             this.$refs.myLayer.tooltips.splice(0);
         },
+        trackResize4: function ({ width, height }, comp) {
+            this.trackViewWidth4 = width;
+            this.$refs.myLayer.tooltips.splice(0);
+        },
         resize: function ({ width, height }, comp) {
             this.width = width;
             this.$refs.myLayer.tooltips.splice(0);
         },
         trackHeaderResize: function ({ width, height }, comp) {
             this.trackHeaderHeight = height;
-        },
-        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
-            let localPos = comp.pixiObj.toLocal(globalPos);
-            const width = comp.viewWidth;
-            let yCoord = comp.transformY.invert(localPos.y);
-            comp.signal('tooltip-on', comp, {
-                content: ` y: ${yCoord.toFixed(4)}`,
-                viewWidth: width,
-                viewHeight: 50,
-                fillColor: '#F0F000',
-                fillTransparency: 0.3,
-                tooltipPosY: comp.$children[0].viewPosY + 10
-            });
         },
         addPath: function () {
             let arr = [];
@@ -475,6 +503,8 @@ new Vue({
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
             / (this.trackRealMaxY - this.trackRealMinY);
         this.scaleTrackHeight = y;
+        let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
+        this.trackBodyOffsetY -= transformFn(this.trackRealMinY)
     },
     components: {
         Fragment, VScene, VTrack, VRect, ContextMenu,

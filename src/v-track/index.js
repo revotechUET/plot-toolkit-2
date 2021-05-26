@@ -10,10 +10,12 @@ import VViewport from '../v-viewport';
 import { VCartersianFactory } from '../v-cartersian';
 import VTextbox from '../v-textbox';
 import VHeaderCurve from '../v-header-curve';
+import VHeaderShading from '../v-header-shading';
 import template from './template.html';
 import VShape from '../v-shape';
 import selectable from '../mixins/selectable';
-import { scaleLinear, tickStep } from 'd3';
+import { scaleLinear, } from 'd3';
+import eventManager from '../event-manager';
 
 let component = {
     props: {
@@ -44,9 +46,6 @@ let component = {
             default: 100
         },
         trackHeaderResize: {
-            type: Function
-        },
-        genTooltip: {
             type: Function
         },
         knobFlags: {
@@ -81,7 +80,7 @@ let component = {
             let ratio = this.getCentimeterFromPixel() *
                 (this.viewHeight - Math.max(this.trackHeaderHeight - 20, this.trackHeaderChildrenHeight)) / (this.trackRealMaxY - this.trackRealMinY);
             return `1:${Math.floor(ratio)}`;
-        }
+        },
     },
     data: function () {
         return {
@@ -103,12 +102,17 @@ let component = {
     template,
     components: {
         VPath, VRect, VResizable, VViewport, VHeaderCurve,
-        VContainer, Fragment, VTextbox, VShape,
+        VContainer, Fragment, VTextbox, VShape, VHeaderShading,
         VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
         VRectWithMountedEvent: VRectFactory({ onMounted: true }),
         VAxisExtMouse: VAxisFactory({ extMouseListener: true })
     },
     methods: {
+        registerEvents: function () {
+            eventManager.on("viewport-scroll", val => {
+                this.$refs.viewportBody.offsetY = val;
+            });
+        },
         childHighlight: function (target, localPos, globalPos, evt) {
             let name = target.hostComponent.name.split(" ");
             let typeMouseDown = evt.data.button;
@@ -295,6 +299,63 @@ let component = {
             num ? res[`b${num}`] = b : res['b'] = b;
             return res;
         },
+
+        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
+            let localPos = comp.pixiObj.toLocal(globalPos);
+            const width = comp.viewWidth;
+            let yCoord = comp.transformY.invert(localPos.y);
+            let depthInfo = `   MD(Ref): ${yCoord.toFixed(2)} (M) \n   MD: ${yCoord.toFixed(2)} (M)`;
+            let tooltipPosY = this.trackHeaderHeight;
+            let children = this.$refs.trackChildren.$children.filter(child => child.componentType === "VCurve");
+            if (this.trackType === 'Depth Track' || children.length === 0) {
+                comp.signal('tooltip-on', comp, {
+                    content: depthInfo,
+                    viewWidth: width,
+                    viewHeight: 50,
+                    fillColor: '#F0F000',
+                    fillTransparency: 0.3,
+                    tooltipPosY
+                });
+            } else {
+                let curveInfoList = [];
+                for (let i = 0; i < children.length; i++) {
+                    children[i].realPath.some(point => {
+                        if (point.y > yCoord) {
+                            let content = `   ${children[i].name}: ${point.x} (${children[i].unit})`
+                            curveInfoList.push({
+                                content,
+                                color: children[i].symbolColor,
+                                viewHeight: this.textHeight(content),
+
+                            })
+                            return true;
+                        }
+                    })
+                }
+                comp.signal('tooltip-on', comp, {
+                    curveInfoList,
+                    content: depthInfo,
+                    viewWidth: width,
+                    viewHeight: this.textHeight(depthInfo),
+                    fillColor: '#F0F000',
+                    fillTransparency: 0.3,
+                    tooltipPosY
+                });
+            }
+        },
+        onTitleDragMove: function (target, localPos, globalPos, evts) {
+            if (target.hostComponent.dragging) {
+                if (globalPos.y < target.hostComponent.viewHeight) {
+                    return;
+                }
+                if (globalPos.x < this.viewPosX || globalPos.x > this.viewPosX + this.viewWidth) {
+                    console.log(globalPos.x, globalPos.y);
+                }
+            }
+        },
+        onTitleDrag: function (target) {
+            target.hostComponent.dragging = true;
+        }
     },
     mounted: function () {
         document.body.oncontextmenu = (evt) => false;
@@ -324,6 +385,14 @@ let component = {
         }
         let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
         this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
+        this.$watch(
+            () => {
+                return this.$refs.viewportBody.offsetY;
+            },
+            (val) => {
+                eventManager.emit("viewport-scroll", val);
+            }
+        )
     },
     watch: {
         trackChildren: function (newValue, oldValue) {
@@ -342,9 +411,9 @@ let component = {
                 }
                 this.selectionStates.pop();
             }
-        }
+        },
     },
-    mixins: [selectable]
+    mixins: [selectable],
 }
 
 export default VResizable.extend(component);

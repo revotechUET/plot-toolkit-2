@@ -1,0 +1,35 @@
+<fragment>
+    <v-textbox 
+        v-if="curveLowValue !== undefined"
+        :content="curveLowValue" :fill-color="fillColor"
+        :fill-transparency="1" 
+        :line-color="0x101010" :line-width="1"
+        :content-style="contentStyle"
+        :view-width="textWidth(curveLowValue) + 5"
+        :view-height="textHeight(curveLowValue)"
+        :view-pos-x="5"
+        :view-pos-y="15 - textHeight(curveLowValue) / 2"
+    />
+    <v-textbox
+        :content="shadingName"
+        :fill-color="fillColor"
+        :fill-transparency="1"
+        line-color="0x010101" :line-width="1"
+        :view-width="textWidth(shadingName) + 10"
+        :view-height="textHeight(shadingName)"
+        :content-style="contentStyle"
+        :view-pos-x="viewWidth/2 - (textWidth(shadingName) + 10) / 2"
+        :view-pos-y="15 - textHeight(shadingName) / 2"
+    />
+    <v-textbox 
+        v-if="curveHighValue !== undefined"
+        :content="curveHighValue" :fill-color="fillColor"
+        :fill-transparency="1" 
+        :line-color="0x101010" :line-width="1"
+        :content-style="contentStyle"
+        :view-width="textWidth(curveHighValue) + 5"
+        :view-height="textHeight(curveHighValue)"
+        :view-pos-x="viewWidth - textHeight(curveHighValue) - 10"
+        :view-pos-y="15 - textHeight(curveHighValue) / 2"
+    />
+</fragment>
