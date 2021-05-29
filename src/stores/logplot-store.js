@@ -14,7 +14,7 @@ export default {
     actions: {
         getData({ state, commit }, { idProject, idPlot }) {
             console.log('Get data');
-            axios.post('http://localhost:3000/project/plot/info', {
+            axios.post('http://112.137.129.214:35280/quangtuan/project/plot/info', {
                 idProject: idProject,
                 idPlot: idPlot
             })

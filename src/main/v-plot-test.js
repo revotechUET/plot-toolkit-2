@@ -11,7 +11,7 @@ const store = new Vuex.Store( options );
 let app = new Vue({
     el: "#vue-app",
     template: `<div>
-        <v-plot :id-plot="1" :id-project="1" />
+        <v-plot :id-project="1" :id-plot="2" />
     </div>
     `,
     data: function() {

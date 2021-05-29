@@ -4,7 +4,10 @@ import VTrack from '../v-track';
 
 const component = {
     name: 'v-plot',
-    props: ["idProject", "idPlot"],
+    props: [
+        "idProject",
+        "idPlot"
+    ],
     data: function() {
         return {}
     },
@@ -13,17 +16,11 @@ const component = {
     },
     template,
     computed: {
-        moduleName: function() {
-            return `plot${this.idPlot}`;
-        },
         cName: function() {
             return (this.$store.state.plot || {}).name; 
         },
     },
     mounted: function() {
-        // if (!this.$store.hasModule(this.moduleName)) {
-        //     this.$store.registerModule(this.moduleName, options);
-        // };
         this.$store.dispatch("getData", { idProject: this.idProject, idPlot: this.idPlot });
     },
 }
