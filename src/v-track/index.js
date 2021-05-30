@@ -25,6 +25,14 @@ let component = {
         afterMouseDown: {
             type: Function
         },
+        showTitle: {
+            type: Boolean,
+            default: true
+        },
+        justification: {
+            type: String,
+            default: 'center'
+        },
         trackTitleFillColor: {
             default: 0x3366ff
         },
@@ -65,8 +73,15 @@ let component = {
         minorTicks: {
             type: Number
         },
+        majorTicks: {
+            type: Number
+        },
         unit: {
             type: String
+        },
+        trackId: Number,
+        orderNum: {
+            default: ""
         }
     },
     computed: {
@@ -92,7 +107,7 @@ let component = {
                 fontStyle: 'italic',
                 align: 'center',
                 padding: 5,
-                fontSize: 13,
+                fontSize: 12,
             },
             selectionStates: [],
             childrenHeaderPosYList: [0],
@@ -105,6 +120,7 @@ let component = {
         VContainer, Fragment, VTextbox, VShape, VHeaderShading,
         VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
         VRectWithMountedEvent: VRectFactory({ onMounted: true }),
+        VRectExtMouseWithMountedEvent: VRectFactory({ onMounted: true, extMouseListener: true }),
         VAxisExtMouse: VAxisFactory({ extMouseListener: true })
     },
     methods: {
@@ -112,6 +128,9 @@ let component = {
             eventManager.on("viewport-scroll", val => {
                 this.$refs.viewportBody.offsetY = val;
             });
+        },
+        onHeaderMouseDown: function (target, localPos, globalPos, evt) {
+            this.selectionStates = this.selectionStates.map(state => false);
         },
         childHighlight: function (target, localPos, globalPos, evt) {
             let name = target.hostComponent.name.split(" ");
@@ -135,20 +154,34 @@ let component = {
             }
             return []
         },
-        textWidth: function (content) {
+        textHeaderWidth: function (content) {
             let text = new Text(content);
             let textWidth = text.getLocalBounds().width * this.headerContentStyle.fontSize / 26;
             return textWidth;
         },
-        textHeight: function (content) {
+        textHeaderHeight: function (content) {
             let text = new Text(content);
             let textHeight = text.getLocalBounds().height * this.headerContentStyle.fontSize / 26;
             return textHeight;
+        },
+        textHeight: function (content) {
+            let text = new Text(content);
+            let textHeight = text.getLocalBounds().height;
+            return textHeight;
+        },
+        textWidth: function (content) {
+            let text = new Text(content);
+            let textWidth = text.getLocalBounds().width;
+            return textWidth;
         },
         getCentimeterFromPixel() {
             return 38;
         },
         onTrackMouseDown: function (target, localPos, globalPos, evt) {
+            if (this.trackType === 'Depth Track') {
+                this.$refs.axis.isSelected = !this.$refs.axis.isSelected;
+                return;
+            }
             let { x, y } = localPos;
             let typeMouseDown = evt.data.button;
             let pixelPathLeft, pixelPathRight, pixelPath, child, exitFlag = false, contextType = "VTrack";
@@ -172,7 +205,6 @@ let component = {
                                 let x1 = (y - b) / a;
                                 if ((xPos < x && x < x1) || (xPos > x && x > x1)) {
                                     this.selectionStates = this.selectionStates.map((child, idx) => {
-                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
                                         return idx === i ? true : false
                                     });
                                     exitFlag = true;
@@ -194,7 +226,6 @@ let component = {
                                 let x1 = (y - b) / a;
                                 if (xPos < x && x < x1 || (xPos > x && x > x1)) {
                                     this.selectionStates = this.selectionStates.map((child, idx) => {
-                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
                                         return idx === i ? true : false
                                     });
                                     exitFlag = true;
@@ -218,7 +249,6 @@ let component = {
                                 let x2 = Math.max((y - b1) / a1, (y - b2) / a2);
                                 if (x1 < x && x < x2) {
                                     this.selectionStates = this.selectionStates.map((child, idx) => {
-                                        this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
                                         return idx === i ? true : false
                                     });
                                     exitFlag = true;
@@ -243,7 +273,6 @@ let component = {
                             console.log(distance1, distance2);
                             if (distance1 <= 4 || distance2 <= 4) {
                                 this.selectionStates = this.selectionStates.map((child, idx) => {
-                                    this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
                                     return idx === i ? true : false
                                 });
                                 exitFlag = true;
@@ -257,7 +286,6 @@ let component = {
                         let bottomPosY = this.getPosY(child.realMaxY);
                         if (topPosY < y && y < bottomPosY) {
                             this.selectionStates = this.selectionStates.map((child, idx) => {
-                                this.$refs.trackChildren.$children[idx].isSelected = i !== idx ? false : true;
                                 return idx === i ? true : false
                             });
                             exitFlag = true;
@@ -272,7 +300,6 @@ let component = {
                 return;
             }
             this.selectionStates = this.selectionStates.map((child, idx) => {
-                this.$refs.trackChildren.$children[idx].isSelected = false;
                 return false;
             });
             this.afterMouseDown && this.afterMouseDown(evt, contextType, typeMouseDown);
@@ -304,29 +331,28 @@ let component = {
             let localPos = comp.pixiObj.toLocal(globalPos);
             const width = comp.viewWidth;
             let yCoord = comp.transformY.invert(localPos.y);
-            let depthInfo = `   MD(Ref): ${yCoord.toFixed(2)} (M) \n   MD: ${yCoord.toFixed(2)} (M)`;
+            let depthInfo = ` MD(Ref): ${yCoord.toFixed(2)} (M) \n MD: ${yCoord.toFixed(2)} (M)`;
             let tooltipPosY = this.trackHeaderHeight;
-            let children = this.$refs.trackChildren.$children.filter(child => child.componentType === "VCurve");
-            if (this.trackType === 'Depth Track' || children.length === 0) {
+            if (this.trackType === 'Depth Track' || this.trackType === 'Zone Track' || !this.$refs.trackChildren) {
                 comp.signal('tooltip-on', comp, {
                     content: depthInfo,
                     viewWidth: width,
-                    viewHeight: 50,
-                    fillColor: '#F0F000',
-                    fillTransparency: 0.3,
+                    viewHeight: this.textHeight(depthInfo),
+                    fillColor: 0xF0F000,
+                    fillTransparency: 0.7,
                     tooltipPosY
                 });
             } else {
+                let children = this.$refs.trackChildren.$children.filter(child => child.componentType === "VCurve");
                 let curveInfoList = [];
                 for (let i = 0; i < children.length; i++) {
                     children[i].realPath.some(point => {
                         if (point.y > yCoord) {
-                            let content = `   ${children[i].name}: ${point.x} (${children[i].unit})`
+                            let content = ` ${children[i].name}: ${point.x.toFixed(2)} (${children[i].unit})`
                             curveInfoList.push({
                                 content,
                                 color: children[i].symbolColor,
                                 viewHeight: this.textHeight(content),
-
                             })
                             return true;
                         }
@@ -337,8 +363,8 @@ let component = {
                     content: depthInfo,
                     viewWidth: width,
                     viewHeight: this.textHeight(depthInfo),
-                    fillColor: '#F0F000',
-                    fillTransparency: 0.3,
+                    fillColor: 0xF0F000,
+                    fillTransparency: 0.7,
                     tooltipPosY
                 });
             }
@@ -355,6 +381,15 @@ let component = {
         },
         onTitleDrag: function (target) {
             target.hostComponent.dragging = true;
+        },
+        titlePosX: function (name) {
+            if (this.justification === 'Center' || this.justification === 'center') {
+                return this.viewWidth / 2 - this.textHeaderWidth(name) / 2
+            } else if (this.justification === 'Left' || this.justification === 'left') {
+                return 0;
+            } else {
+                return this.viewWidth - this.textHeaderWidth(name);
+            }
         }
     },
     mounted: function () {
@@ -381,7 +416,7 @@ let component = {
             };
             this.childrenHeaderPosYList.pop();
         } else {
-            this.trackHeaderChildrenHeight += this.textHeight(this.unit || 'M') + this.textWidth(this.cRatioScreen) + 20;
+            this.trackHeaderChildrenHeight += this.textHeaderHeight(this.unit || 'M') + this.textHeaderHeight(this.cRatioScreen) + 20;
         }
         let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
         this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
@@ -412,6 +447,11 @@ let component = {
                 this.selectionStates.pop();
             }
         },
+        selectionStates: function () {
+            this.selectionStates.forEach((state, idx) => {
+                this.$refs.trackChildren.$children[idx].isSelected = state;
+            })
+        }
     },
     mixins: [selectable],
 }

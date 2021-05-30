@@ -12,6 +12,7 @@ import {
 } from "../utils";
 import { scaleLinear, scaleQuantile } from "d3-scale";
 import layoutMixin from '../mixins/layout';
+import selectable from '../mixins/selectable';
 import factoryFn from '../mixins';
 
 async function drawRect(obj, align = 0) {
@@ -61,11 +62,16 @@ async function drawRect(obj, align = 0) {
             }
         }
     } else {
-        obj.beginFill(
-            this.cFillColor.color,
-            this.cFillColor.transparency,
-            this.fillTexture
-        );
+        if (this.isSelected) {
+            let myFillColor = processColorStr(0xF0F000, DefaultValues.fillColor, 0.2);
+            obj.beginFill(myFillColor.color, myFillColor.transparency);
+        } else {
+            obj.beginFill(
+                this.cFillColor.color,
+                this.cFillColor.transparency,
+                this.fillTexture
+            );
+        }
     }
 
     if (this.imagePatternUrl) {
@@ -101,7 +107,12 @@ let component = {
         drawRect,
         draw: drawRect
     },
-    mixins: [layoutMixin]
+    mixins: [layoutMixin, selectable],
+    watch: {
+        isSelected: function () {
+            this.draw(this.getPixiObj());
+        }
+    }
 };
 let VRect = VShape.extend(component);
 export function VRectFactory(opts) {

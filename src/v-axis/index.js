@@ -271,7 +271,7 @@ let component = {
             for (let i = 0; i < this.tickValues.length; i++) {
                 if (this.tickMarks[i]) {
                     majorTickIdx++;
-                    obj.lineStyle(1.5, 0x888888, 1, 0.5, false);
+                    obj.lineStyle(0.5, 0x0000F0, 1, 0.5, false);
                     drawOneTick(obj, this, container, i, majorTickIdx);
                 }
                 else {

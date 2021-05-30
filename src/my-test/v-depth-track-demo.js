@@ -30,7 +30,7 @@ new Vue({
                     :ref-line-x="true" :ref-line-y="false">
                     <v-track
                         name="Depth Track" track-type="Depth Track"
-                        :gen-tooltip="genTooltip" unit="M"
+                        unit="M"
                         :major-tick-length="30" :minor-ticks="6"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth2" :view-height="viewHeight"
@@ -39,9 +39,8 @@ new Vue({
                         :track-header-height="trackHeaderHeight"
                         :view-pos-x="0" :view-pos-y="-trackHeaderHeight"
                         fill-color="0xFFFFFF" :fill-transparency="1"
-                        :real-min-x="realMinX" :real-max-x="realMaxX"
                         :real-min-y="realMinY" :real-max-y="realMaxY"
-                        x-transform="linear" y-transform="linear"
+                        x-transform="none" y-transform="linear"
                         cursor="crosshair"
                         :enabled="true"
                         >
@@ -77,19 +76,6 @@ new Vue({
         },
         trackHeaderResize: function ({ width, height }, comp) {
             this.trackHeaderHeight = height;
-        },
-        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
-            let localPos = comp.pixiObj.toLocal(globalPos);
-            const width = comp.viewWidth;
-            let yCoord = comp.transformY.invert(localPos.y);
-            comp.signal('tooltip-on', comp, {
-                content: ` y: ${yCoord.toFixed(4)}`,
-                viewWidth: width,
-                viewHeight: 50,
-                fillColor: '#F0F000',
-                fillTransparency: 0.3,
-                tooltipPosY: this.trackHeaderHeight
-            });
         },
         childrenChanged: function () {
             console.log("child changed");

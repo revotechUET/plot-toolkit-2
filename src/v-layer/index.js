@@ -80,16 +80,19 @@ let component = {
             }
             let tooltips = [];
             if (message.curveInfoList) {
-                let viewHeight;
+                let viewHeight, viewPosY;
                 tooltips = message.curveInfoList.map((item, idx) => {
-                    viewHeight = item.viewHeight * 26 / (this.tooltipStyle.fontSize || 1) + (idx === message.curveInfoList.length - 1 ? 10 : 0);
+                    item.viewHeight *= (this.tooltipStyle.fontSize || 26) / 26;
+                    viewHeight = item.viewHeight + (idx === message.curveInfoList.length - 1 ? 5 : 0);
+                    viewPosY = tooltipGlobalPos.y + (message.viewPosY || 0)
+                        + message.viewHeight * (this.tooltipStyle.fontSize || 26) / 26 + idx * item.viewHeight;
                     return {
                         key: key + idx,
                         content: item.content,
                         viewWidth: message.viewWidth,
                         viewHeight,
                         viewPosX: tooltipGlobalPos.x,
-                        viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0) + message.viewHeight + idx * item.viewHeight,
+                        viewPosY,
                         tooltipStyle: {
                             ...this.tooltipStyle,
                             fill: item.color,
@@ -104,7 +107,7 @@ let component = {
                     key: key,
                     content: message.content,
                     viewWidth: message.viewWidth,
-                    viewHeight: message.viewHeight,
+                    viewHeight: message.viewHeight * (this.tooltipStyle.fontSize || 26) / 26 + 5,
                     viewPosX: tooltipGlobalPos.x,
                     viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
                     tooltipStyle: this.tooltipStyle,
@@ -121,7 +124,7 @@ let component = {
                         key: key,
                         content: message.content,
                         viewWidth: message.viewWidth,
-                        viewHeight: message.viewHeight,
+                        viewHeight: message.viewHeight * (this.tooltipStyle.fontSize || 26) / 26,
                         viewPosX: tooltipGlobalPos.x,
                         viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
                         tooltipStyle: this.tooltipStyle,
@@ -133,7 +136,7 @@ let component = {
                         key: key,
                         content: message.content,
                         viewWidth: message.viewWidth,
-                        viewHeight: message.viewHeight,
+                        viewHeight: message.viewHeight * (this.tooltipStyle.fontSize || 26) / 26 + 5,
                         viewPosX: tooltipGlobalPos.x,
                         viewPosY: tooltipGlobalPos.y + (message.viewPosY || 0),
                         tooltipStyle: this.tooltipStyle,

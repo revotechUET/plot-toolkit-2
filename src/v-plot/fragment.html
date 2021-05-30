@@ -1,2 +1,82 @@
-<div>{{ cName }}</div>
-<pre>{{ JSON.stringify($store.state.plot, undefined, 2) }}</pre>
+
+<v-track 
+    v-for="(track, idx) in ($store.state.plot && $store.state.plot.depth_axes)"
+    :key="'depth_track' + idx + track.idDepthAxis" :name="track.title"
+    :track-id="track.idDepthAxis" :order-num="track.orderNum"
+    :justification="track.justification" :show-title="track.showTitle"
+    :view-pos-x="tracksPosXList[track.title + ' ' + idx]" :view-pos-y="-viewPosY"
+    track-type="Depth Track" :unit="track.unitType"
+    :major-tick-length="track.majorTickLength" :minor-ticks="track.minorTickNum"
+    :track-real-min-y="$store.state.currentPlotTop"
+    :track-real-max-y="$store.state.currentPlotBottom + 100"
+    :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
+    :track-header-height="viewPosY" 
+    :track-header-resize="trackHeaderResize"
+    :on-resize="trackResize"
+    :fill-color="track.trackBackground" :fill-transparency="1"
+    x-transform="none" y-transform="linear"
+    :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
+    cursor="crosshair" :enabled="true"
+/>
+<v-track
+    v-for="(track, idx) in ($store.state && $store.state.zone_tracks)"
+    track-type='Zone Track' :grid="false"
+    :key="'zone_track' + idx + track.idZoneTrack" :name="track.title"
+    :track-id="track.idZoneTrack" :order-num="track.orderNum"
+    :justification="track.topJustification" :show-title="track.showTitle"
+    :view-pos-x="tracksPosXList[track.title + ' ' + idx]" :view-pos-y="-viewPosY"
+    :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
+    :track-real-min-y="$store.state.currentPlotTop"
+    :track-real-max-y="$store.state.currentPlotBottom + 100"
+    :track-header-height="viewPosY" 
+    :track-header-resize="trackHeaderResize"
+    :on-resize="trackResize"
+    :fill-color="track.color" :fill-transparency="1"
+    x-transform="none" y-transform="linear"
+    :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
+    :enabled="true">
+    <v-xone
+        v-for="(zone, i) in $store.state.zone_tracks[idx]['zones']"
+        :key="'zone' + i + track.idZoneTrack"
+        :zoneset-id="zone.idZoneSet" :zone-id="zone.idZone"
+        :knob-flags="[true, true]"
+        :fill-color="zone.zone_template.background" :fill-transparency="1"
+        direction="vertical" :name="zone.zone_template.name"
+        :real-min-y="zone.startDepth" 
+        :real-max-y="zone.endDepth + 100"
+        :handle-real-y="zoneResize"
+        x-transform="none" y-transform="linear"
+        :view-width="convertWidth(track.widthUnit, track.width)"
+        :content="zone.zone_template.name"
+        :content-style="zoneContentStyle"
+        :no-label="false"
+        :no-fill="false" />
+</v-track>
+<v-track
+    v-for="(track, idx) in ($store.state && $store.state.tracks)"
+    :grid="track.showDepthGrid"
+    :key="'track' + idx + track.idTrack" :name="track.title"
+    :track-id="track.idTrack" :order-num="track.orderNum"
+    :justification="track.topJustification" :show-title="track.showTitle"
+    :view-pos-x="tracksPosXList[track.title + ' ' + idx]" :view-pos-y="-viewPosY"
+    :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
+    :track-real-min-y="$store.state.currentPlotTop"
+    :track-real-max-y="$store.state.currentPlotBottom + 100"
+    :track-header-height="viewPosY" 
+    :track-header-resize="trackHeaderResize"
+    :on-resize="trackResize"
+    :fill-color="track.color" :fill-transparency="1"
+    x-transform="linear" y-transform="linear"
+    :real-min-x="80" :real-max-x="150"
+    :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
+    :enabled="true">
+    <v-curve
+        v-for="(line, idx) in track.lines"
+        :key="line.alias + idx + line.idCurve" :name="line.alias"
+        :real-path="line.curveData" :unit="line.unit"
+        :symbol-color="line.lineColor" :line-width="line.lineWidth"
+        :left-value="line.minValue" :right-value="line.maxValue"
+        :view-width="convertWidth(track.widthUnit, track.width)" :view-height="trackBodyScale"
+    />
+</v-track>
+${require('../v-layer/fragment.html')}

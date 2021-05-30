@@ -31,6 +31,7 @@ new Vue({
                     :ref-line-x="true" :ref-line-y="false">
                     <v-track
                         name="Zone Track" :grid="false"
+                        track-type="Zone Track"
                         :after-mouse-down="contextMenuHandler"
                         :track-real-min-y="trackRealMinY" :track-real-max-y="trackRealMaxY"
                         :view-width="trackViewWidth" :view-height="viewHeight"

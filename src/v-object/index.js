@@ -69,9 +69,29 @@ function draw(obj) {
 }
 
 let component = {
-    props: ["name", "viewPosX", "viewPosY", "viewWidth", "viewHeight", 'rotation', 'cursor', 'constrained', 'expanded',
-        'realMinX', 'realMaxX', 'realMinY', 'realMaxY', 'xTransform', 'yTransform'
-    ],
+    props: {
+        name: String,
+        viewPosX: Number,
+        viewPosY: Number,
+        viewWidth: Number,
+        viewHeight: Number,
+        rotation: [Number, String],
+        cursor: String,
+        constrained: Boolean,
+        expanded: Boolean,
+        realMinX: Number,
+        realMaxX: Number,
+        realMinY: Number,
+        realMaxY: Number,
+        xTransform: {
+            type: String,
+            default: "none"
+        },
+        yTransform: {
+            type: String,
+            default: "none"
+        }
+    },
     template,
     data: function () {
         return {

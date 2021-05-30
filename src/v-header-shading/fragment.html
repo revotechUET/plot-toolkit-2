@@ -1,7 +1,7 @@
 <fragment>
     <v-textbox 
         v-if="curveLowValue !== undefined"
-        :content="curveLowValue" :fill-color="fillColor"
+        :content="curveLowValue" :fill-color="0xFFFFFF"
         :fill-transparency="1" 
         :line-color="0x101010" :line-width="1"
         :content-style="contentStyle"
@@ -23,7 +23,7 @@
     />
     <v-textbox 
         v-if="curveHighValue !== undefined"
-        :content="curveHighValue" :fill-color="fillColor"
+        :content="curveHighValue" :fill-color="0xFFFFFF"
         :fill-transparency="1" 
         :line-color="0x101010" :line-width="1"
         :content-style="contentStyle"

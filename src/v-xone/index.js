@@ -42,7 +42,9 @@ let component = {
         noLabel: Boolean,
         viewWidth: Number,
         handleRealY: Function,
-        viewPosY: Number
+        viewPosY: Number,
+        zoneId: Number,
+        zonesetId: Number
     },
     template,
     components: {
@@ -67,8 +69,8 @@ let component = {
         },
         textPosX: function () {
             let text = new Text(this.content);
-            let textHeight = text.getLocalBounds().height;
-            let textWidth = text.getLocalBounds().width;
+            let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
+            let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
             if (textWidth > this.viewWidth) {
                 return this.viewWidth / 2 - textHeight / 2;
             } else {
@@ -77,8 +79,8 @@ let component = {
         },
         textPosY: function () {
             let text = new Text(this.content);
-            let textHeight = text.getLocalBounds().height;
-            let textWidth = text.getLocalBounds().width;
+            let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
+            let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
             if (textWidth > this.viewWidth) {
                 return this.height / 2 + textWidth / 2;
             } else {
@@ -160,7 +162,7 @@ let component = {
 
             let newRealMinY = this.scaleViewToReal(this.topPosY);
             let newRealMaxY = this.scaleViewToReal(this.bottomPosY);
-            this.handleRealY && this.handleRealY(newRealMinY, newRealMaxY);
+            this.handleRealY && this.handleRealY(newRealMinY, newRealMaxY, this.name, this.zonesetId, this.zoneId);
         },
         scaleViewToReal: function (value) {
             let real = scaleLinear()
@@ -182,7 +184,6 @@ let component = {
             console.log(this.$parent.viewHeight);
         },
         isSelected: function (newValue, oldValue) {
-            console.log("VXone", newValue, oldValue);
             let pixiObj = this.getPixiObj();
             pixiObj.clear();
             let lw = parseInt(this.lineWidth);
