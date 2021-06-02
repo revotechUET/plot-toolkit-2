@@ -4,14 +4,6 @@ import { getColor, DefaultValues } from "../utils";
 
 let component = {
     props: {
-        leftValue: {
-            type: Number,
-            default: 0
-        },
-        rightValue: {
-            type: Number,
-            default: 1
-        },
         unit: {
             type: String,
             default: "V/V"
@@ -30,7 +22,7 @@ let component = {
             let obj = this.getPixiObj();
             if (newValue) {
                 let points = this.getShadingPath();
-                obj.lineStyle(3, getColor(this.symbolColor, DefaultValues.lineColor), 0.3, 0.5);
+                obj.lineStyle(2, getColor(this.symbolColor, DefaultValues.lineColor), 0.05, 0.5);
                 obj.moveTo(points[0].x, points[0].y);
                 for (let i = 1; i < points.length; i++) {
                     obj.myLineTo(points[i].x, points[i].y);
@@ -42,8 +34,8 @@ let component = {
     },
     methods: {
         getShadingPath: function () {
-            let transformXFn = this.$parent.getTransformX();
-            let transformYFn = this.$parent.getTransformY();
+            let transformXFn = this.getTransformX() || this.$parent.getTransformX();
+            let transformYFn = this.getTransformY() || this.$parent.getTransformY();
             return this.realPath.map((point) => ({
                 x: transformXFn(point.x) + 2,
                 y: transformYFn(point.y) + 2,

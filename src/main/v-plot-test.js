@@ -19,12 +19,12 @@ let app = new Vue({
                 :view-width="viewWidth" :view-height="viewHeight"
                 :tooltip-style="tooltipStyle" ref="myPlot"
                 :zone-content-style="zoneContentStyle"
-                :enabled="true" :clipped="false"
+                :enabled="true"
                 @plotHeaderResize="headerResize"
                 :line-width="0.75" line-color="0x101010"
                 :viewport-pos-y="plotHeaderHeight"
                 :ref-line-x="true" :ref-line-y="false"
-                :id-project="1" :id-plot="3" />
+                :id-project="1" :id-plot="4" />
         </v-scene>
     `,
     data: function () {

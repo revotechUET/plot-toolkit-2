@@ -3,9 +3,10 @@ import layout from './layout';
 import extMouseListener from './mouse-listener';
 import selectable from './selectable';
 import onMounted from './on-mounted';
+import onDestroyed from './on-destroyed';
 
 const features = {
-    sticky, layout, extMouseListener, selectable, onMounted
+    sticky, layout, extMouseListener, selectable, onMounted, onDestroyed
 }
 export default function factoryFn(baseComp, opts) {
     let outComponent = baseComp;

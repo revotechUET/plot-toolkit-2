@@ -5,6 +5,7 @@ import VLayer from '../v-layer';
 import VXone from '../v-xone';
 import VShading from '../v-shading';
 import VCurve from '../v-curve';
+import VContainer from '../v-container';
 
 const component = {
     name: 'v-plot',
@@ -24,6 +25,10 @@ const component = {
                     fontSize: 14
                 }
             }
+        },
+        clipped: {
+            type: Boolean,
+            default: false,
         }
     },
     data: function () {
@@ -32,60 +37,28 @@ const component = {
         }
     },
     components: {
-        Fragment, VTrack, VLayer, VXone, VShading, VCurve
+        Fragment, VTrack, VLayer, VXone, VShading, VCurve, VContainer
     },
     template,
     computed: {
         cName: function () {
             return (this.$store.state.plot || {}).name;
         },
-        tracksPosXList: function () {
-            let tracksPosX = {}, previousWidth = 0, track, trackList = [];
-            if (this.$store.state.plot) {
-                for (let i = 0; i < this.$store.state.plot.depth_axes.length; i++) {
-                    track = this.$store.state.plot.depth_axes[i];
-                    trackList.push({
-                        name: track.title + " " + i,
-                        width: this.convertWidth(track.widthUnit, track.width)
-                    })
-                }
+        sortedTracks: function () {
+            let sTracks = [];
+            if (!this.$store.state.plot) {
+                return [];
             }
-            if (this.$store.state.zone_tracks.length) {
-                for (let i = 0; i < this.$store.state.zone_tracks.length; i++) {
-                    track = this.$store.state.zone_tracks[i];
-                    trackList.push({
-                        name: track.title + " " + i,
-                        width: this.convertWidth(track.widthUnit, track.width)
-                    })
-                }
-            }
-            if (this.$store.state.tracks.length) {
-                for (let i = 0; i < this.$store.state.tracks.length; i++) {
-                    track = this.$store.state.tracks[i];
-                    trackList.push({
-                        name: track.title + " " + i,
-                        width: this.convertWidth(track.widthUnit, track.width)
-                    })
-                }
-            }
-            console.log(trackList);
-            if (trackList.length) {
-                tracksPosX[trackList[0].name] = 0;
-                previousWidth = trackList[0].width;
-                for (let i = 1; i < trackList.length; i++) {
-                    tracksPosX[trackList[i].name] = previousWidth;
-                    previousWidth += trackList[i].width;
-                }
-            }
-            console.log(tracksPosX);
-            return tracksPosX;
+            sTracks = [...this.$store.state.plot.depth_axes, ...this.$store.state.zone_tracks, ...this.$store.state.tracks];
+            sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
+            return sTracks;
         }
     },
     mounted: async function () {
         console.log("V Plot Created");
         await this.$store.dispatch("getData", { idProject: this.idProject, idPlot: this.idPlot });
         const y = (this.viewHeight - this.viewPosY) * (this.$store.state.plotBottom - this.$store.state.plotTop)
-            / (this.$store.state.currentPlotBottom + 100 - this.$store.state.currentPlotTop);
+            / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop);
         this.trackBodyScale = y;
     },
     methods: {
@@ -135,15 +108,58 @@ const component = {
                         trackType: "Track"
                     })
             }
+            this.$nextTick(() => {
+                comp.triggerRelayout();
+            })
         },
         zoneResize: function (newStartDepth, newEndDepth, name, zonesetId, zoneId) {
             console.log(newStartDepth, newEndDepth);
             this.$store.commit("zoneHeightChange", {
                 newStartDepth,
-                newEndDepth: newEndDepth - 100,
+                newEndDepth: newEndDepth,
                 zonesetId,
                 zoneId
             })
+        },
+        getShadingInfo: function (lines, shading) {
+            let line = lines.filter(line => line.idCurve === shading.idControlCurve)[0];
+            return {
+                xTransform: line.displayType === "Linear" ? 'linear' : 'loga',
+                realMinX: line.minValue,
+                realMaxX: line.maxValue,
+                curveData: line.curveData
+            }
+        },
+        getShadingCustomFills: function ({ content }) {
+            if (!content) return [];
+            return content.map(item => {
+                return {
+                    lowVal: item.lowVal,
+                    highVal: item.highVal
+                }
+            })
+        },
+        getShadingPatternList: function ({ content }) {
+            if (!content) return [];
+            return content.map(item => item.pattern);
+        },
+        getShadingForegroundList: function ({ content }) {
+            if (!content) return [];
+            return content.map(item => item.foreground);
+        },
+        getShadingBackgroundList: function ({ content }) {
+            if (!content) return [];
+            return content.map(item => item.background);
+        },
+        formatShadingTypeFill: function (typeFill) {
+            switch (typeFill) {
+                case "gradient":
+                    return "Gradient";
+                case "palette":
+                    return "Palette";
+                case "customFills":
+                    return "Custom Fills"
+            }
         }
     }
 }

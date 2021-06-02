@@ -1,12 +1,10 @@
 <fragment>
     <div v-if="debug" style="padding-left:12px;">{{compProps}}
         <v-text-box v-if="noLabel == true"
-            :line-width="1"
-            line-color="red"
-            :line-transparency="1"
             :content="content" :content-style="contentStyle"
             :view-pos-x="textPosX"
             :view-pos-y="textPosY"
+            :rotation="labelRotation"
         />
         ${require('../v-resizable/fragment.html')}
     </div>
@@ -15,11 +13,11 @@
 
     <fragment v-if="!debug">
         <v-text-box
-            :content="content"
+            :content="content" :content-style="contentStyle"
             :view-pos-x="textPosX"
             :view-pos-y="textPosY"
-            :content-style="contentStyle"
-        />
+            :rotation="labelRotation"
+            />
         ${require('../v-resizable/fragment.html')}
         
         <!-- <v-container :view-width="cWidth" :view-height="cHeight" 

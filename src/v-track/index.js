@@ -45,10 +45,6 @@ let component = {
         trackRealMaxY: {
             type: Number
         },
-        grid: {
-            type: Boolean,
-            default: true
-        },
         trackHeaderHeight: {
             type: Number,
             default: 100
@@ -82,6 +78,14 @@ let component = {
         trackId: Number,
         orderNum: {
             default: ""
+        },
+        showDepthGrid: {
+            type: Boolean,
+            default: true
+        },
+        showValueGrid: {
+            type: Boolean,
+            default: true
         }
     },
     computed: {
@@ -110,7 +114,6 @@ let component = {
                 fontSize: 12,
             },
             selectionStates: [],
-            childrenHeaderPosYList: [0],
             nChildren: 0
         }
     },
@@ -121,6 +124,7 @@ let component = {
         VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
         VRectWithMountedEvent: VRectFactory({ onMounted: true }),
         VRectExtMouseWithMountedEvent: VRectFactory({ onMounted: true, extMouseListener: true }),
+        VRectWithDestroyedEvt: VRectFactory({ onDestroyed: true }),
         VAxisExtMouse: VAxisFactory({ extMouseListener: true })
     },
     methods: {
@@ -131,6 +135,9 @@ let component = {
         },
         onHeaderMouseDown: function (target, localPos, globalPos, evt) {
             this.selectionStates = this.selectionStates.map(state => false);
+        },
+        onChildRemove: function (childHeight) {
+            this.trackHeaderChildrenHeight -= childHeight;
         },
         childHighlight: function (target, localPos, globalPos, evt) {
             let name = target.hostComponent.name.split(" ");
@@ -192,8 +199,9 @@ let component = {
                     case "VShading":
                         let idx = null;
                         if (!Array.isArray(child.realLeft)) {
-                            xPos = this.$refs.viewportBody.transformX(child.realLeft);
-                            pixelPathRight = this.transformPath(child.realRight);
+                            // xPos = this.$refs.viewportBody.transformX(child.realLeft);
+                            xPos = child.transformX(child.realLeft);
+                            pixelPathRight = this.transformPath(child, child.realRight);
                             for (let j = 0; j < pixelPathRight.length - 1; j++) {
                                 if (pixelPathRight[j].y <= y && pixelPathRight[j + 1].y >= y) {
                                     idx = j;
@@ -213,8 +221,9 @@ let component = {
                                 }
                             }
                         } else if (!Array.isArray(child.realRight)) {
-                            xPos = this.$refs.viewportBody.transformX(child.realRight);
-                            pixelPathLeft = this.transformPath(child.realLeft);
+                            // xPos = this.$refs.viewportBody.transformX(child.realRight);
+                            xPos = child.transformX(child.realRight);
+                            pixelPathLeft = this.transformPath(child, child.realLeft);
                             for (let j = 0; j < pixelPathLeft.length - 1; j++) {
                                 if (pixelPathLeft[j].y <= y && pixelPathLeft[j + 1].y >= y) {
                                     idx = j;
@@ -234,8 +243,8 @@ let component = {
                                 }
                             }
                         } else {
-                            pixelPathLeft = this.transformPath(child.realLeft);
-                            pixelPathRight = this.transformPath(child.realRight);
+                            pixelPathLeft = this.transformPath(child, child.realLeft);
+                            pixelPathRight = this.transformPath(child, child.realRight);
                             for (let j = 0; j < pixelPathLeft.length - 1; j++) {
                                 if (pixelPathLeft[j].y <= y && pixelPathLeft[j + 1].y >= y) {
                                     idx = j;
@@ -260,7 +269,7 @@ let component = {
                         break;
                     case "VCurve":
                         let index = null;
-                        pixelPath = this.transformPath(child.realPath);
+                        pixelPath = this.transformPath(child, child.realPath);
                         for (let j = 0; j < pixelPath.length; j++) {
                             if (pixelPath[j].y <= y && pixelPath[j + 1].y >= y) {
                                 index = j;
@@ -284,6 +293,8 @@ let component = {
                     case "VZone":
                         let topPosY = this.getPosY(child.realMinY);
                         let bottomPosY = this.getPosY(child.realMaxY);
+                        // let topPosY = this.transformY(child.realMinY);
+                        // let bottomPosY = this.transformY(child.realMaxY);
                         if (topPosY < y && y < bottomPosY) {
                             this.selectionStates = this.selectionStates.map((child, idx) => {
                                 return idx === i ? true : false
@@ -304,17 +315,17 @@ let component = {
             });
             this.afterMouseDown && this.afterMouseDown(evt, contextType, typeMouseDown);
         },
-        getPosX: function (posX) {
-            return this.$refs.viewportBody.transformX(posX);
-        },
+        // getPosX: function (posX) {
+        //     return this.$refs.viewportBody.transformX(posX);
+        // },
         getPosY: function (posY) {
             return this.$refs.viewportBody.transformY(posY);
         },
-        transformPath: function (realPath) {
+        transformPath: function (comp, realPath) {
             return realPath.map(point => {
                 return {
-                    x: this.getPosX(point.x),
-                    y: this.getPosY(point.y)
+                    x: comp.transformX(point.x),
+                    y: comp.transformY(point.y)
                 }
             })
         },
@@ -348,7 +359,7 @@ let component = {
                 for (let i = 0; i < children.length; i++) {
                     children[i].realPath.some(point => {
                         if (point.y > yCoord) {
-                            let content = ` ${children[i].name}: ${point.x.toFixed(2)} (${children[i].unit})`
+                            let content = ` ${children[i].name}: ${!point.x ? point.x : point.x.toFixed(2)} (${children[i].unit})`
                             curveInfoList.push({
                                 content,
                                 color: children[i].symbolColor,
@@ -411,10 +422,7 @@ let component = {
             for (let i = 0; i < children.length; i++) {
                 height = children[i].componentType === 'VCurve' ? 60 : 30;
                 this.trackHeaderChildrenHeight += height;
-                i === 0 ? this.childrenHeaderPosYList.push(height) :
-                    this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[i]);
             };
-            this.childrenHeaderPosYList.pop();
         } else {
             this.trackHeaderChildrenHeight += this.textHeaderHeight(this.unit || 'M') + this.textHeaderHeight(this.cRatioScreen) + 20;
         }
@@ -437,13 +445,9 @@ let component = {
                 let newChild = this.$refs.trackChildren.$children[this.nChildren - 1];
                 height = newChild.componentType === 'VCurve' ? 60 : 30;
                 this.trackHeaderChildrenHeight += height;
-                oldValue !== 0 && this.childrenHeaderPosYList.push(height + this.childrenHeaderPosYList[oldValue - 1]);
                 this.selectionStates.push(false);
             } else {
-                this.trackHeaderChildrenHeight = this.childrenHeaderPosYList[oldValue - 1];
-                if (this.childrenHeaderPosYList.length !== 1) {
-                    this.childrenHeaderPosYList.pop();
-                }
+                // this.trackHeaderChildrenHeight = this.childrenHeaderPosYList[oldValue - 1];
                 this.selectionStates.pop();
             }
         },

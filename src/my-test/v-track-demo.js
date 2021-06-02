@@ -7,7 +7,7 @@ import VRect from '../v-rect';
 import VResizable from '../v-resizable';
 import VPath from '../v-path';
 import VCurve from '../v-curve';
-import Pallete from '../main/pallete.json';
+import Palette from '../main/pallete.json';
 import VLayer from '../v-layer';
 import ContextMenu from '../context-menu';
 import VXone from '../v-xone';
@@ -103,7 +103,6 @@ new Vue({
                             :no-label="false"
                             :no-fill="false"
                         />
-                        </v-shading>
                     </v-track>
                     <v-track
                         name="vtrack1" :after-mouse-down="contextMenuHandler"
@@ -116,9 +115,8 @@ new Vue({
                         track-header-fill-color="0xFFFFFF"
                         :view-pos-x="trackViewWidth" :view-pos-y="-trackHeaderHeight"
                         fill-color="0xFFFFFF" :fill-transparency="1"
-                        :real-min-x="realMinX" :real-max-x="realMaxX"
                         :real-min-y="realMinY" :real-max-y="realMaxY"
-                        x-transform="linear" y-transform="linear"
+                        x-transform="none" y-transform="linear"
                         :real-right="realPath2"
                         :real-left="realPath1"
                         cursor="crosshair"
@@ -137,8 +135,8 @@ new Vue({
                             :enabled="true"
                             min-color="#ffff00"
                             max-color="#33CC33"
-                            type-fill-color="Pallete"
-                            :pallete="myPallete['BGR']"
+                            type-fill-color="Palette"
+                            :palette="myPalette['BGR']"
                             :fill-pattern-list="fillPatternList"
                             :custom-fill-values="fillValues"  
                             :foreground-color-list="foregroundColorList"
@@ -156,8 +154,8 @@ new Vue({
                             :enabled="true"
                             min-color="#F0F000"
                             max-color="#0000FF"
-                            type-fill-color="Gradient"
-                            :pallete="myPallete['BGR']"
+                            type-fill-color="Custom Fills"
+                            :palette="myPalette['BGR']"
                             :fill-pattern-list="fillPatternList"
                             :custom-fill-values="fillValues"  
                             :foreground-color-list="foregroundColorList"
@@ -165,11 +163,17 @@ new Vue({
                         </v-shading>
                         <v-curve :real-path="realPath2" :symbol-color="0xFF0000"
                             name="C1"
+                            :real-min-x="realMinX" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            x-transform="linear" y-transform="linear"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
                             :view-width="trackViewWidth2" :view-height="scaleTrackHeight">
                         </v-curve>
                         <v-curve :real-path="realPath1" :symbol-color="0x996600"
                             name="C2"
+                            :real-min-x="realMinX" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            x-transform="linear" y-transform="linear"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
                             :view-width="trackViewWidth2" :view-height="scaleTrackHeight">
                         </v-curve>
@@ -194,9 +198,8 @@ new Vue({
                         track-header-fill-color="0xFFFFFF"
                         :view-pos-x="trackViewWidth + width + trackViewWidth2" :view-pos-y="-trackHeaderHeight"
                         fill-color="0xFFFFFF" :fill-transparency="1"
-                        :real-min-x="6" :real-max-x="realMaxX"
                         :real-min-y="realMinY" :real-max-y="realMaxY"
-                        x-transform="linear" y-transform="linear"
+                        x-transform="none" y-transform="linear"
                         :real-right="realPath2"
                         :real-left="realPath1"
                         cursor="crosshair"
@@ -206,6 +209,9 @@ new Vue({
                             :key="idx" :real-path="path" :symbol-color="0xFF0000"
                             :name="idx % 2 === 0 ? 'Alice' : 'Bob'"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
+                            :real-min-x="6" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            x-transform="linear" y-transform="linear"
                             :view-width="trackViewWidth3" :view-height="scaleTrackHeight"
                             @vMounted="childrenChanged"
                             @vDestroyed="childrenChanged">
@@ -222,21 +228,24 @@ new Vue({
                         track-header-fill-color="0xFFFFFF"
                         :view-pos-x="trackViewWidth + width + trackViewWidth2 + trackViewWidth3" :view-pos-y="-trackHeaderHeight"
                         fill-color="0xFFFFFF" :fill-transparency="1"
-                        :real-min-x="6" :real-max-x="realMaxX"
                         :real-min-y="realMinY" :real-max-y="realMaxY"
-                        x-transform="linear" y-transform="linear"
-                        :real-right="realPath2"
-                        :real-left="realPath1"
+                        x-transform="none" y-transform="linear"
                         cursor="crosshair"
                         :enabled="true"
                         >
                         <v-curve :real-path="realPath2" :symbol-color="0x0000FF"
                             name="bob1"
+                            :real-min-x="6" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            x-transform="linear" y-transform="linear"
                             :left-value="1.95" :right-value="2.95" unit="g/cm3"
                             :view-width="trackViewWidth4" :view-height="scaleTrackHeight">
                         </v-curve>
                         <v-curve :real-path="realPath1" :symbol-color="0xFF0000"
                             name="bob2"
+                            :real-min-x="6" :real-max-x="realMaxX"
+                            :real-min-y="realMinY" :real-max-y="realMaxY"
+                            x-transform="linear" y-transform="linear"
                             :left-value="0" :right-value="1" unit="V/ V"
                             :view-width="trackViewWidth4" :view-height="scaleTrackHeight">
                         </v-curve>
@@ -281,10 +290,10 @@ new Vue({
             },
             trackBodyOffsetY: 0,
             fillValues: [
-                { lowVal: 0.3, highVal: 0.6 },
-                { lowVal: 0.3, highVal: 0 },
-                { lowVal: 0.6, highVal: 0.75 },
-                { lowVal: 0.75, highVal: 1 },
+                { lowVal: 14, highVal: 17 },
+                { lowVal: 17, highVal: 21 },
+                { lowVal: 21, highVal: 25 },
+                { lowVal: 25, highVal: 30 },
             ],
             backgroundColorList: ["blue", "green", "red", "orange"],
             fillPatternList: [
@@ -428,8 +437,8 @@ new Vue({
             }
             return res;
         },
-        myPallete: function () {
-            return Pallete["content"];
+        myPalette: function () {
+            return Palette["content"];
         },
     },
     methods: {

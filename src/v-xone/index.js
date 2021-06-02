@@ -71,7 +71,7 @@ let component = {
             let text = new Text(this.content);
             let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
             let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
-            if (textWidth > this.viewWidth) {
+            if (textWidth > this.viewWidth || this.labelRotation) {
                 return this.viewWidth / 2 - textHeight / 2;
             } else {
                 return this.viewWidth / 2 - textWidth / 2;
@@ -81,7 +81,7 @@ let component = {
             let text = new Text(this.content);
             let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
             let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
-            if (textWidth > this.viewWidth) {
+            if (textWidth > this.viewWidth || this.labelRotation) {
                 return this.height / 2 + textWidth / 2;
             } else {
                 return this.height / 2 - textHeight / 2;

@@ -19,7 +19,7 @@ function draw(obj) {
 			? parseInt(this.symbolSize)
 			: this.symbolSize || 5;
 
-	if (this.dashLine) {
+	if (this.dashLine && this.lineDash !== "[0]") {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
 			obj.myLineTo(points[i].x, points[i].y, this.lineDash);
@@ -121,13 +121,19 @@ let component = {
 		getPath: function () {
 			if (this.viewPath) return this.viewPath;
 			if (!this.realPath) return [];
-			let transformXFn = this.$parent.getTransformX();
-			let transformYFn = this.$parent.getTransformY();
+			let transformXFn = this.getTransformX() || this.$parent.getTransformX();
+			let transformYFn = this.getTransformY() || this.$parent.getTransformY();
 			if (!transformXFn || !transformYFn) return [];
 			if (!this.realPath.length) {
 				return [
-					{ x: transformXFn(this.realPath) - (this.shadingOffsetX || 0), y: transformYFn(this.$parent.realMinY) },
-					{ x: transformXFn(this.realPath) - (this.shadingOffsetX || 0), y: transformYFn(this.$parent.realMaxY) },
+					{
+						x: transformXFn(this.realPath) - (this.shadingOffsetX || 0),
+						y: transformYFn(this.realMinY || this.$parent.realMinY)
+					},
+					{
+						x: transformXFn(this.realPath) - (this.shadingOffsetX || 0),
+						y: transformYFn(this.realMaxY || this.$parent.realMaxY)
+					},
 				]
 			} else {
 				return this.realPath.map((point) => ({

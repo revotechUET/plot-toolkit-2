@@ -20,7 +20,7 @@
     <v-resizable :view-pos-x="0" :view-pos-y="showTitle ? 20 : 0"
         :view-height="showTitle ? trackHeaderHeight - 20 : trackHeaderHeight" :view-width="viewWidth"
         direction="vertical" :knob-flags="[false, true]"
-        :fill-color="fillColor || 0xFFFFFF" :fill-transparency="fillTransparency"
+        :fill-color="fillColor || 0xFFFFFF" :fill-transparency="0.2"
         :size="5" :on-resize="trackHeaderResize"
         x-transform="none" y-transform="none">
         <v-viewport :view-pos-x="0" :view-pos-y="0"
@@ -30,18 +30,23 @@
             :enabled="true" :onmousedown="onHeaderMouseDown"
             line-color="0x000000" :line-width="1">
             <!-- TO BE CHANGED: tao 1 class moi v-item-header => track header visualize items -->
-            <v-rect
+            <v-container 
+                :view-pos-x="0" :view-pos-y="0"
+                :view-width="viewWidth" :view-height="Math.max(showTitle ? trackHeaderHeight - 20 : trackHeaderHeight, trackHeaderChildrenHeight)"
+                layout-direction="vertical">
+            <v-rect-with-destroyed-evt
                 v-if="trackType !== 'Depth Track'"
-                v-for="(child, idx) in onRefsReady()" 
+                v-for="(child, idx) in onRefsReady().sort((child1, child2) => child1.componentType.localeCompare(child2.componentType))" 
                 :key = "child.name + ' ' + idx" :name="child.componentType + ' ' + idx"
-                :view-pos-x="0" :view-pos-y="childrenHeaderPosYList[idx]"
-                :enabled="true"
-                :view-width="viewWidth" :view-height="child.componentType === 'Curve' ? 60: 30"
+                :view-pos-x="0"
+                :enabled="true" :constrained="true"
+                :view-width="viewWidth" :view-height="child.componentType === 'VCurve' ? 60: 30"
                 :fill-color="child.componentType !== 'VZone' ? '0xFFFFFF' : child.fillColor" 
                 x-transform="none" y-transform="none"
                 :fill-transparency="child.componentType !== 'VZone' ? 0 : 1"
                 line-color="0x080808" :line-width="1"
                 :line-transparency="child.componentType !== 'VCurve' ? 1 : 0"
+                :on-destroyed-fn="onChildRemove"
                 :onmousedown="childHighlight">
                     <v-header-shading
                         v-if="child.componentType === 'VShading'"
@@ -53,7 +58,7 @@
                         :background-color="child.backgroundColor"
                         :image-pattern-url="child.imagePatternUrl"
                         :min-color="child.minColor" :max-color="child.maxColor"
-                        :pallete="child.pallete"
+                        :palette="child.palette"
                         :view-width="viewWidth" :view-height="30"
                         :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
                         :fill-transparency="0" :content-style="headerContentStyle"
@@ -70,8 +75,8 @@
                         :view-width="viewWidth" :view-height="60"
                         :content-style="{...headerContentStyle, fill: child.symbolColor}"
                         :unit="child.unit"
-                        :left-value="child.leftValue"
-                        :right-value="child.rightValue"
+                        :left-value="child.realMinX || child.$parent.realMinX"
+                        :right-value="child.realMaxX || child.$parent.realMaxX"
                         :line-dash="child.lineDash"
                         :path-color="child.symbolColor"
                     />
@@ -80,13 +85,13 @@
                         :content="child.name || child.componentType + ' ' + idx" :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
                         :fill-transparency="1"
                         line-color="0x010101" :line-width="1"
-                        :view-width="textHeaderWidth(child.name || child.componentType + ' ' + idx) + 10"
+                        :view-width="textHeaderWidth(child.name || child.componentType + ' ' + idx)"
                         :view-height="textHeaderHeight(child.name || child.componentType + ' ' + idx)"
                         :content-style="headerContentStyle"
-                        :view-pos-x="viewWidth/2 - (textHeaderWidth(child.name || child.componentType + ' ' + idx) + 10) / 2"
+                        :view-pos-x="viewWidth/2 - textHeaderWidth(child.name || child.componentType + ' ' + idx) / 2"
                         :view-pos-y="15 - textHeaderHeight(child.name || child.componentType + ' ' + idx) / 2"
                     />
-            </v-rect>
+            </v-rect-with-destroyed-evt>
             <fragment v-if="trackType === 'Depth Track'">
                 <v-textbox
                     :content="unit || 'M'"
@@ -105,15 +110,15 @@
                     :view-pos-y="textHeaderHeight(unit || 'M') + 10"
                 />
             </fragment>
+        </v-container>
         </v-viewport>
     </v-resizable>
     <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight"
         ref="viewportBody" :clipped="true"
         :view-width="viewWidth" :view-height="scaleTrackHeight"
         :viewport-width="viewWidth" :viewport-height="viewHeight - trackHeaderHeight"
-        :x-transform="xTransform" :y-transform="yTransform"
+        x-transform="none" :y-transform="yTransform"
         line-color="0x000000" :line-width="1"
-        :real-min-x="realMinX" :real-max-x="realMaxX"
         :real-min-y="realMinY" :real-max-y="realMaxY">
         <v-axis-ext-mouse
             v-if="trackType === 'Depth Track'"
@@ -121,10 +126,10 @@
             ref="axis"
             :view-width="viewWidth" :view-height="scaleTrackHeight" 
             :real-min-y="realMinY" :real-max-y="realMaxY" 
-            :y-transform="yTransform" :x-transform="xTransform"
+            :y-transform="yTransform" x-transform="none"
             :grid="false" :on-ext-mouse-pos="genTooltip"
             :onmousedown="onTrackMouseDown"
-            :major-tick-length="majorTickLength/minorTicks || 5" :minor-ticks="1" 
+            :major-tick-length="majorTickLength" :minor-ticks="minorTicks" 
             :line-width="lineWidth" :line-color="lineColor"
             :fill-color="fillColor || 0xFFFFFF" :tick-precision="1"
             tick-label-position="middle"
@@ -136,8 +141,7 @@
             ref="trackChildren" :name="name"
             :on-mounted-fn="onRefsReady"
             :view-width="viewWidth" :view-height="scaleTrackHeight"
-            :x-transform="xTransform" :y-transform="yTransform"
-            :real-min-x="realMinX" :real-max-x="realMaxX"
+            x-transform="none" :y-transform="yTransform"
             :real-min-y="realMinY" :real-max-y="realMaxY"
             :fill-color="checkSelected ? '0xF0F000' : '0xFFFFFF'"
             :fill-transparency="checkSelected ? 0.2 : 1"
@@ -149,26 +153,25 @@
         <v-cartersian-ext-mouse
             v-if="!trackType"
             :view-pos-x="0" :view-pos-y="0"
-            :name="name + trackId" :grid="grid"
+            :name="name + trackId" 
+            :grid-x="showValueGrid" :grid-y="showDepthGrid"
             :view-width="viewWidth" :view-height="scaleTrackHeight"
-            :real-min-x="realMinX" :real-max-x="realMaxX"
             :real-min-y="realMinY" :real-max-y="realMaxY"
+            :real-min-x="0" :real-max-x="viewWidth"
             :fill-color="checkSelected ? '0xF0F000' : '0xFFFFFF'"
             :fill-transparency="checkSelected ? 0.2 : 1"
             :enabled="true" cursor="crosshair"
-            :x-transform="xTransform" :y-transform="yTransform"
+            x-transform="linear" :y-transform="yTransform"
             line-color="0x000000" :line-width="1"
-            :major-ticks-y="grid && Math.floor(scaleTrackHeight  / 150)" :minor-ticks-y="grid && 5"
-            :major-ticks-x="grid && majorTicks || 1" :minor-ticks-x="grid && minorTicks || 5"
+            :major-ticks-y="showDepthGrid && Math.floor(scaleTrackHeight  / 150)" :minor-ticks-y="showDepthGrid && 5"
+            :major-ticks-x="showValueGrid && (majorTicks || 1)" :minor-ticks-x="showValueGrid && (minorTicks || 5)"
             :onmousedown="onTrackMouseDown"
             :on-ext-mouse-pos="genTooltip">
             <v-rect-with-mounted-event :view-pos-x="0" :view-pos-y="0"
                 ref="trackChildren"
                 :on-mounted-fn="onRefsReady"
                 :view-width="viewWidth" :view-height="scaleTrackHeight"
-                :x-transform="xTransform" :y-transform="yTransform"
-                :real-min-x="realMinX" :real-max-x="realMaxX"
-                :real-min-y="realMinY" :real-max-y="realMaxY"
+                x-transform="none" y-transform="none"
                 fill-color="0xFFFFFF" :fill-transparency="0.001">
                 <slot />
             </v-rect-with-mounted-event>

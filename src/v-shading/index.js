@@ -28,15 +28,20 @@ async function draw(obj) {
         mn, mx,
         myFillColor,
         transformColor,
-        myPallete;
+        myPalette;
     switch (this.typeFillColor) {
         case "Gradient": //transform linear
             if (!this.minColor || !this.maxColor) {
                 throw new Error(`No sufficient information for fill color
                             Gradient: min color ${this.minColor} and max color ${this.maxColor}`)
             }
-            transformColor = scaleLinear().domain([this.realMinX, this.realMaxX])
-                .range([this.minColor, this.maxColor]);
+            if (this.realMinX && this.realMaxX) {
+                transformColor = scaleLinear().domain([this.realMinX, this.realMaxX])
+                    .range([this.minColor, this.maxColor])
+            } else {
+                transformColor = scaleLinear().domain([this.$parent.realMinX, this.$parent.realMaxX])
+                    .range([this.minColor, this.maxColor]);
+            };
             break;
         case "Custom Fills": //transform discrete
             if (!this.customFillValues) {
@@ -81,10 +86,12 @@ async function draw(obj) {
             let rangeCheck = {}
             for (let i = 0; i < this.customFillValues.length; i++) {
                 let ele = this.customFillValues[i];
-                if (ele["lowVal"] > 1 || ele["highVal"] > 1 || ele["lowVal"] === ele["highVal"]) {
-                    throw new Error(`Invalid custom fill values with low value: ${ele["lowVal"]}
-                                    and high value: ${ele["highVal"]}`);
-                }
+                // if (ele["lowVal"] > (this.realMinX || this.$parent.realMinX) ||
+                //     ele["highVal"] > (this.realMaxX || this.$parent.realMaxX) ||
+                //     ele["lowVal"] === ele["highVal"]) {
+                //     throw new Error(`Invalid custom fill values with low value: ${ele["lowVal"]}
+                //                     and high value: ${ele["highVal"]}`);
+                // }
                 mn = Math.min(ele["lowVal"], ele["highVal"]);
                 mx = Math.max(ele["lowVal"], ele["highVal"]);
                 if (fillValues.length === 0) {
@@ -165,12 +172,16 @@ async function draw(obj) {
             console.log("foreground color", fgColors);
             transformColor = scaleQuantile().domain(fillValues).range(bgColors);
             break;
-        case "Pallete":
-            if (!this.pallete) {
-                throw new Error(`No sufficient information for fill color Pallete: ${this.pallete}`);
+        case "Palette":
+            if (!this.palette) {
+                throw new Error(`No sufficient information for fill color Palette: ${this.palette}`);
             }
-            myPallete = this.pallete.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
-            transformColor = scaleQuantile().domain([this.realMinX, this.realMaxX]).range(myPallete);
+            myPalette = this.palette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
+            if (this.realMinX && this.realMaxX) {
+                transformColor = scaleQuantile().domain([this.realMinX, this.realMaxX]).range(myPalette);
+            } else {
+                transformColor = scaleQuantile().domain([this.$parent.realMinX, this.$parent.realMaxX]).range(myPalette);
+            }
             break;
         default:
             throw new Error(`No sufficient information for type fill color : ${this.typeFillColor}`);
@@ -241,42 +252,48 @@ async function draw(obj) {
         }
         switch (this.typeFillColor) {
             case "Gradient":
-                myFillColor = processColorStr(transformColor(posXFillColor));
-                obj.beginFill(
-                    myFillColor.color,
-                    myFillColor.transparency
-                );
-                this.myDrawPolygon(obj, polygon);
-                obj.endFill();
+                if (posXFillColor) {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
+                    obj.beginFill(
+                        myFillColor.color,
+                        myFillColor.transparency
+                    );
+                    this.myDrawPolygon(obj, polygon);
+                    obj.endFill();
+                }
                 break;
             case "Custom Fills":
-                let xScale = (posXFillColor - this.realMinX) / (this.realMaxX - this.realMinX);
-                let index;
-                for (let j = 0; j < fillValues.length; j++) {
-                    if (fillValues[j] <= xScale) {
-                        index = j;
+                // let xScale = (posXFillColor - this.realMinX) / (this.realMaxX - this.realMinX);
+                if (posXFillColor) {
+                    let index;
+                    for (let j = 0; j < fillValues.length; j++) {
+                        if (fillValues[j] <= posXFillColor) {
+                            index = j;
+                        }
                     }
+                    if (fillPatterns[index] && pattern[fillPatterns[index]]) {
+                        let srcUrl = `https://users.i2g.cloud/pattern/${pattern[fillPatterns[index]]}_.png?service=WI_BACKEND`;
+                        let myFgColor = convert2rgbColor(fgColors[index]),
+                            myBgColor = convert2rgbColor(transformColor(posXFillColor));
+                        let imagePattern = await getImagePattern(srcUrl);
+                        let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
+                        const texture = Texture.from(canvas);
+                        obj.beginTextureFill(texture);
+                    }
+                    this.myDrawPolygon(obj, polygon);
+                    obj.endFill();
                 }
-                if (fillPatterns[index] && pattern[fillPatterns[index]]) {
-                    let srcUrl = `https://users.i2g.cloud/pattern/${pattern[fillPatterns[index]]}_.png?service=WI_BACKEND`;
-                    let myFgColor = convert2rgbColor(fgColors[index]),
-                        myBgColor = convert2rgbColor(transformColor(xScale));
-                    let imagePattern = await getImagePattern(srcUrl);
-                    let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
-                    const texture = Texture.from(canvas);
-                    obj.beginTextureFill(texture);
-                }
-                this.myDrawPolygon(obj, polygon);
-                obj.endFill();
                 break;
-            case "Pallete":
-                myFillColor = processColorStr(transformColor(posXFillColor));
-                obj.beginFill(
-                    myFillColor.color,
-                    myFillColor.transparency
-                );
-                this.myDrawPolygon(obj, polygon);
-                obj.endFill();
+            case "Palette":
+                if (posXFillColor) {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
+                    obj.beginFill(
+                        myFillColor.color,
+                        myFillColor.transparency
+                    );
+                    this.myDrawPolygon(obj, polygon);
+                    obj.endFill();
+                }
                 break;
         }
     };
@@ -376,7 +393,7 @@ let component = {
         "foregroundColorList",
         "backgroundColorList",
         "fillPatternList",
-        "pallete",
+        "palette",
         "curveLowValue",
         "curveHighValue"
     ],
@@ -431,9 +448,15 @@ let component = {
         draw,
         myDrawPolygon: function (obj, polygon) {
             let res = [];
-            polygon.forEach(item => {
-                res.push(this._getX(item.x), this._getY(item.y));
-            });
+            if (this.getTransformX() && this.getTransformY()) {
+                polygon.forEach(item => {
+                    res.push(this.transformX(item.x), this.transformY(item.y));
+                })
+            } else {
+                polygon.forEach(item => {
+                    res.push(this._getX(item.x), this._getY(item.y));
+                });
+            }
             obj.drawPolygon(res);
         }
     },

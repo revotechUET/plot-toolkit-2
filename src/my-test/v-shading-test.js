@@ -21,10 +21,7 @@ new Vue({
                 x-transform="linear" y-transform="linear"> 
                 <v-shading
                     fill-color="rgba(255, 0, 0, 0.3)" 
-                    :real-min-x="realMinX" :real-max-x="realMaxX"
-                    :real-min-y="realMinY" :real-max-y="realMaxY"
                     :view-width="viewWidth" :view-height="viewHeight"
-                    x-transform="linear" y-transform="linear"
                     :real-right="realPath1"
                     :real-left="realPath2"
                     line-color="#000000"
@@ -32,8 +29,8 @@ new Vue({
                     :enabled="true"
                     min-color="#F0F000"
                     max-color="#0000FF"
-                    type-fill-color="Pallete"
-                    :pallete="myPallete['BGR']"
+                    type-fill-color="Palette"
+                    :palette="myPalette['BGR']"
                     :fill-pattern-list="fillPatternList"
                     :custom-fill-values="fillValues"
                     :foreground-color-list="foregroundColorList"
@@ -116,7 +113,7 @@ new Vue({
             }
             return res;
         },
-        myPallete: function () {
+        myPalette: function () {
             return Pallete["content"];
         }
     },

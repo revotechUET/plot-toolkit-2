@@ -38,13 +38,13 @@ async function drawRect(obj, align = 0) {
                 }
                 transformFn = scaleLinear().domain([0, this.viewWidth]).range([this.minColor, this.maxColor]);
                 break;
-            case "Pallete":
-                let myPallete = this.pallete.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
-                if (!this.pallete) {
+            case "Palette":
+                let myPalette = this.palette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
+                if (!this.palette) {
                     throw new Error(`No sufficient information for VRect typeFillColor
-                    ${this.typeFillColor} with: ${this.pallete}`);
+                    ${this.typeFillColor} with: ${this.palette}`);
                 }
-                transformFn = scaleQuantile().domain([0, this.viewWidth]).range(myPallete);
+                transformFn = scaleQuantile().domain([0, this.viewWidth]).range(myPalette);
                 break;
         }
         if (transformFn) {
@@ -96,7 +96,7 @@ let component = {
         "typeFillColor",
         "minColor",
         "maxColor",
-        "pallete"
+        "palette"
     ],
     computed: {
         componentType: function () {
