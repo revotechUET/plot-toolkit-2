@@ -2,7 +2,6 @@ import VShape from "../v-shape";
 import VPath from '../v-path';
 import VRect from '../v-rect';
 import { scaleLinear, scaleQuantile } from "d3-scale";
-import pattern from '../main/pattern_sample.json';
 import {
     processColorStr,
     DefaultValues,
@@ -35,7 +34,7 @@ async function draw(obj) {
                 throw new Error(`No sufficient information for fill color
                             Gradient: min color ${this.minColor} and max color ${this.maxColor}`)
             }
-            if (this.realMinX && this.realMaxX) {
+            if ((this.realMinX || this.realMinX === 0) && this.realMaxX) {
                 transformColor = scaleLinear().domain([this.realMinX, this.realMaxX])
                     .range([this.minColor, this.maxColor])
             } else {
@@ -83,15 +82,9 @@ async function draw(obj) {
                     formatPatternList.push(null);
                 }
             }
-            let rangeCheck = {}
+            let rangeCheck = {};
             for (let i = 0; i < this.customFillValues.length; i++) {
                 let ele = this.customFillValues[i];
-                // if (ele["lowVal"] > (this.realMinX || this.$parent.realMinX) ||
-                //     ele["highVal"] > (this.realMaxX || this.$parent.realMaxX) ||
-                //     ele["lowVal"] === ele["highVal"]) {
-                //     throw new Error(`Invalid custom fill values with low value: ${ele["lowVal"]}
-                //                     and high value: ${ele["highVal"]}`);
-                // }
                 mn = Math.min(ele["lowVal"], ele["highVal"]);
                 mx = Math.max(ele["lowVal"], ele["highVal"]);
                 if (fillValues.length === 0) {
@@ -104,9 +97,9 @@ async function draw(obj) {
                     if (mn > fillValues[fillValues.length - 1]) { //case: lowVal > maximum of fillValues => push both lowVal and highVal
                         rangeCheck[mn] = mx;
                         fillValues.push(mn, mx);
-                        bgColors.push("transparent", formatBgColorList[i]);
-                        fgColors.push("white", formatFgColorList[i]);
-                        fillPatterns.push(null, formatPatternList[i]);
+                        bgColors.push(formatBgColorList[i]);
+                        fgColors.push(formatFgColorList[i]);
+                        fillPatterns.push(formatPatternList[i]);
                         continue;
                     } else if (mn === fillValues[fillValues.length - 1]) { //case: lowVal = maximum of fillValues => just push highVal
                         rangeCheck[fillValues[fillValues.length - 1]] = mx;
@@ -143,26 +136,17 @@ async function draw(obj) {
                         throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
                     }
 
-                    Object.keys(rangeCheck).forEach(key => {
-                        if (rangeCheck[key] === mn) {
-                            let idx = fillValues.indexOf(key);
-                            if (fillValues[idx + 1] && mx > fillValues[idx + 1]) {
-                                throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
-                            } else if (mx === fillValues[idx + 1]) {
-                                rangeCheck[mn] = mx;
-                                bgColors.splice(idx, 0, formatBgColorList[i]);
-                                fgColors.splice(idx, 0, formatFgColorList[i]);
-                                fillPatterns.splice(idx, 0, formatPatternList[i]);
-                            } else {
-                                fillValues.splice(idx + 1, 0, mx);
-                                bgColors.splice(idx, 0, formatBgColorList[i], "transparent");
-                                fgColors.splice(idx, 0, formatFgColorList[i], "white");
-                                fillPatterns.splice(idx, 0, formatPatternList[i], null);
-                                rangeCheck[mn] = mx;
-                                rangeCheck[mx] = fillValues[idx + 1];
-                            }
+                    let idx = fillValues.indexOf(mn);
+                    if (fillValues[idx] + 1) {
+                        if (mx > fillValues[idx + 1]) {
+                            throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
+                        } else if (mx === fillValues[idx + 1]) {
+                            rangeCheck[mn] = mx;
+                            bgColors.splice(idx, 0, formatBgColorList[i]);
+                            fgColors.splice(idx, 0, formatFgColorList[i]);
+                            fillPatterns.splice(idx, 0, formatPatternList[i]);
                         }
-                    })
+                    }
                 }
             }
             console.log("rang check", rangeCheck)
@@ -205,6 +189,68 @@ async function draw(obj) {
                         }
                 }
             }
+        } else { // this polygon is not quadriateral => it must be triangle
+            posXFillColor = Math.min(polygon[0]["x"], polygon[1]['x']);
+            if (idx >= 1 && this.cPolygonList[idx - 1].length === 3 && polygon[0]["x"] < polygon[1]["x"]) {
+                posXFillColor = polygon[2]["x"];
+            }
+        }
+        switch (this.typeFillColor) {
+            case "Gradient":
+                if (posXFillColor) {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
+                    obj.beginFill(
+                        myFillColor.color,
+                        myFillColor.transparency
+                    );
+                    this.myDrawPolygon(obj, polygon);
+                    obj.endFill();
+                }
+                break;
+            case "Custom Fills":
+                if (posXFillColor) {
+                    let index;
+                    for (let j = 0; j < fillValues.length; j++) {
+                        if (fillValues[j] <= posXFillColor) {
+                            index = j;
+                        }
+                    }
+                    if (fillPatterns[index]) {
+                        let srcUrl = `https://users.i2g.cloud${fillPatterns[index]}?service=WI_BACKEND`;
+                        let myFgColor = convert2rgbColor(fgColors[index]),
+                            myBgColor = convert2rgbColor(transformColor(posXFillColor));
+                        let imagePattern = await getImagePattern(srcUrl);
+                        let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
+                        const texture = Texture.from(canvas);
+                        obj.beginTextureFill(texture);
+                    } else {
+                        myFillColor = processColorStr(transformColor(posXFillColor));
+                        obj.beginFill(
+                            myFillColor.color,
+                            myFillColor.transparency
+                        );
+                    }
+                    this.myDrawPolygon(obj, polygon);
+                    obj.endFill();
+                }
+                break;
+            case "Palette":
+                if (posXFillColor) {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
+                    obj.beginFill(
+                        myFillColor.color,
+                        myFillColor.transparency
+                    );
+                    this.myDrawPolygon(obj, polygon);
+                    obj.endFill();
+                }
+                break;
+        }
+    };
+
+    for (let i = 0; i < this.cPolygonList.length; i++) {
+        let polygon = this.cPolygonList[i];
+        if (polygon.length === 4) {
             if (i === 0) {
                 if (polygon[0]["x"] > polygon[1]["x"]) {
                     this.shadingPathLeft.push(polygon[1], polygon[2]);
@@ -222,11 +268,7 @@ async function draw(obj) {
                     this.shadingPathRight.push(polygon[2]);
                 }
             }
-        } else { // this polygon is not quadriateral => it must be triangle
-            posXFillColor = Math.min(polygon[0]["x"], polygon[1]['x']);
-            if (idx >= 1 && this.cPolygonList[idx - 1].length === 3 && polygon[0]["x"] < polygon[1]["x"]) {
-                posXFillColor = polygon[2]["x"];
-            }
+        } else {
             if (i === 0) {
                 if (polygon[0]["x"] < polygon[1]["x"]) {
                     this.shadingPathLeft.push(polygon[0], polygon[2]);
@@ -250,53 +292,7 @@ async function draw(obj) {
                 }
             }
         }
-        switch (this.typeFillColor) {
-            case "Gradient":
-                if (posXFillColor) {
-                    myFillColor = processColorStr(transformColor(posXFillColor));
-                    obj.beginFill(
-                        myFillColor.color,
-                        myFillColor.transparency
-                    );
-                    this.myDrawPolygon(obj, polygon);
-                    obj.endFill();
-                }
-                break;
-            case "Custom Fills":
-                // let xScale = (posXFillColor - this.realMinX) / (this.realMaxX - this.realMinX);
-                if (posXFillColor) {
-                    let index;
-                    for (let j = 0; j < fillValues.length; j++) {
-                        if (fillValues[j] <= posXFillColor) {
-                            index = j;
-                        }
-                    }
-                    if (fillPatterns[index] && pattern[fillPatterns[index]]) {
-                        let srcUrl = `https://users.i2g.cloud/pattern/${pattern[fillPatterns[index]]}_.png?service=WI_BACKEND`;
-                        let myFgColor = convert2rgbColor(fgColors[index]),
-                            myBgColor = convert2rgbColor(transformColor(posXFillColor));
-                        let imagePattern = await getImagePattern(srcUrl);
-                        let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
-                        const texture = Texture.from(canvas);
-                        obj.beginTextureFill(texture);
-                    }
-                    this.myDrawPolygon(obj, polygon);
-                    obj.endFill();
-                }
-                break;
-            case "Palette":
-                if (posXFillColor) {
-                    myFillColor = processColorStr(transformColor(posXFillColor));
-                    obj.beginFill(
-                        myFillColor.color,
-                        myFillColor.transparency
-                    );
-                    this.myDrawPolygon(obj, polygon);
-                    obj.endFill();
-                }
-                break;
-        }
-    };
+    }
 
     obj.x = getPosX(this.coordinate, this.posX);
     obj.y = getPosY(this.coordinate, this.posY);

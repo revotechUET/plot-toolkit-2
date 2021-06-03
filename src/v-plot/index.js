@@ -121,45 +121,111 @@ const component = {
                 zoneId
             })
         },
-        getShadingInfo: function (lines, shading) {
-            let line = lines.filter(line => line.idCurve === shading.idControlCurve)[0];
-            return {
-                xTransform: line.displayType === "Linear" ? 'linear' : 'loga',
-                realMinX: line.minValue,
-                realMaxX: line.maxValue,
-                curveData: line.curveData
-            }
-        },
-        getShadingCustomFills: function ({ content }) {
-            if (!content) return [];
-            return content.map(item => {
-                return {
-                    lowVal: item.lowVal,
-                    highVal: item.highVal
+        // getPatternShadingInfo: function(idTrack, shading) {
+        //     let {lines} = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
+        //     let realMinX = lines.filter(line => line.idLine = shading.idRightLine)[0].minValue;
+        //     let realMaxX = lines.filter(line => line.idLine = shading.idRightLine)[0].maxValue;
+        //     let {fill: pattern} = JSON.parse(shading.fill);
+        //     return {
+        //         patterns: [pattern.name],
+        //         foregroundColors: [pattern.foreground],
+        //         backgroundColors: [pattern.background],
+        //         customFills: [{lowVal: realMinX, highVal: realMaxX}]
+        //     }
+        // },
+        getShadingType: function (shading) {
+            let fill = JSON.parse(shading.fill);
+            let shadingType = 'Custom Fills';
+            if (fill.shadingType === 'varShading') {
+                switch (fill.varShading.varShadingType) {
+                    case "gradient":
+                        shadingType = "Gradient";
+                        break;
+                    case "palette":
+                        shadingType = "Palette";
+                        break;
                 }
+            }
+            return shadingType;
+        },
+        getXTransformShading: function (idTrack, shading) {
+            let { lines } = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
+            let line = lines.filter(line => line.idCurve === shading.idControlCurve)[0];
+            return line.displayType === "Linear" ? "linear" : "loga"
+        },
+        getShadingCustomFills: function (idTrack, shading) {
+            let { shadingType } = JSON.parse(shading.fill);
+            if (shadingType === "pattern") {
+                let { lines } = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
+                let realMinX = lines.filter(line => line.idLine = shading.idRightLine)[0].minValue;
+                let realMaxX = lines.filter(line => line.idLine = shading.idRightLine)[0].maxValue;
+                return [{ lowVal: realMinX, highVal: realMaxX }]
+            }
+            let { content } = JSON.parse(shading.fill).varShading.customFills;
+            if (!content) return [];
+            return content.map(({ lowVal, highVal }) => {
+                return { lowVal, highVal }
             })
         },
-        getShadingPatternList: function ({ content }) {
+        getShadingPatternList: function (shading) {
+            let { shadingType } = JSON.parse(shading.fill);
+            if (shadingType === "pattern") {
+                let { pattern } = JSON.parse(shading.fill);
+                if (pattern.name === "Solid") return [];
+                return [this.$store.state.patterns[pattern.name].src];
+            }
+            let { content } = JSON.parse(shading.fill).varShading.customFills;
             if (!content) return [];
-            return content.map(item => item.pattern);
+            return content.map(item => this.$store.state.patterns[item.pattern].src);
         },
-        getShadingForegroundList: function ({ content }) {
+        getShadingForegroundList: function (shading) {
+            let { shadingType } = JSON.parse(shading.fill);
+            if (shadingType === "pattern") {
+                let { pattern } = JSON.parse(shading.fill);
+                return [pattern.foreground];
+            }
+            let { content } = JSON.parse(shading.fill).varShading.customFills;
             if (!content) return [];
             return content.map(item => item.foreground);
         },
-        getShadingBackgroundList: function ({ content }) {
+        getShadingBackgroundList: function (shading) {
+            let { shadingType } = JSON.parse(shading.fill);
+            if (shadingType === "pattern") {
+                let { pattern } = JSON.parse(shading.fill);
+                return [pattern.background];
+            }
+            let { content } = JSON.parse(shading.fill).varShading.customFills;
             if (!content) return [];
             return content.map(item => item.background);
         },
-        formatShadingTypeFill: function (typeFill) {
-            switch (typeFill) {
-                case "gradient":
-                    return "Gradient";
-                case "palette":
-                    return "Palette";
-                case "customFills":
-                    return "Custom Fills"
+        getShadingPalette: function (shading) {
+            let { palette } = JSON.parse(shading.fill).varShading;
+            return this.$store.state.palettes[palette];
+        },
+        getShadingMinColor: function (shading) {
+            if (this.getShadingPatternList(shading) === "Custom Fills") {
+                return;
             }
+            return JSON.parse(shading.fill).varShading.gradient.startColor;
+        },
+        getShadingMaxColor: function (shading) {
+            if (this.getShadingPatternList(shading) === "Custom Fills") {
+                return;
+            }
+            return JSON.parse(shading.fill).varShading.gradient.endColor;
+        },
+        // formatShadingTypeFill: function (typeFill) {
+        //     switch (typeFill) {
+        //         case "gradient":
+        //             return "Gradient";
+        //         case "palette":
+        //             return "Palette";
+        //         case "customFills":
+        //             return "Custom Fills"
+        //     }
+        // },
+        checkVarShading: function (fill) {
+            return JSON.parse(fill).shadingType === 'varShading' ? true : false;
         }
     }
 }

@@ -29,7 +29,7 @@ new Vue({
                     :enabled="true"
                     min-color="#F0F000"
                     max-color="#0000FF"
-                    type-fill-color="Palette"
+                    type-fill-color="Custom Fills"
                     :palette="myPalette['BGR']"
                     :fill-pattern-list="fillPatternList"
                     :custom-fill-values="fillValues"
@@ -74,16 +74,16 @@ new Vue({
                 { x: 21.32, y: 3400 },
             ],
             fillValues: [
-                { lowVal: 0.3, highVal: 0.6 },
-                { lowVal: 0.3, highVal: 0 },
-                { lowVal: 0.6, highVal: 0.75 },
-                { lowVal: 0.75, highVal: 1 },
+                { lowVal: 14, highVal: 17 },
+                { lowVal: 17, highVal: 21 },
+                { lowVal: 26, highVal: 30 },
+                { lowVal: 21, highVal: 26 },
             ],
             backgroundColorList: ["blue", "green", "red", "orange"],
             fillPatternList: [
-                "Massive sand or sandstone", "Quartz", "Limestone", "DBOS Metamorphic"
+                "/pattern/Sandstone9_.png", "/pattern/point_.png", "/pattern/Clay_shale_.png", "/pattern/Limestone_.png"
             ],
-            foregroundColorList: ["white", "red", "yellow", "white"]
+            foregroundColorList: ["white", "red", "yellow", "green"]
         }
     },
     computed: {
