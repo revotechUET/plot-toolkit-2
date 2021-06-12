@@ -17,8 +17,6 @@ import { Texture, utils } from "pixi.js";
 
 async function draw(obj) {
     console.log("isShading draw");
-    this.shadingPathLeft = [];
-    this.shadingPathRight = [];
     obj.clear();
     let fillValues = [],
         bgColors = [],
@@ -27,25 +25,54 @@ async function draw(obj) {
         mn, mx,
         myFillColor,
         transformColor,
+        positiveTransformColor,
+        negativeTransformColor,
         myPalette;
     switch (this.typeFillColor) {
         case "Gradient": //transform linear
-            if (!this.minColor || !this.maxColor) {
-                throw new Error(`No sufficient information for fill color
-                            Gradient: min color ${this.minColor} and max color ${this.maxColor}`)
-            }
-            if ((this.realMinX || this.realMinX === 0) && this.realMaxX) {
-                transformColor = scaleLinear().domain([this.realMinX, this.realMaxX])
-                    .range([this.minColor, this.maxColor])
+            if (!this.isNormalFill) {
+                if (!this.positiveSideColor || !this.negativeSideColor) {
+                    throw new Error(`No sufficient information for Gradient positive/negative fill color`);
+                }
+                let subtractRealX = (this.realMaxX || this.$parent.realMaxX) - (this.realMinX || this.$parent.realMinX);
+                let ratioPosRealX = subtractRealX / (this.shadingPositiveHighValue - this.shadingPositiveLowValue),
+                    ratioNegRealX = subtractRealX / (this.shadingNegativeHighValue - this.shadingNegativeLowValue);
+                console.log(ratioPosRealX, ratioNegRealX);
+                positiveTransformColor = scaleLinear()
+                    .domain([
+                        (this.realMinX || this.$parent.realMinX) / ratioPosRealX,
+                        (this.realMaxX || this.$parent.realMaxX) / ratioPosRealX
+                    ])
+                    .range([this.positiveSideColor.minColor, this.positiveSideColor.maxColor]);
+                negativeTransformColor = scaleLinear()
+                    .domain([
+                        (this.realMinX || this.$parent.realMinX) / ratioNegRealX,
+                        (this.realMaxX || this.$parent.realMaxX) / ratioNegRealX
+                    ])
+                    .range([this.negativeSideColor.minColor, this.negativeSideColor.maxColor]);
             } else {
-                transformColor = scaleLinear().domain([this.$parent.realMinX, this.$parent.realMaxX])
+                if (!this.minColor || !this.maxColor) {
+                    throw new Error(`No sufficient information for fill color
+                                Gradient: min color ${this.minColor} and max color ${this.maxColor}`)
+                }
+                let ratioRealX;
+                if (!isNaN(this.shadingLowValue) && !isNaN(this.shadingHighValue)) {
+                    console.log("Shading value", this.shadingLowValue, this.shadingHighValue);
+                    ratioRealX = (this.realMaxX - this.realMinX) / (this.shadingHighValue - this.shadingLowValue);
+                }
+                transformColor = scaleLinear()
+                    .domain([
+                        (this.realMinX || this.$parent.realMinX) / (ratioRealX || 1),
+                        (this.realMaxX || this.$parent.realMaxX) / (ratioRealX || 1)
+                    ])
                     .range([this.minColor, this.maxColor]);
-            };
+            }
             break;
         case "Custom Fills": //transform discrete
             if (!this.customFillValues) {
                 throw new Error(`No sufficient information for custom fill color`)
             }
+            if (!this.isNormalFill) return;
             //background color list 
             let formatBgColorList = [];
             if (this.backgroundColorList) {
@@ -149,6 +176,12 @@ async function draw(obj) {
                     }
                 }
             }
+            fillPatterns = fillPatterns.map((item, idx) => {
+                return {
+                    src: fillPatterns[idx],
+                    texture: null
+                }
+            })
             console.log("rang check", rangeCheck)
             console.log("fillValues", fillValues);
             console.log("backgroundColorList", bgColors);
@@ -157,14 +190,40 @@ async function draw(obj) {
             transformColor = scaleQuantile().domain(fillValues).range(bgColors);
             break;
         case "Palette":
-            if (!this.palette) {
-                throw new Error(`No sufficient information for fill color Palette: ${this.palette}`);
-            }
-            myPalette = this.palette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
-            if (this.realMinX && this.realMaxX) {
-                transformColor = scaleQuantile().domain([this.realMinX, this.realMaxX]).range(myPalette);
+            if (!this.isNormalFill) {
+                if (!this.positiveSidePalette || !this.negativeSidePalette) {
+                    throw new Error(`No sufficient information for Palette positive/negative fill color`);
+                }
+                let subtractRealX = (this.realMaxX || this.$parent.realMaxX) - (this.realMinX || this.$parent.realMinX);
+                let ratioPosRealX = subtractRealX / (this.shadingPositiveHighValue - this.shadingPositiveLowValue),
+                    ratioNegRealX = subtractRealX / (this.shadingNegativeHighValue - this.shadingNegativeLowValue);
+                positiveTransformColor = scaleLinear()
+                    .domain([
+                        (this.realMinX || this.$parent.realMinX) / ratioPosRealX,
+                        (this.realMaxX || this.$parent.realMaxX) / ratioPosRealX
+                    ])
+                    .range(this.positiveSidePalette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`));
+                negativeTransformColor = scaleLinear()
+                    .domain([
+                        (this.realMinX || this.$parent.realMinX) / ratioNegRealX,
+                        (this.realMaxX || this.$parent.realMaxX) / ratioNegRealX])
+                    .range(this.negativeSidePalette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`));
             } else {
-                transformColor = scaleQuantile().domain([this.$parent.realMinX, this.$parent.realMaxX]).range(myPalette);
+                if (!this.palette) {
+                    throw new Error(`No sufficient information for fill color Palette: ${this.palette}`);
+                }
+                myPalette = this.palette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
+                let ratioRealX;
+                if (!isNaN(this.shadingLowValue) && !isNaN(this.shadingHighValue)) {
+                    console.log("Shading value", this.shadingLowValue, this.shadingHighValue);
+                    ratioRealX = (this.realMaxX - this.realMinX) / (this.shadingHighValue - this.shadingLowValue);
+                }
+                transformColor = scaleQuantile()
+                    .domain([
+                        (this.realMinX || this.$parent.realMinX) / (ratioRealX || 1),
+                        (this.realMaxX || this.$parent.realMaxX) / (ratioRealX || 1)
+                    ])
+                    .range(myPalette);
             }
             break;
         default:
@@ -195,10 +254,20 @@ async function draw(obj) {
                 posXFillColor = polygon[2]["x"];
             }
         }
+        if (!this.isNormalFill) {
+            let polygonMaxX = Math.max(...polygon.map(point => point["x"]));
+            if (posXFillColor > this.realLeft || (posXFillColor === this.realLeft && polygonMaxX > this.realLeft)) {
+                myFillColor = processColorStr(positiveTransformColor(posXFillColor));
+            } else {
+                myFillColor = processColorStr(negativeTransformColor(posXFillColor));
+            }
+        }
         switch (this.typeFillColor) {
             case "Gradient":
                 if (posXFillColor) {
-                    myFillColor = processColorStr(transformColor(posXFillColor));
+                    if (this.isNormalFill) {
+                        myFillColor = processColorStr(transformColor(posXFillColor));
+                    }
                     obj.beginFill(
                         myFillColor.color,
                         myFillColor.transparency
@@ -215,14 +284,21 @@ async function draw(obj) {
                             index = j;
                         }
                     }
-                    if (fillPatterns[index]) {
-                        let srcUrl = `https://users.i2g.cloud${fillPatterns[index]}?service=WI_BACKEND`;
-                        let myFgColor = convert2rgbColor(fgColors[index]),
-                            myBgColor = convert2rgbColor(transformColor(posXFillColor));
-                        let imagePattern = await getImagePattern(srcUrl);
-                        let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
-                        const texture = Texture.from(canvas);
-                        obj.beginTextureFill(texture);
+                    if (index === fillValues.length - 1 && fillPatterns[index - 1].texture) {
+                        obj.beginTextureFill(fillPatterns[index - 1].texture)
+                    } else if (fillPatterns[index] && fillPatterns[index].src) {
+                        if (!fillPatterns[index].texture) {
+                            let srcUrl = `https://users.i2g.cloud${fillPatterns[index].src}?service=WI_BACKEND`;
+                            let myFgColor = convert2rgbColor(fgColors[index]),
+                                myBgColor = convert2rgbColor(bgColors[index]);
+                            let imagePattern = await getImagePattern(srcUrl);
+                            let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
+                            const texture = Texture.from(canvas);
+                            obj.beginTextureFill(texture);
+                            fillPatterns[index].texture = texture;
+                        } else {
+                            obj.beginTextureFill(fillPatterns[index].texture);
+                        }
                     } else {
                         myFillColor = processColorStr(transformColor(posXFillColor));
                         obj.beginFill(
@@ -236,7 +312,9 @@ async function draw(obj) {
                 break;
             case "Palette":
                 if (posXFillColor) {
-                    myFillColor = processColorStr(transformColor(posXFillColor));
+                    if (this.isNormalFill) {
+                        myFillColor = processColorStr(transformColor(posXFillColor));
+                    }
                     obj.beginFill(
                         myFillColor.color,
                         myFillColor.transparency
@@ -248,6 +326,8 @@ async function draw(obj) {
         }
     };
 
+    this.shadingPathLeft = [];
+    this.shadingPathRight = [];
     for (let i = 0; i < this.cPolygonList.length; i++) {
         let polygon = this.cPolygonList[i];
         if (polygon.length === 4) {
@@ -379,20 +459,32 @@ function generatePolygons(path, bothIsArr) {
 }
 
 let component = {
-    props: [
-        "realLeft",
-        "realRight",
-        "minColor",
-        "maxColor",
-        "typeFillColor",
-        "customFillValues",
-        "foregroundColorList",
-        "backgroundColorList",
-        "fillPatternList",
-        "palette",
-        "curveLowValue",
-        "curveHighValue"
-    ],
+    props: {
+        realLeft: [Number, Array],
+        realRight: [Number, Array],
+        minColor: [Number, String, Array],
+        maxColor: [Number, String, Array],
+        typeFillColor: String,
+        customFillValues: Array,
+        foregroundColorList: Array,
+        backgroundColorList: Array,
+        fillPatternList: Array,
+        palette: Array,
+        shadingLowValue: Number,
+        shadingHighValue: Number,
+        shadingPositiveLowValue: Number,
+        shadingPositiveHighValue: Number,
+        shadingNegativeLowValue: Number,
+        shadingNegativeHighValue: Number,
+        isNormalFill: {
+            type: Boolean,
+            default: true
+        },
+        positiveSideColor: Object,
+        negativeSideColor: Object,
+        positiveSidePalette: Array,
+        negativeSidePalette: Array
+    },
     template,
     data: function () {
         return {
@@ -407,16 +499,10 @@ let component = {
             let begin, end, path = [];
             let bothIsArray = Array.isArray(this.realLeft) && Array.isArray(this.realRight);
             if (bothIsArray) {
-                let pathLeft = this.realLeft;
-                let pathRight = this.realRight;
-                let i = 0, j = 0;
-                while (i < pathLeft.length && j < pathRight.length) {
-                    path.push({ x: pathLeft[i]["x"], y: pathLeft[i]["y"] });
-                    path.push({ x: pathRight[j]["x"], y: pathRight[j]["y"] });
-                    i += 1;
-                    j += 1;
+                for (let i = 0; i < this.realLeft.length; i++) {
+                    path.push({ x: this.realLeft[i]["x"], y: this.realLeft[i]["y"] });
+                    path.push({ x: this.realRight[i]["x"], y: this.realRight[i]['y'] });
                 }
-
             }
             else {
                 if (Array.isArray(this.realLeft) && !Array.isArray(this.realRight)) {

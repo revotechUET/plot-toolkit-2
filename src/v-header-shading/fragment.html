@@ -1,14 +1,14 @@
 <fragment>
     <v-textbox 
-        v-if="curveLowValue !== undefined"
-        :content="curveLowValue" :fill-color="0xFFFFFF"
+        v-if="shadingLowValue !== undefined"
+        :content="shadingLowValue" :fill-color="0xFFFFFF"
         :fill-transparency="1" 
         :line-color="0x101010" :line-width="1"
         :content-style="contentStyle"
-        :view-width="textWidth(curveLowValue)"
-        :view-height="textHeight(curveLowValue)"
+        :view-width="textWidth(shadingLowValue)"
+        :view-height="textHeight(shadingLowValue)"
         :view-pos-x="5"
-        :view-pos-y="15 - textHeight(curveLowValue) / 2"
+        :view-pos-y="15 - textHeight(shadingLowValue) / 2"
     />
     <v-textbox
         :content="shadingName"
@@ -22,14 +22,14 @@
         :view-pos-y="15 - textHeight(shadingName) / 2"
     />
     <v-textbox 
-        v-if="curveHighValue !== undefined"
-        :content="curveHighValue" :fill-color="0xFFFFFF"
+        v-if="shadingHighValue !== undefined"
+        :content="shadingHighValue" :fill-color="0xFFFFFF"
         :fill-transparency="1" 
         :line-color="0x101010" :line-width="1"
         :content-style="contentStyle"
-        :view-width="textWidth(curveHighValue)"
-        :view-height="textHeight(curveHighValue)"
-        :view-pos-x="viewWidth - textHeight(curveHighValue) - 10"
-        :view-pos-y="15 - textHeight(curveHighValue) / 2"
+        :view-width="textWidth(shadingHighValue)"
+        :view-height="textHeight(shadingHighValue)"
+        :view-pos-x="viewWidth - textHeight(shadingHighValue) - 10"
+        :view-pos-y="15 - textHeight(shadingHighValue) / 2"
     />
 </fragment>

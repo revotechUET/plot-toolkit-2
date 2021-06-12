@@ -297,7 +297,7 @@ new Vue({
             ],
             backgroundColorList: ["blue", "green", "red", "orange"],
             fillPatternList: [
-                "Massive sand or sandstone", "Quartz", "Limestone", "DBOS Metamorphic"
+                "/pattern/Sandstone9_.png", "/pattern/point_.png", "/pattern/Clay_shale_.png", "/pattern/Limestone_.png"
             ],
             foregroundColorList: ["white", "red", "yellow", "white"],
             realPath1: [

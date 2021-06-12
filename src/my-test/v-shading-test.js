@@ -23,18 +23,25 @@ new Vue({
                     fill-color="rgba(255, 0, 0, 0.3)" 
                     :view-width="viewWidth" :view-height="viewHeight"
                     :real-right="realPath1"
-                    :real-left="realPath2"
+                    :real-left="20"
                     line-color="#000000"
                     cursor="crosshair"
                     :enabled="true"
                     min-color="#F0F000"
                     max-color="#0000FF"
-                    type-fill-color="Custom Fills"
+                    type-fill-color="Palette"
                     :palette="myPalette['BGR']"
                     :fill-pattern-list="fillPatternList"
                     :custom-fill-values="fillValues"
                     :foreground-color-list="foregroundColorList"
-                    :background-color-list="backgroundColorList">
+                    :background-color-list="backgroundColorList"
+                    :is-normal-fill="false"
+                    :positive-side-color="positiveSideColor"
+                    :negative-side-color="negativeSideColor"
+                    :shading-positive-high-value="30" :shading-positive-low-value="18"
+                    :shading-negative-high-value="18" :shading-negative-low-value="14"
+                    :positive-side-palette="myPalette['HFU']"
+                    :negative-side-palette="myPalette['RandomColor']">
                 </v-shading>
             </v-rect>
         </v-scene>
@@ -83,36 +90,18 @@ new Vue({
             fillPatternList: [
                 "/pattern/Sandstone9_.png", "/pattern/point_.png", "/pattern/Clay_shale_.png", "/pattern/Limestone_.png"
             ],
-            foregroundColorList: ["white", "red", "yellow", "green"]
+            foregroundColorList: ["white", "red", "yellow", "green"],
+            positiveSideColor: {
+                minColor: 0x009933,
+                maxColor: 0xFF0000
+            },
+            negativeSideColor: {
+                minColor: 0x0000FF,
+                maxColor: 0xF0F000
+            }
         }
     },
     computed: {
-        realPathObjFormat1: function () {
-            if (this.realPath1[0].x || this.realPath2[0].y) {
-                return this.realPath1;
-            }
-            let res = [];
-            for (let i = 0; i < this.realPath1.length; i += 2) {
-                res.push({
-                    x: this.realPath1[i],
-                    y: this.realPath1[i + 1]
-                })
-            }
-            return res;
-        },
-        realPathObjFormat2: function () {
-            if (this.realPath2[0].x || this.realPath2[x].y) {
-                return this.realPath2;
-            }
-            let res = [];
-            for (let i = 0; i < this.realPath2.length; i += 2) {
-                res.push({
-                    x: this.realPath2[i],
-                    y: this.realPath2[i + 1]
-                });
-            }
-            return res;
-        },
         myPalette: function () {
             return Pallete["content"];
         }

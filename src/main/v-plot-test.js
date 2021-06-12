@@ -24,7 +24,7 @@ let app = new Vue({
                 :line-width="0.75" line-color="0x101010"
                 :viewport-pos-y="plotHeaderHeight"
                 :ref-line-x="true" :ref-line-y="false"
-                :id-project="1" :id-plot="4" />
+                :id-project="1" :id-plot="5" />
         </v-scene>
     `,
     data: function () {

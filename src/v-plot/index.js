@@ -49,9 +49,12 @@ const component = {
             if (!this.$store.state.plot) {
                 return [];
             }
-            sTracks = [...this.$store.state.plot.depth_axes, ...this.$store.state.zone_tracks, ...this.$store.state.tracks];
+            sTracks = [...this.$store.state.depth_axes, ...this.$store.state.zone_tracks, ...this.$store.state.tracks];
             sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
             return sTracks;
+        },
+        componentType: function () {
+            return "VPlot";
         }
     },
     mounted: async function () {
@@ -93,10 +96,10 @@ const component = {
                     })
                     break;
                 case "Depth Track":
-                    idx = this.$store.state.plot.depth_axes.findIndex(track => track.idDepthAxis === comp.trackId && track.orderNum === comp.orderNum);
+                    idx = this.$store.state.depth_axes.findIndex(track => track.idDepthAxis === comp.trackId && track.orderNum === comp.orderNum);
                     this.$store.dispatch("trackWidthChange", {
                         idx,
-                        width: this.reverseWidth(this.$store.state.plot.depth_axes[idx].widthUnit, width),
+                        width: this.reverseWidth(this.$store.state.depth_axes[idx].widthUnit, width),
                         trackType: comp.trackType
                     })
                     break;
@@ -116,28 +119,16 @@ const component = {
             console.log(newStartDepth, newEndDepth);
             this.$store.commit("zoneHeightChange", {
                 newStartDepth,
-                newEndDepth: newEndDepth,
+                newEndDepth,
                 zonesetId,
                 zoneId
             })
         },
-        // getPatternShadingInfo: function(idTrack, shading) {
-        //     let {lines} = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
-        //     let realMinX = lines.filter(line => line.idLine = shading.idRightLine)[0].minValue;
-        //     let realMaxX = lines.filter(line => line.idLine = shading.idRightLine)[0].maxValue;
-        //     let {fill: pattern} = JSON.parse(shading.fill);
-        //     return {
-        //         patterns: [pattern.name],
-        //         foregroundColors: [pattern.foreground],
-        //         backgroundColors: [pattern.background],
-        //         customFills: [{lowVal: realMinX, highVal: realMaxX}]
-        //     }
-        // },
-        getShadingType: function (shading) {
-            let fill = JSON.parse(shading.fill);
+        getShadingType: function (typeFill) {
+            // let fill = JSON.parse(shading.fill);
             let shadingType = 'Custom Fills';
-            if (fill.shadingType === 'varShading') {
-                switch (fill.varShading.varShadingType) {
+            if (typeFill.shadingType === 'varShading') {
+                switch (typeFill.varShading.varShadingType) {
                     case "gradient":
                         shadingType = "Gradient";
                         break;
@@ -148,53 +139,53 @@ const component = {
             }
             return shadingType;
         },
-        getXTransformShading: function (idTrack, shading) {
-            let { lines } = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
-            let line = lines.filter(line => line.idCurve === shading.idControlCurve)[0];
-            return line.displayType === "Linear" ? "linear" : "loga"
+        getXTransformShading: function (shading) {
+            // let track = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
+            let line = this.$store.state.lines.filter(line => line.idCurve === shading.idControlCurve)[0];
+            return !line ? "linear" : line.displayType === "Linear" ? "linear" : "loga"
         },
-        getShadingCustomFills: function (idTrack, shading) {
-            let { shadingType } = JSON.parse(shading.fill);
+        getShadingCustomFills: function (typeFill, shading) {
+            let { shadingType } = typeFill;
             if (shadingType === "pattern") {
-                let { lines } = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
-                let realMinX = lines.filter(line => line.idLine = shading.idRightLine)[0].minValue;
-                let realMaxX = lines.filter(line => line.idLine = shading.idRightLine)[0].maxValue;
+                // let { lines } = this.$store.state.tracks.filter(track => track.idTrack === idTrack)[0];
+                let realMinX = this.$store.state.lines.filter(line => line.idLine = shading.idRightLine)[0].minValue;
+                let realMaxX = this.$store.state.lines.filter(line => line.idLine = shading.idRightLine)[0].maxValue;
                 return [{ lowVal: realMinX, highVal: realMaxX }]
             }
-            let { content } = JSON.parse(shading.fill).varShading.customFills;
+            let { content } = typeFill.varShading.customFills;
             if (!content) return [];
             return content.map(({ lowVal, highVal }) => {
                 return { lowVal, highVal }
             })
         },
-        getShadingPatternList: function (shading) {
-            let { shadingType } = JSON.parse(shading.fill);
+        getShadingPatternList: function (typeFill) {
+            let { shadingType } = typeFill;
             if (shadingType === "pattern") {
-                let { pattern } = JSON.parse(shading.fill);
+                let { pattern } = typeFill;
                 if (pattern.name === "Solid") return [];
                 return [this.$store.state.patterns[pattern.name].src];
             }
-            let { content } = JSON.parse(shading.fill).varShading.customFills;
+            let { content } = typeFill.varShading.customFills;
             if (!content) return [];
             return content.map(item => this.$store.state.patterns[item.pattern].src);
         },
-        getShadingForegroundList: function (shading) {
-            let { shadingType } = JSON.parse(shading.fill);
+        getShadingForegroundList: function (typeFill) {
+            let { shadingType } = typeFill;
             if (shadingType === "pattern") {
-                let { pattern } = JSON.parse(shading.fill);
+                let { pattern } = typeFill;
                 return [pattern.foreground];
             }
-            let { content } = JSON.parse(shading.fill).varShading.customFills;
+            let { content } = typeFill.varShading.customFills;
             if (!content) return [];
             return content.map(item => item.foreground);
         },
-        getShadingBackgroundList: function (shading) {
-            let { shadingType } = JSON.parse(shading.fill);
+        getShadingBackgroundList: function (typeFill) {
+            let { shadingType } = typeFill;
             if (shadingType === "pattern") {
-                let { pattern } = JSON.parse(shading.fill);
+                let { pattern } = typeFill;
                 return [pattern.background];
             }
-            let { content } = JSON.parse(shading.fill).varShading.customFills;
+            let { content } = typeFill.varShading.customFills;
             if (!content) return [];
             return content.map(item => item.background);
         },
@@ -202,30 +193,49 @@ const component = {
             let { palette } = JSON.parse(shading.fill).varShading;
             return this.$store.state.palettes[palette];
         },
-        getShadingMinColor: function (shading) {
-            if (this.getShadingPatternList(shading) === "Custom Fills") {
+        getShadingMinColor: function (typeFill) {
+            if (this.getShadingType(typeFill) === "Custom Fills") {
                 return;
             }
-            return JSON.parse(shading.fill).varShading.gradient.startColor;
+            return typeFill.varShading.gradient.startColor;
         },
-        getShadingMaxColor: function (shading) {
-            if (this.getShadingPatternList(shading) === "Custom Fills") {
+        getShadingMaxColor: function (typeFill) {
+            if (this.getShadingType(typeFill) === "Custom Fills") {
                 return;
             }
-            return JSON.parse(shading.fill).varShading.gradient.endColor;
+            return typeFill.varShading.gradient.endColor;
         },
-        // formatShadingTypeFill: function (typeFill) {
-        //     switch (typeFill) {
-        //         case "gradient":
-        //             return "Gradient";
-        //         case "palette":
-        //             return "Palette";
-        //         case "customFills":
-        //             return "Custom Fills"
-        //     }
-        // },
-        checkVarShading: function (fill) {
-            return JSON.parse(fill).shadingType === 'varShading' ? true : false;
+        getShadingRealLeft(shading) {
+            if (shading.leftFixedValue || shading.leftFixedValue === 0) {
+                return shading.leftFixedValue;
+            }
+            return this.$store.state.lines.filter(line => line.idLine === shading.idLeftLine)[0].curveData;
+        },
+        getShadingRealRight(shading) {
+            if (shading.rightFixedValue || shading.rightFixedValue === 0) {
+                return shading.rightFixedValue;
+            }
+            return this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0].curve;
+        },
+        getShadingRealMinX: function (shading) {
+            let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
+            if (!line) {
+                let { varShading } = JSON.parse(shading.fill);
+                if (!isNaN(varShading.startX)) {
+                    return varShading.startX;
+                }
+            }
+            return line.minValue;
+        },
+        getShadingRealMaxX: function (shading) {
+            let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
+            if (!line) {
+                let { varShading } = JSON.parse(shading.fill);
+                if (!isNaN(varShading.endX)) {
+                    return varShading.endX;
+                }
+            }
+            return line.maxValue;
         }
     }
 }

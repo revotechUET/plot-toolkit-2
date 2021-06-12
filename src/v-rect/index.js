@@ -19,6 +19,7 @@ async function drawRect(obj, align = 0) {
     obj.clear();
     let lw = this.lineWidth || 0;
     let lt = this.lineTransparency || 1.0;
+    let imageUrl = '';
     if (this.hasMouseOver) {
         lw = lw ? (lw + 4) : 0;
         lt /= 2;
@@ -45,6 +46,9 @@ async function drawRect(obj, align = 0) {
                     ${this.typeFillColor} with: ${this.palette}`);
                 }
                 transformFn = scaleQuantile().domain([0, this.viewWidth]).range(myPalette);
+                break;
+            case "Custom Fills":
+                imageUrl = `https://users.i2g.cloud${this.imagePatternUrl}?service=WI_BACKEND`;
                 break;
         }
         if (transformFn) {
@@ -75,7 +79,12 @@ async function drawRect(obj, align = 0) {
     }
 
     if (this.imagePatternUrl) {
-        let imagePattern = await getImagePattern(this.imagePatternUrl);
+        let imagePattern;
+        if (imageUrl) {
+            imagePattern = await getImagePattern(imageUrl);
+        } else {
+            imagePattern = await getImagePattern(this.imagePatternUrl);
+        }
         let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
         const texture = Texture.from(canvas);

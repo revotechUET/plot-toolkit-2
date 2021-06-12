@@ -7,8 +7,8 @@ import template from './template.html';
 
 let component = {
     props: {
-        curveLowValue: Number,
-        curveHighValue: Number,
+        shadingLowValue: Number,
+        shadingHighValue: Number,
         contentStyle: Object,
         shadingName: String,
     },
