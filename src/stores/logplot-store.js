@@ -29,21 +29,9 @@ export default {
         setDepthAxes(state, depthAxis) {
             state.depth_axes.push(depthAxis)
         },
-        setLines(state, { idLine, idCurve, curve, idTrack, alias,
-            unit,
-            symbolFillStyle,
-            lineWidth,
-            lineColor,
-            lineDash,
-            minValue,
-            maxValue,
-            displayType }) {
-            console.log("id Line", idLine, alias)
-            state.lines = state.lines.concat({
-                idLine, idCurve, curve, idTrack, alias,
-                unit, symbolFillStyle, lineWidth, lineColor,
-                lineDash, minValue, maxValue, displayType
-            })
+        setLines(state, lines) {
+            lines.forEach(line => console.log(`inside setLines ${line.idLine} ${line.alias}`))
+            state.lines.push(...lines)
         },
         setCurrentPlotTop(state, top) {
             state.currentPlotTop = top;
@@ -89,6 +77,10 @@ export default {
                 idProject,
                 idPlot
             });
+            const projectReponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/fullInfo', {
+                idProject
+            });
+            const { wells } = projectReponse.data;
             console.log(JSON.parse(plotResponse.data.currentState));
             const { zone_tracks, tracks, depth_axes } = plotResponse.data
             let { top, bottom, top0, range0 } = JSON.parse(plotResponse.data.currentState);
@@ -109,29 +101,49 @@ export default {
                     idTrack: tracks[i].idTrack
                 });
                 commit('setTracks', tracksResponse.data);
-                for (let j = 0; j < tracks[i].lines.length; j++) {
-                    let line = tracks[i].lines[j];
+                let lines = [];
+                for (const line of tracks[i].lines) {
+                    let step;
+                    for (const well of wells) {
+                        const { datasets } = well;
+                        datasets[0].curves.some(curve => {
+                            if (curve.idCurve === line.idCurve) {
+                                step = Number(datasets[0].step)
+                                return true;
+                            }
+                        })
+                        if (step) break;
+                    }
+                    console.log(step)
                     const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
-                        idCurve: line.idCurve,
-                        top: top0,
-                        bottom: top0 + range0
+                        idCurve: line.idCurve, //=> idDataset
+                        // top: top0,
+                        // bottom: top0 + range0
                     });
-                    commit("setLines", {
-                        idLine: line.idLine,
-                        idCurve: line.idCurve,
-                        curve: curveReponse.data,
-                        idTrack: tracks[i].idTrack,
-                        alias: line.alias,
-                        unit: line.unit,
-                        symbolFillStyle: line.symbolFillStyle,
-                        lineWidth: line.lineWidth,
-                        lineColor: line.lineColor,
-                        lineDash: line.lineStyle,
-                        minValue: line.minValue,
-                        maxValue: line.maxValue,
-                        displayType: line.displayType
-                    });
+                    lines.push(
+                        {
+                            idLine: line.idLine,
+                            idCurve: line.idCurve,
+                            curve: curveReponse.data.map((point, idx) => {
+                                return {
+                                    ...point,
+                                    y: top0 + step * idx
+                                }
+                            }),
+                            idTrack: tracks[i].idTrack,
+                            alias: line.alias,
+                            unit: line.unit,
+                            symbolFillStyle: line.symbolFillStyle,
+                            lineWidth: line.lineWidth,
+                            lineColor: line.lineColor,
+                            lineDash: line.lineStyle,
+                            minValue: line.minValue,
+                            maxValue: line.maxValue,
+                            displayType: line.displayType
+                        }
+                    )
                 }
+                commit("setLines", lines);
             }
 
             for (let i = 0; i < depth_axes.length; i++) {

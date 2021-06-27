@@ -28,6 +28,13 @@ async function draw(obj) {
         positiveTransformColor,
         negativeTransformColor,
         myPalette;
+    let normalFillDomain = [
+        (!isNaN(this.realMinX) ? this.realMinX : this.$parent.realMinX),
+        (!isNaN(this.realMaxX) ? this.realMaxX : this.$parent.realMaxX)
+    ]
+    if (!isNaN(this.shadingLowValue) && !isNaN(this.shadingHighValue)) {
+        normalFillDomain = [this.shadingLowValue, this.shadingHighValue]
+    }
     switch (this.typeFillColor) {
         case "Gradient": //transform linear
             if (!this.isNormalFill) {
@@ -40,14 +47,12 @@ async function draw(obj) {
                 console.log(ratioPosRealX, ratioNegRealX);
                 positiveTransformColor = scaleLinear()
                     .domain([
-                        (this.realMinX || this.$parent.realMinX) / ratioPosRealX,
-                        (this.realMaxX || this.$parent.realMaxX) / ratioPosRealX
+                        this.shadingPositiveLowValue, this.shadingPositiveHighValue
                     ])
                     .range([this.positiveSideColor.minColor, this.positiveSideColor.maxColor]);
                 negativeTransformColor = scaleLinear()
                     .domain([
-                        (this.realMinX || this.$parent.realMinX) / ratioNegRealX,
-                        (this.realMaxX || this.$parent.realMaxX) / ratioNegRealX
+                        this.shadingNegativeLowValue, this.shadingNegativeHighValue
                     ])
                     .range([this.negativeSideColor.minColor, this.negativeSideColor.maxColor]);
             } else {
@@ -55,16 +60,8 @@ async function draw(obj) {
                     throw new Error(`No sufficient information for fill color
                                 Gradient: min color ${this.minColor} and max color ${this.maxColor}`)
                 }
-                let ratioRealX;
-                if (!isNaN(this.shadingLowValue) && !isNaN(this.shadingHighValue)) {
-                    console.log("Shading value", this.shadingLowValue, this.shadingHighValue);
-                    ratioRealX = (this.realMaxX - this.realMinX) / (this.shadingHighValue - this.shadingLowValue);
-                }
                 transformColor = scaleLinear()
-                    .domain([
-                        (this.realMinX || this.$parent.realMinX) / (ratioRealX || 1),
-                        (this.realMaxX || this.$parent.realMaxX) / (ratioRealX || 1)
-                    ])
+                    .domain(normalFillDomain)
                     .range([this.minColor, this.maxColor]);
             }
             break;
@@ -154,8 +151,8 @@ async function draw(obj) {
                     }
 
                     let flag = false;
-                    for (let i = 0; i < fillValues.length; i++) {
-                        if (fillValues[i] === mn) {
+                    for (let j = 0; j < fillValues.length; j++) {
+                        if (fillValues[j] === mn) {
                             flag = true;
                         }
                     }
@@ -194,35 +191,23 @@ async function draw(obj) {
                 if (!this.positiveSidePalette || !this.negativeSidePalette) {
                     throw new Error(`No sufficient information for Palette positive/negative fill color`);
                 }
-                let subtractRealX = (this.realMaxX || this.$parent.realMaxX) - (this.realMinX || this.$parent.realMinX);
-                let ratioPosRealX = subtractRealX / (this.shadingPositiveHighValue - this.shadingPositiveLowValue),
-                    ratioNegRealX = subtractRealX / (this.shadingNegativeHighValue - this.shadingNegativeLowValue);
-                positiveTransformColor = scaleLinear()
+                positiveTransformColor = scaleQuantile()
                     .domain([
-                        (this.realMinX || this.$parent.realMinX) / ratioPosRealX,
-                        (this.realMaxX || this.$parent.realMaxX) / ratioPosRealX
+                        this.shadingPositiveLowValue, this.shadingPositiveHighValue
                     ])
                     .range(this.positiveSidePalette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`));
-                negativeTransformColor = scaleLinear()
+                negativeTransformColor = scaleQuantile()
                     .domain([
-                        (this.realMinX || this.$parent.realMinX) / ratioNegRealX,
-                        (this.realMaxX || this.$parent.realMaxX) / ratioNegRealX])
+                        this.shadingNegativeLowValue, this.shadingNegativeHighValue
+                    ])
                     .range(this.negativeSidePalette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`));
             } else {
                 if (!this.palette) {
                     throw new Error(`No sufficient information for fill color Palette: ${this.palette}`);
                 }
                 myPalette = this.palette.map(p => `rgba(${p["red"]}, ${p["green"]}, ${p["blue"]}, ${p["alpha"]})`);
-                let ratioRealX;
-                if (!isNaN(this.shadingLowValue) && !isNaN(this.shadingHighValue)) {
-                    console.log("Shading value", this.shadingLowValue, this.shadingHighValue);
-                    ratioRealX = (this.realMaxX - this.realMinX) / (this.shadingHighValue - this.shadingLowValue);
-                }
                 transformColor = scaleQuantile()
-                    .domain([
-                        (this.realMinX || this.$parent.realMinX) / (ratioRealX || 1),
-                        (this.realMaxX || this.$parent.realMaxX) / (ratioRealX || 1)
-                    ])
+                    .domain(normalFillDomain)
                     .range(myPalette);
             }
             break;
@@ -462,6 +447,7 @@ let component = {
     props: {
         realLeft: [Number, Array],
         realRight: [Number, Array],
+        shadingControlCurve: Array,
         minColor: [Number, String, Array],
         maxColor: [Number, String, Array],
         typeFillColor: String,
@@ -521,6 +507,22 @@ let component = {
             let { arr, checkArr } = generatePolygons(path, bothIsArray);
             this.checkTriangle = checkArr;
             return arr;
+        },
+        getShadingMinColor: function () {
+            if (this.minColor) {
+                return this.minColor;
+            }
+            if (this.positiveSideColor) {
+                return this.positiveSideColor.minColor;
+            }
+        },
+        getShadingMaxColor: function () {
+            if (this.maxColor) {
+                return this.maxColor;
+            }
+            if (this.positiveSideColor) {
+                return this.positiveSideColor.maxColor;
+            }
         },
         componentType: function () {
             return "VShading";

@@ -92,10 +92,9 @@
                         :fill-pattern-list="getShadingPatternList(JSON.parse(shading.fill))"
                         :foreground-color-list="getShadingForegroundList(JSON.parse(shading.fill))"
                         :background-color-list="getShadingBackgroundList(JSON.parse(shading.fill))"
-                        :palette="getShadingType(JSON.parse(shading.fill)) === 'Palette' ? getShadingPalette(shading) : []"
+                        :palette="getShadingPalette(JSON.parse(shading.fill))"
                         :view-width="convertWidth(track.widthUnit, track.width)" :view-height="trackBodyScale"
-                        y-transform="linear"
-                        :x-transform="getXTransformShading(shading)"
+                        y-transform="linear" :x-transform="getXTransformShading(shading)"
                         :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
                         :real-min-x="getShadingRealMinX(shading)"
                         :real-max-x="getShadingRealMaxX(shading)"
@@ -103,7 +102,28 @@
                         :shading-high-value="JSON.parse(shading.fill).varShading.endX"
                         :real-left="getShadingRealLeft(shading)"
                         :real-right="getShadingRealRight(shading)"
+                        :shading-control-curve="getShadingControlCurve(shading)"
                         />
+                    <v-shading 
+                        :name="shading.name" :is-normal-fill="false"
+                        v-else
+                        :type-fill-color="getShadingType(JSON.parse(shading.positiveFill))"
+                        :positive-side-color=getObjShadingColor(JSON.parse(shading.positiveFill))
+                        :negative-side-color="getObjShadingColor(JSON.parse(shading.negativeFill))"
+                        :positive-side-palette="getShadingPalette(JSON.parse(shading.positiveFill))"
+                        :negative-side-palette="getShadingPalette(JSON.parse(shading.negativeFill))"
+                        :view-width="convertWidth(track.widthUnit, track.width)" :view-height="trackBodyScale"
+                        y-transform="linear" :x-transform="getXTransformShading(shading)"
+                        :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
+                        :real-min-x="getShadingRealMinX(shading)"
+                        :real-max-x="getShadingRealMaxX(shading)"
+                        :shading-positive-low-value="JSON.parse(shading.positiveFill).varShading.startX"
+                        :shading-positive-high-value="JSON.parse(shading.positiveFill).varShading.endX"
+                        :shading-negative-low-value="JSON.parse(shading.negativeFill).varShading.startX"
+                        :shading-negative-high-value="JSON.parse(shading.negativeFill).varShading.endX"
+                        :real-left="getShadingRealLeft(shading)"
+                        :real-right="getShadingRealRight(shading)"
+                    />
                 </fragment>
                 <v-curve
                     v-for="(line, idx) in $store.state.lines.filter(line => line.idTrack === track.idTrack)"

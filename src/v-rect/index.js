@@ -19,7 +19,7 @@ async function drawRect(obj, align = 0) {
     obj.clear();
     let lw = this.lineWidth || 0;
     let lt = this.lineTransparency || 1.0;
-    let imageUrl = '';
+    let imageUrl = '', fillFlag = false;
     if (this.hasMouseOver) {
         lw = lw ? (lw + 4) : 0;
         lt /= 2;
@@ -48,10 +48,13 @@ async function drawRect(obj, align = 0) {
                 transformFn = scaleQuantile().domain([0, this.viewWidth]).range(myPalette);
                 break;
             case "Custom Fills":
-                imageUrl = `https://users.i2g.cloud${this.imagePatternUrl}?service=WI_BACKEND`;
-                break;
+                if (this.imagePatternUrl) {
+                    imageUrl = `https://users.i2g.cloud${this.imagePatternUrl}?service=WI_BACKEND`;
+                    break;
+                }
         }
         if (transformFn) {
+            fillFlag = true
             let polygon, myFillColor, posXFillColor;
             for (let i = 0; i <= this.viewWidth; i += 1) {
                 polygon = [i, 0, i + 1, 0, i + 1, this.viewHeight, i, this.viewHeight];
@@ -78,17 +81,18 @@ async function drawRect(obj, align = 0) {
         }
     }
 
-    if (this.imagePatternUrl) {
-        let imagePattern;
-        if (imageUrl) {
-            imagePattern = await getImagePattern(imageUrl);
-        } else {
-            imagePattern = await getImagePattern(this.imagePatternUrl);
-        }
+    if (imageUrl) {
+        let imagePattern = await getImagePattern(imageUrl);
         let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
         const texture = Texture.from(canvas);
         obj.beginTextureFill(texture);
+    } else {
+        !fillFlag && obj.beginFill(
+            this.cFillColor.color,
+            this.cFillColor.transparency,
+            this.fillTexture
+        );
     }
 
     obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, align);
@@ -118,9 +122,9 @@ let component = {
     },
     mixins: [layoutMixin, selectable],
     watch: {
-        isSelected: function () {
-            this.draw(this.getPixiObj());
-        }
+        // isSelected: function () {
+        //     this.draw(this.getPixiObj());
+        // }
     }
 };
 let VRect = VShape.extend(component);

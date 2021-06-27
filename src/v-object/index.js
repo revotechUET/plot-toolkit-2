@@ -20,7 +20,7 @@ async function makeScene() {
     }
     else this.coordinate = {}
 
-    maskObj && this.drawMask(maskObj);
+    maskObj && await this.drawMask(maskObj);
     pixiObj && await this.draw(pixiObj);
     if (this.live) {
         requestAnimationFrame(() => {
@@ -215,8 +215,8 @@ let component = {
         makeScene, createPixiObj, getPixiObj, getMaskObj,
         renderGraphic, rawRenderGraphic, registerEvents,
         draw,
-        drawMask: function (obj) {
-            this.draw(obj);
+        drawMask: async function (obj) {
+            await this.draw(obj);
         },
         getParent: function () {
             return this.$parent;

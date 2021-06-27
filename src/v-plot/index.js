@@ -162,7 +162,7 @@ const component = {
             let { shadingType } = typeFill;
             if (shadingType === "pattern") {
                 let { pattern } = typeFill;
-                if (pattern.name === "Solid") return [];
+                if (pattern.name === "Solid" || pattern.name === 'none') return [];
                 return [this.$store.state.patterns[pattern.name].src];
             }
             let { content } = typeFill.varShading.customFills;
@@ -189,33 +189,59 @@ const component = {
             if (!content) return [];
             return content.map(item => item.background);
         },
-        getShadingPalette: function (shading) {
-            let { palette } = JSON.parse(shading.fill).varShading;
-            return this.$store.state.palettes[palette];
+        getShadingPalette: function (typeFill) {
+            let palette;
+            if (typeFill.display) {
+                palette = typeFill.varShading.palette;
+            }
+            if (palette) {
+                return this.$store.state.palettes[palette];
+            }
+            return [];
         },
         getShadingMinColor: function (typeFill) {
             if (this.getShadingType(typeFill) === "Custom Fills") {
                 return;
             }
-            return typeFill.varShading.gradient.startColor;
+            return typeFill.varShading.gradient.startColor || typeFill.varShading.startX;
         },
         getShadingMaxColor: function (typeFill) {
             if (this.getShadingType(typeFill) === "Custom Fills") {
                 return;
             }
-            return typeFill.varShading.gradient.endColor;
+            return typeFill.varShading.gradient.endColor || typeFill.varShading.endX;
+        },
+        getObjShadingColor: function (typeFill) {
+            if (!typeFill.varShading.gradient) {
+                return;
+            }
+            let { startColor, endColor } = typeFill.varShading.gradient;
+            return {
+                minColor: startColor,
+                maxColor: endColor
+            }
         },
         getShadingRealLeft(shading) {
             if (shading.leftFixedValue || shading.leftFixedValue === 0) {
                 return shading.leftFixedValue;
             }
-            return this.$store.state.lines.filter(line => line.idLine === shading.idLeftLine)[0].curveData;
+            let line = this.$store.state.lines.filter(line => line.idLine === shading.idLeftLinne)[0];
+            if (line) {
+                return line.curve;
+            }
         },
         getShadingRealRight(shading) {
             if (shading.rightFixedValue || shading.rightFixedValue === 0) {
                 return shading.rightFixedValue;
             }
-            return this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0].curve;
+            let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
+            if (line) {
+                return line.curve;
+            }
+        },
+        getShadingControlCurve(shading) {
+            let line = this.$store.state.lines.filter(line => line.idCurve === shading.idControlCurve)[0];
+            return line.curve;
         },
         getShadingRealMinX: function (shading) {
             let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
