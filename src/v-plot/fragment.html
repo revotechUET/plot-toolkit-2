@@ -102,7 +102,9 @@
                         :shading-high-value="JSON.parse(shading.fill).varShading.endX"
                         :real-left="getShadingRealLeft(shading)"
                         :real-right="getShadingRealRight(shading)"
-                        :shading-control-curve="getShadingControlCurve(shading)"
+                        :shading-control-curve="getCurveData(shading.idControlCurve)"
+                        :left-real-min-x="getLeftShadingRealMinX(shading)"
+                        :left-real-max-x="getLeftShadingRealMaxX(shading)"
                         />
                     <v-shading 
                         :name="shading.name" :is-normal-fill="false"
@@ -123,12 +125,13 @@
                         :shading-negative-high-value="JSON.parse(shading.negativeFill).varShading.endX"
                         :real-left="getShadingRealLeft(shading)"
                         :real-right="getShadingRealRight(shading)"
+                        :shading-control-curve="getCurveData(shading.idControlCurve)"
                     />
                 </fragment>
                 <v-curve
-                    v-for="(line, idx) in $store.state.lines.filter(line => line.idTrack === track.idTrack)"
+                    v-for="(line, idx) in track.lines"
                     :key="line.alias + idx + line.idLine" :name="line.alias"
-                    :real-path="line.curve" :unit="line.unit"
+                    :real-path="getCurveData(line.idCurve)" :unit="line.unit"
                     :symbol-color="line.symbolFillStyle" :line-width="line.lineWidth"
                     :line-color="line.lineColor" :line-dash="line.lineStyle ? line.lineStyle : ''"
                     :real-min-x="line.minValue" :real-max-x="line.maxValue"

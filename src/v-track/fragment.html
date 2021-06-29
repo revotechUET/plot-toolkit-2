@@ -31,87 +31,87 @@
             line-color="0x000000" :line-width="1">
             <!-- TO BE CHANGED: tao 1 class moi v-item-header => track header visualize items -->
             <v-container 
-                :view-pos-x="0" :view-pos-y="0"
+                :view-pos-x="0" :view-pos-y="showTitle ? 0 : 20"
                 :view-width="viewWidth" :view-height="Math.max(showTitle ? trackHeaderHeight - 20 : trackHeaderHeight, trackHeaderChildrenHeight)"
                 layout-direction="vertical">
-            <v-rect-with-destroyed-evt
-                v-if="trackType !== 'Depth Track'"
-                v-for="(child, idx) in onRefsReady().sort((child1, child2) => child1.componentType.localeCompare(child2.componentType))" 
-                :key = "child.name + ' ' + idx" :name="child.componentType + ' ' + idx"
-                :view-pos-x="0"
-                :enabled="true" :constrained="true"
-                :view-width="viewWidth" :view-height="child.componentType === 'VCurve' ? 60: 30"
-                :fill-color="child.componentType !== 'VZone' ? '0xFFFFFF' : child.fillColor" 
-                x-transform="none" y-transform="none"
-                :fill-transparency="child.componentType !== 'VZone' ? 0 : 1"
-                line-color="0x080808" :line-width="1"
-                :line-transparency="child.componentType !== 'VCurve' ? 1 : 0"
-                :on-destroyed-fn="onChildRemove"
-                :onmousedown="childHighlight">
-                    <v-header-shading
-                        v-if="child.componentType === 'VShading'"
-                        :shading-name="child.name || child.componentType + ' ' + idx"
-                        :line-color="0x101010" :line-width="1"
-                        :view-pos-x="0" :view-pos-y="0"
-                        :type-fill-color="child.typeFillColor"
-                        :foreground-color="child.foregroundColorList && child.foregroundColorList.length === 1 ? child.foregroundColorList[0] : null"
-                        :background-color="child.backgroundColorList && child.backgroundColorList.length === 1 ? child.backgroundColorList[0] : null"
-                        :image-pattern-url="child.fillPatternList && child.fillPatternList.length === 1 ? child.fillPatternList[0] : null"
-                        :min-color="child.getShadingMinColor" 
-                        :max-color="child.getShadingMaxColor"
-                        :palette="child.palette || child.positiveSidePalette"
-                        :view-width="viewWidth" :view-height="30"
-                        :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
-                        :fill-transparency="0" :content-style="headerContentStyle"
-                        :shading-low-value="child.shadingLowValue"
-                        :shading-high-value="child.shadingHighValue"
-                        x-transform="none" y-transform="none"
-                    />
-                    <v-header-curve 
-                        v-if="child.componentType === 'VCurve'"
-                        :curve-name="child.name || child.componentType + ' ' + idx"
-                        :view-pos-x="0" :view-pos-y="0"
-                        :fill-color="selectionStates[idx] ? child.symbolColor : '0xFFFFFF'" 
-                        :fill-transparency="selectionStates[idx] ? 0.2 : 1"
-                        :view-width="viewWidth" :view-height="60"
-                        :content-style="{...headerContentStyle, fill: child.symbolColor}"
-                        :unit="child.unit"
-                        :left-value="child.realMinX || child.$parent.realMinX"
-                        :right-value="child.realMaxX || child.$parent.realMaxX"
-                        :line-dash="child.lineDash"
-                        :path-color="child.symbolColor"
+                <v-rect-with-destroyed-evt
+                    v-if="trackType !== 'Depth Track'"
+                    v-for="(child, idx) in onRefsReady().sort((child1, child2) => child1.componentType.localeCompare(child2.componentType))" 
+                    :key = "child.name + ' ' + idx" :name="child.componentType + ' ' + idx"
+                    :view-pos-x="0"
+                    :enabled="true" :constrained="true"
+                    :view-width="viewWidth" :view-height="child.componentType === 'VCurve' ? 60: 30"
+                    :fill-color="child.componentType !== 'VZone' ? '0xFFFFFF' : child.fillColor" 
+                    x-transform="none" y-transform="none"
+                    :fill-transparency="child.componentType !== 'VZone' ? 0 : 1"
+                    line-color="0x080808" :line-width="1"
+                    :line-transparency="child.componentType !== 'VCurve' ? 1 : 0"
+                    :on-destroyed-fn="onChildRemove"
+                    :onmousedown="childHighlight">
+                        <v-header-shading
+                            v-if="child.componentType === 'VShading'"
+                            :shading-name="child.name || child.componentType + ' ' + idx"
+                            :line-color="0x101010" :line-width="1"
+                            :view-pos-x="0" :view-pos-y="0"
+                            :type-fill-color="child.typeFillColor"
+                            :foreground-color="child.foregroundColorList && child.foregroundColorList.length === 1 ? child.foregroundColorList[0] : null"
+                            :background-color="child.backgroundColorList && child.backgroundColorList.length === 1 ? child.backgroundColorList[0] : null"
+                            :image-pattern-url="child.fillPatternList && child.fillPatternList.length === 1 ? child.fillPatternList[0] : null"
+                            :min-color="child.getShadingMinColor" 
+                            :max-color="child.getShadingMaxColor"
+                            :palette="child.palette || child.positiveSidePalette"
+                            :view-width="viewWidth" :view-height="30"
+                            :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
+                            :fill-transparency="0" :content-style="headerContentStyle"
+                            :shading-low-value="child.shadingLowValue"
+                            :shading-high-value="child.shadingHighValue"
+                            x-transform="none" y-transform="none"
+                        />
+                        <v-header-curve 
+                            v-if="child.componentType === 'VCurve'"
+                            :curve-name="child.name || child.componentType + ' ' + idx"
+                            :view-pos-x="0" :view-pos-y="0"
+                            :fill-color="selectionStates[idx] ? child.symbolColor : '0xFFFFFF'" 
+                            :fill-transparency="selectionStates[idx] ? 0.2 : 1"
+                            :view-width="viewWidth" :view-height="60"
+                            :content-style="{...headerContentStyle, fill: child.symbolColor}"
+                            :unit="child.unit"
+                            :left-value="child.realMinX || child.$parent.realMinX"
+                            :right-value="child.realMaxX || child.$parent.realMaxX"
+                            :line-dash="child.lineDash"
+                            :path-color="child.symbolColor"
+                        />
+                        <v-textbox
+                            v-if="child.componentType === 'VZone'"
+                            :content="child.name || child.componentType + ' ' + idx" :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
+                            :fill-transparency="1"
+                            line-color="0x010101" :line-width="1"
+                            :view-width="textHeaderWidth(child.name || child.componentType + ' ' + idx)"
+                            :view-height="textHeaderHeight(child.name || child.componentType + ' ' + idx)"
+                            :content-style="headerContentStyle"
+                            :view-pos-x="viewWidth/2 - textHeaderWidth(child.name || child.componentType + ' ' + idx) / 2"
+                            :view-pos-y="15 - textHeaderHeight(child.name || child.componentType + ' ' + idx) / 2"
+                        />
+                </v-rect-with-destroyed-evt>
+                <fragment v-if="trackType === 'Depth Track'">
+                    <v-textbox
+                        :content="unit || 'M'"
+                        :view-width="textHeaderWidth(unit || 'M')"
+                        :view-height="textHeaderHeight(unit || 'M')"
+                        :content-style="headerContentStyle"
+                        :view-pos-x="viewWidth/2 - textHeaderWidth(unit || 'M')/2"
+                        :view-pos-y="5"
                     />
                     <v-textbox
-                        v-if="child.componentType === 'VZone'"
-                        :content="child.name || child.componentType + ' ' + idx" :fill-color="selectionStates[idx] ? '0xffc2b3' : '0xFFFFFF'"
-                        :fill-transparency="1"
-                        line-color="0x010101" :line-width="1"
-                        :view-width="textHeaderWidth(child.name || child.componentType + ' ' + idx)"
-                        :view-height="textHeaderHeight(child.name || child.componentType + ' ' + idx)"
+                        :content="cRatioScreen"
+                        :view-width="textHeaderWidth(cRatioScreen)"
+                        :view-height="textHeaderHeight(cRatioScreen)"
                         :content-style="headerContentStyle"
-                        :view-pos-x="viewWidth/2 - textHeaderWidth(child.name || child.componentType + ' ' + idx) / 2"
-                        :view-pos-y="15 - textHeaderHeight(child.name || child.componentType + ' ' + idx) / 2"
+                        :view-pos-x="viewWidth/2 - textHeaderWidth(cRatioScreen)/2"
+                        :view-pos-y="textHeaderHeight(unit || 'M') + 10"
                     />
-            </v-rect-with-destroyed-evt>
-            <fragment v-if="trackType === 'Depth Track'">
-                <v-textbox
-                    :content="unit || 'M'"
-                    :view-width="textHeaderWidth(unit || 'M')"
-                    :view-height="textHeaderHeight(unit || 'M')"
-                    :content-style="headerContentStyle"
-                    :view-pos-x="viewWidth/2 - textHeaderWidth(unit || 'M')/2"
-                    :view-pos-y="5"
-                />
-                <v-textbox
-                    :content="cRatioScreen"
-                    :view-width="textHeaderWidth(cRatioScreen)"
-                    :view-height="textHeaderHeight(cRatioScreen)"
-                    :content-style="headerContentStyle"
-                    :view-pos-x="viewWidth/2 - textHeaderWidth(cRatioScreen)/2"
-                    :view-pos-y="textHeaderHeight(unit || 'M') + 10"
-                />
-            </fragment>
-        </v-container>
+                </fragment>
+            </v-container>
         </v-viewport>
     </v-resizable>
     <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight"

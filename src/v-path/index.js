@@ -22,7 +22,11 @@ function draw(obj) {
 	if (this.dashLine && this.lineDash !== "[0]") {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
-			obj.myLineTo(points[i].x, points[i].y, this.lineDash);
+			if (i < pointa.length - 1 && !this.realPath[i].x) {
+				obj.moveTo(points[i + 1].x, points[i + 1].y)
+			} else {
+				obj.myLineTo(points[i].x, points[i].y, this.lineDash);
+			}
 		}
 		// for (let i = 0; i < points.length - 1; i++) {
 		// 	obj.drawLine(
@@ -36,7 +40,11 @@ function draw(obj) {
 	} else {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
-			obj.myLineTo(points[i].x, points[i].y);
+			if (i < points.length - 1 && !this.realPath[i].x) {
+				obj.moveTo(points[i + 1].x, points[i + 1].y)
+			} else {
+				obj.myLineTo(points[i].x, points[i].y);
+			}
 		}
 		// for (let i = 0; i < points.length - 1; i++) {
 		// 	obj.drawLine(

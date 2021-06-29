@@ -25,7 +25,11 @@ let component = {
                 obj.lineStyle(2, getColor(this.symbolColor, DefaultValues.lineColor), 0.05, 0.5);
                 obj.moveTo(points[0].x, points[0].y);
                 for (let i = 1; i < points.length; i++) {
-                    obj.myLineTo(points[i].x, points[i].y);
+                    if (i < points.length - 1 && !this.realPath[i].x) {
+                        obj.moveTo(points[i + 1].x, points[i + 1].y)
+                    } else {
+                        obj.myLineTo(points[i].x, points[i].y);
+                    }
                 }
             } else {
                 this.draw(obj);

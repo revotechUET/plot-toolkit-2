@@ -41,10 +41,6 @@ async function draw(obj) {
                 if (!this.positiveSideColor || !this.negativeSideColor) {
                     throw new Error(`No sufficient information for Gradient positive/negative fill color`);
                 }
-                let subtractRealX = (this.realMaxX || this.$parent.realMaxX) - (this.realMinX || this.$parent.realMinX);
-                let ratioPosRealX = subtractRealX / (this.shadingPositiveHighValue - this.shadingPositiveLowValue),
-                    ratioNegRealX = subtractRealX / (this.shadingNegativeHighValue - this.shadingNegativeLowValue);
-                console.log(ratioPosRealX, ratioNegRealX);
                 positiveTransformColor = scaleLinear()
                     .domain([
                         this.shadingPositiveLowValue, this.shadingPositiveHighValue
@@ -179,11 +175,6 @@ async function draw(obj) {
                     texture: null
                 }
             })
-            console.log("rang check", rangeCheck)
-            console.log("fillValues", fillValues);
-            console.log("backgroundColorList", bgColors);
-            console.log("fill patterns", fillPatterns);
-            console.log("foreground color", fgColors);
             transformColor = scaleQuantile().domain(fillValues).range(bgColors);
             break;
         case "Palette":
@@ -215,29 +206,13 @@ async function draw(obj) {
             throw new Error(`No sufficient information for type fill color : ${this.typeFillColor}`);
     }
 
+    let shadingIdx = 0;
+
     for (let i = 0; i < this.cPolygonList.length; i++) {
-        let polygon = this.cPolygonList[i], idx = i;
-        let posXFillColor;
-        if (polygon.length === 4) { // this polygon is quadrilateral
-            posXFillColor = Math.max(polygon[0]["x"], polygon[1]["x"]);
-            if (this.notIsArray) {
-                switch (this.notIsArray) {
-                    case "Real Right":
-                        if (this.realRight >= posXFillColor) {
-                            posXFillColor = Math.min(polygon[0]["x"], polygon[1]["x"]);
-                        }
-                        break;
-                    case "Real Left":
-                        if (this.realLeft >= posXFillColor) {
-                            posXFillColor = Math.min(polygon[0]["x"], polygon[1]["x"]);
-                        }
-                }
-            }
-        } else { // this polygon is not quadriateral => it must be triangle
-            posXFillColor = Math.min(polygon[0]["x"], polygon[1]['x']);
-            if (idx >= 1 && this.cPolygonList[idx - 1].length === 3 && polygon[0]["x"] < polygon[1]["x"]) {
-                posXFillColor = polygon[2]["x"];
-            }
+        let polygon = this.cPolygonList[i];
+        let posXFillColor = this.shadingControlCurve[shadingIdx].x;
+        if (!this.checkTriangle[i]) {
+            shadingIdx++;
         }
         if (!this.isNormalFill) {
             let polygonMaxX = Math.max(...polygon.map(point => point["x"]));
@@ -249,64 +224,52 @@ async function draw(obj) {
         }
         switch (this.typeFillColor) {
             case "Gradient":
-                if (posXFillColor) {
-                    if (this.isNormalFill) {
-                        myFillColor = processColorStr(transformColor(posXFillColor));
-                    }
-                    obj.beginFill(
-                        myFillColor.color,
-                        myFillColor.transparency
-                    );
-                    this.myDrawPolygon(obj, polygon);
-                    obj.endFill();
+                if (this.isNormalFill) {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
                 }
+                obj.beginFill(
+                    myFillColor.color,
+                    myFillColor.transparency
+                );
+                this.myDrawPolygon(obj, polygon);
+                obj.endFill();
                 break;
             case "Custom Fills":
-                if (posXFillColor) {
-                    let index;
-                    for (let j = 0; j < fillValues.length; j++) {
-                        if (fillValues[j] <= posXFillColor) {
-                            index = j;
-                        }
+                let index;
+                for (let j = 0; j < fillValues.length; j++) {
+                    if (fillValues[j] <= posXFillColor) {
+                        index = j;
                     }
-                    if (index === fillValues.length - 1 && fillPatterns[index - 1].texture) {
-                        obj.beginTextureFill(fillPatterns[index - 1].texture)
-                    } else if (fillPatterns[index] && fillPatterns[index].src) {
-                        if (!fillPatterns[index].texture) {
-                            let srcUrl = `https://users.i2g.cloud${fillPatterns[index].src}?service=WI_BACKEND`;
-                            let myFgColor = convert2rgbColor(fgColors[index]),
-                                myBgColor = convert2rgbColor(bgColors[index]);
-                            let imagePattern = await getImagePattern(srcUrl);
-                            let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
-                            const texture = Texture.from(canvas);
-                            obj.beginTextureFill(texture);
-                            fillPatterns[index].texture = texture;
-                        } else {
-                            obj.beginTextureFill(fillPatterns[index].texture);
-                        }
-                    } else {
-                        myFillColor = processColorStr(transformColor(posXFillColor));
-                        obj.beginFill(
-                            myFillColor.color,
-                            myFillColor.transparency
-                        );
-                    }
-                    this.myDrawPolygon(obj, polygon);
-                    obj.endFill();
                 }
-                break;
-            case "Palette":
-                if (posXFillColor) {
-                    if (this.isNormalFill) {
-                        myFillColor = processColorStr(transformColor(posXFillColor));
+                if (index === fillValues.length - 1) index--;
+                if (fillPatterns[index] && fillPatterns[index].src) {
+                    if (!fillPatterns[index].texture) {
+                        const texture = await this.getTexture(bgColors[index], fgColors[index], fillPatterns[index].src);
+                        obj.beginTextureFill(texture);
+                        fillPatterns[index].texture = texture;
+                    } else {
+                        obj.beginTextureFill(fillPatterns[index].texture);
                     }
+                } else {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
                     obj.beginFill(
                         myFillColor.color,
                         myFillColor.transparency
                     );
-                    this.myDrawPolygon(obj, polygon);
-                    obj.endFill();
                 }
+                this.myDrawPolygon(obj, polygon);
+                obj.endFill();
+                break;
+            case "Palette":
+                if (this.isNormalFill) {
+                    myFillColor = processColorStr(transformColor(posXFillColor));
+                }
+                obj.beginFill(
+                    myFillColor.color,
+                    myFillColor.transparency
+                );
+                this.myDrawPolygon(obj, polygon);
+                obj.endFill();
                 break;
         }
     };
@@ -386,11 +349,12 @@ function generatePolygons(path, bothIsArr) {
                 polygonArr.push([...polygon.slice(0, 2), { x, y: a * x + b }]);
                 polygonArr.push([...polygon.slice(2, 4), { x, y: a * x + b }]);
                 checkArr.push(true, false);
-            } else {
-                checkArr.push(false);
-                polygonArr.push(polygon);
+                i++;
+                continue;
             }
-            i += 1;
+            checkArr.push(false);
+            polygonArr.push(polygon);
+            i++;
         }
     } else {
         let arr = [];
@@ -445,6 +409,8 @@ function generatePolygons(path, bothIsArr) {
 
 let component = {
     props: {
+        leftRealMinX: Number,
+        leftRealMaxX: Number,
         realLeft: [Number, Array],
         realRight: [Number, Array],
         shadingControlCurve: Array,
@@ -542,6 +508,15 @@ let component = {
                 });
             }
             obj.drawPolygon(res);
+        },
+        getTexture: async function (bgColor, fgColor, src) {
+            let srcUrl = `https://users.i2g.cloud${src}?service=WI_BACKEND`;
+            let myFgColor = convert2rgbColor(fgColor),
+                myBgColor = convert2rgbColor(bgColor);
+            let imagePattern = await getImagePattern(srcUrl);
+            let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
+            const texture = Texture.from(canvas);
+            return texture;
         }
     },
     components: {
