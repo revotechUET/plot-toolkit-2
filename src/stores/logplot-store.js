@@ -8,7 +8,7 @@ export default {
         tracks: [],
         depth_axes: [],
         curves: [],
-        lines: [],
+        curveSteps: [],
         currentPlotTop: 0,
         currentPlotBottom: 0,
         plotTop: 0,
@@ -31,13 +31,7 @@ export default {
             state.depth_axes.push(depthAxis)
         },
         setCurves(state, curves) {
-            state.curves.push(...curves)
-        },
-        setLines(state, lines) {
-            const idList = lines.map(line => line.idLine);
-            state.lines = state.lines.filter(line => idList.indexOf(line.idLine) < 0);
-            state.lines = state.lines.concat(lines);
-            console.log("inside set lines", state.lines.map(line => line.idLine + " " + line.alias).toString())
+            state.curves.push(curves)
         },
         setCurrentPlotTop(state, top) {
             state.currentPlotTop = top;
@@ -56,6 +50,9 @@ export default {
         },
         setPalettes(state, palettes) {
             state.palettes = palettes;
+        },
+        setCurveSteps(state, curveStep) {
+            state.curveSteps.push(curveStep);
         },
         setDepthTrackWidth(state, { idx, width }) {
             state.depth_axes[idx].width = Number(width);
@@ -107,32 +104,31 @@ export default {
                     idTrack: tracks[i].idTrack
                 });
                 commit('setTracks', tracksResponse.data);
-                commit("setLines", tracks[i].lines)
-            }
-
-            const curveStore = [];
-            for (const well of wells) {
-                const { datasets } = well;
-                let { curves } = datasets[0];
-                let step = Number(datasets[0].step);
-                curves = curves.filter(curve => {
-                    return state.lines.map(line => line.idCurve).indexOf(curve.idCurve) >= 0;
-                })
-                for (const curve of curves) {
-                    const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
-                        idCurve: curve.idCurve,
-                    });
-                    curveStore.push({
-                        [curve.idCurve]: curveReponse.data.map((point, idx) => {
-                            return {
-                                ...point,
-                                y: top0 + step * idx
-                            }
-                        })
+                for (const well of wells) {
+                    const { datasets } = well;
+                    let { curves } = datasets[0];
+                    let step = Number(datasets[0].step);
+                    commit("setCurveSteps", curves.map(curve => curve.idCurve).join("-") + `:step${step}`);
+                    curves = curves.filter(curve => {
+                        return tracks[i].lines.map(line => line.idCurve).indexOf(curve.idCurve) >= 0
+                            && state.curves.map(c => Object.keys(c)[0]).indexOf(curve.idCurve) < 0;
                     })
+                    for (const curve of curves) {
+                        const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
+                            idCurve: curve.idCurve,
+                        });
+                        commit("setCurves", {
+                            [curve.idCurve]: curveReponse.data.map((point, idx) => {
+                                return {
+                                    ...point,
+                                    y: top0 + step * idx
+                                }
+                            })
+                        });
+                    }
                 }
             }
-            commit("setCurves", curveStore);
+
 
             for (let i = 0; i < depth_axes.length; i++) {
                 const depthAxesResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/depth-axis/info', {
@@ -160,6 +156,8 @@ export default {
             commit('getPlotData', plotResponse.data);
             commit('setPatterns', patternResponse.data);
             commit('setPalettes', paletteResponse.data);
+
+            console.log('Store setup done')
         },
         trackWidthChange({ state, commit }, { idx, width, trackType }) {
             switch (trackType) {

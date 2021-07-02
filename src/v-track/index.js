@@ -243,7 +243,14 @@ let component = {
                                 }
                             }
                         } else {
-                            pixelPathLeft = this.transformPath(child, child.realLeft);
+                            // pixelPathLeft = this.transformPath(child, child.realLeft);
+                            const shadingLeftTransform = child.leftTransformX();
+                            pixelPathLeft = child.realLeft.map(point => {
+                                return {
+                                    x: shadingLeftTransform(point.x),
+                                    y: child.transformY(point.y)
+                                }
+                            })
                             pixelPathRight = this.transformPath(child, child.realRight);
                             for (let j = 0; j < pixelPathLeft.length - 1; j++) {
                                 if (pixelPathLeft[j].y <= y && pixelPathLeft[j + 1].y >= y) {
@@ -293,8 +300,6 @@ let component = {
                     case "VZone":
                         let topPosY = this.getPosY(child.realMinY);
                         let bottomPosY = this.getPosY(child.realMaxY);
-                        // let topPosY = this.transformY(child.realMinY);
-                        // let bottomPosY = this.transformY(child.realMaxY);
                         if (topPosY < y && y < bottomPosY) {
                             this.selectionStates = this.selectionStates.map((child, idx) => {
                                 return idx === i ? true : false
@@ -401,6 +406,12 @@ let component = {
             } else {
                 return this.viewWidth - this.textHeaderWidth(name);
             }
+        },
+        getShadingPattern: function (shading) {
+            if (shading.fillPatternList && shading.fillPatternList.length === 1) {
+                return `https://users.i2g.cloud${shading.fillPatternList[0]}?service=WI_BACKEND`;
+            }
+            return null;
         }
     },
     mounted: function () {

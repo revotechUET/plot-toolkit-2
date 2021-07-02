@@ -15,7 +15,7 @@ const app = new Vue({
                 :real-min-x="2" 
                 :real-max-x="6"
                 line-color="#FF00FF"
-                image-pattern-url="/src/main/trait_rapproches_.png"
+                image-pattern-url="https://users.i2g.cloud/pattern/trait_rapproches_.png?service=WI_BACKEND"
                 foregroundColor="red"
                 backgroundColor="green"
                 :line-width="1"
@@ -40,16 +40,16 @@ const app = new Vue({
     created() {
     },
     methods: {
-        double: function(evt) {
+        double: function (evt) {
             this.x += 10;
             this.y += 10;
         },
-        click1: function(target, localPos, globalPos, evt) {
+        click1: function (target, localPos, globalPos, evt) {
             target.hostComponent.$nextTick(() => {
                 target.zIndex++;
             });
         },
-        dropFn: function(target, pos) {
+        dropFn: function (target, pos) {
             if (pos.x !== undefined) this.x = pos.x;
             if (pos.y !== undefined) this.y = pos.y;
         }

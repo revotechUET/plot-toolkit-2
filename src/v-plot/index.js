@@ -6,6 +6,7 @@ import VXone from '../v-xone';
 import VShading from '../v-shading';
 import VCurve from '../v-curve';
 import VContainer from '../v-container';
+import axios from 'axios';
 
 const component = {
     name: 'v-plot',
@@ -139,14 +140,15 @@ const component = {
             return shadingType;
         },
         getXTransformShading: function (shading) {
-            let line = this.$store.state.lines.filter(line => line.idCurve === shading.idControlCurve)[0];
+            // let line = this.$store.state.lines.filter(line => line.idCurve === shading.idControlCurve)[0];
+            let line = this.getLine(shading.idRightLine)
             return !line ? "linear" : line.displayType === "Linear" ? "linear" : "loga"
         },
         getShadingCustomFills: function (typeFill, shading) {
             let { shadingType } = typeFill;
             if (shadingType === "pattern") {
-                let realMinX = this.$store.state.lines.filter(line => line.idLine = shading.idRightLine)[0].minValue;
-                let realMaxX = this.$store.state.lines.filter(line => line.idLine = shading.idRightLine)[0].maxValue;
+                let realMinX = this.getLine(shading.idRightLine).minValue;
+                let realMaxX = this.getLine(shading.idRightLine).maxValue;
                 return [{ lowVal: realMinX, highVal: realMaxX }]
             }
             let { content } = typeFill.varShading.customFills;
@@ -165,7 +167,7 @@ const component = {
             let { content } = typeFill.varShading.customFills;
             if (!content) return [];
             return content.map(item => {
-                if (item.pattern === "Solid") return null;
+                if (item.pattern === "Solid" || item.pattern === "none") return null;
                 return this.$store.state.patterns[item.pattern].src
             });
         },
@@ -221,73 +223,78 @@ const component = {
                 maxColor: endColor
             }
         },
-        getShadingRealLeft(shading) {
+        getShadingRealLeft: function (shading) {
             if (shading.leftFixedValue || shading.leftFixedValue === 0) {
                 return shading.leftFixedValue;
             }
-            let line;
-            line = this.$store.state.lines.filter(line => line.idLine === shading.idLeftLine)[0];
-            if (!line) {
-                const lines = [];
-                this.$store.state.tracks.forEach(track => lines.push(...track.lines));
-                line = lines.filter(line => line.idLine === shading.idLeftLine)[0];
-            }
+            let line = this.getLine(shading.idLeftLine);
             if (line) return this.getCurveData(line.idCurve);
         },
-        getShadingRealRight(shading) {
+        getShadingRealRight: function (shading) {
             if (shading.rightFixedValue || shading.rightFixedValue === 0) {
                 return shading.rightFixedValue;
             }
-            let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
-            if (!line) {
-                const lines = [];
-                this.$store.state.tracks.forEach(track => lines.push(...track.lines))
-                line = lines.filter(line => line.idLine === shading.idRightLine)[0];
-            }
+            let line = this.getLine(shading.idRightLine);
             if (line) return this.getCurveData(line.idCurve);
 
         },
         getShadingRealMinX: function (shading) {
-            let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
-            if (!line) {
-                let { varShading } = JSON.parse(shading.fill);
-                if (!isNaN(varShading.startX)) {
-                    return varShading.startX;
-                }
-            }
+            let line = this.getLine(shading.idRightLine);
             return line.minValue;
         },
         getShadingRealMaxX: function (shading) {
-            let line = this.$store.state.lines.filter(line => line.idLine === shading.idRightLine)[0];
-            if (!line) {
-                let { varShading } = JSON.parse(shading.fill);
-                if (!isNaN(varShading.endX)) {
-                    return varShading.endX;
-                }
-            }
+            let line = this.getLine(shading.idRightLine);
             return line.maxValue;
         },
-        getCurveData(idCurve) {
+        getCurveData: function (idCurve) {
             let curveIdx = this.$store.state.curves
                 .map(curve => Number(Object.keys(curve)[0]))
                 .indexOf(idCurve)
+            // if (curveIdx < 0) {
+            //     let curveList = this.$store.state.curveSteps
+            //         .map(item => item.split(':step')[0])
+            //     let idx;
+            //     for (let i = 0; i < curveList.length; i++) {
+            //         if (curveList[i].indexOf(idCurve.toString()) >= 0) {
+            //             idx = i;
+            //             break;
+            //         }
+            //     }
+            //     let step = Number(this.$store.state.curveSteps[idx].split(":step")[1]);
+            //     const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
+            //         idCurve: idCurve,
+            //     });
+            //     let curve = curveReponse.data.map((point, idx) => {
+            //         return {
+            //             ...point,
+            //             y: this.$store.state.plotTop + step * idx
+            //         }
+            //     });
+            //     this.$store.commit("setCurves", {
+            //         [idCurve]: curve
+            //     })
+            //     return curve;
+            // }
             return this.$store.state.curves[curveIdx][idCurve];
         },
-        getLeftShadingRealMinX(shading) {
+        getLeftShadingRealMinX: function (shading) {
             if (shading.idLeftLine && shading.idRightLine) {
-                let line = this.$store.state.lines.filter(line => line.idLine === shading.idLeftLine)[0];
-                if (line) {
-                    console.log("shading second real min x", line.minValue);
-                    return line.minValue;
-                }
+                let line = this.getLine(shading.idLeftLine);
+                if (line) return line.minValue;
             }
         },
-        getLeftShadingRealMaxX(shading) {
+        getLeftShadingRealMaxX: function (shading) {
             if (shading.idLeftLine && shading.idRightLine) {
-                let line = this.$store.state.lines.filter(line => line.idLine === shading.idLeftLine)[0];
-                if (line) {
-                    console.log("shading second real min x", line.maxValue);
-                    return line.maxValue;
+                let line = this.getLine(shading.idLeftLine);
+                if (line) return line.maxValue;
+            }
+        },
+        getLine: function (idLine) {
+            for (const track of this.$store.state.tracks) {
+                for (const line of track.lines) {
+                    if (line.idLine === idLine) {
+                        return line;
+                    }
                 }
             }
         }

@@ -22,38 +22,21 @@ function draw(obj) {
 	if (this.dashLine && this.lineDash !== "[0]") {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
-			if (i < pointa.length - 1 && !this.realPath[i].x) {
+			if (i < points.length - 1 && !this.realPath[i].x) {
 				obj.moveTo(points[i + 1].x, points[i + 1].y)
 			} else {
 				obj.myLineTo(points[i].x, points[i].y, this.lineDash);
 			}
 		}
-		// for (let i = 0; i < points.length - 1; i++) {
-		// 	obj.drawLine(
-		// 		points[i].x,
-		// 		points[i].y,
-		// 		points[i + 1].x,
-		// 		points[i + 1].y,
-		// 		this.lineDash
-		// 	);
-		// }
 	} else {
 		obj.moveTo(points[0].x, points[0].y);
 		for (let i = 1; i < points.length; i++) {
 			if (i < points.length - 1 && !this.realPath[i].x) {
 				obj.moveTo(points[i + 1].x, points[i + 1].y)
 			} else {
-				obj.myLineTo(points[i].x, points[i].y);
+				obj.lineTo(points[i].x, points[i].y);
 			}
 		}
-		// for (let i = 0; i < points.length - 1; i++) {
-		// 	obj.drawLine(
-		// 		points[i].x,
-		// 		points[i].y,
-		// 		points[i + 1].x,
-		// 		points[i + 1].y
-		// 	);
-		// }
 	}
 
 	obj.beginFill(symbolColor, 1);
@@ -106,17 +89,6 @@ let component = {
 		"shadingOffsetY"
 	],
 	computed: {
-		// path: function () {
-		// 	if (this.viewPath) return this.viewPath;
-		// 	if (!this.realPath) return [];
-		// 	let transformXFn = this.$parent.getTransformX();
-		// 	let transformYFn = this.$parent.getTransformY();
-		// 	if (!transformXFn || !transformYFn) return [];
-		// 	return this.realPath.map((point) => ({
-		// 		x: transformXFn(point.x),
-		// 		y: transformYFn(point.y),
-		// 	}));
-		// },
 		componentType: function () {
 			return "VPath";
 		},
@@ -128,11 +100,11 @@ let component = {
 		draw,
 		getPath: function () {
 			if (this.viewPath) return this.viewPath;
-			if (!this.realPath) return [];
+			if (isNaN(this.realPath) && !this.realPath) return [];
 			let transformXFn = this.getTransformX() || this.$parent.getTransformX();
 			let transformYFn = this.getTransformY() || this.$parent.getTransformY();
 			if (!transformXFn || !transformYFn) return [];
-			if (!this.realPath.length) {
+			if (!isNaN(this.realPath)) {
 				return [
 					{
 						x: transformXFn(this.realPath) - (this.shadingOffsetX || 0),

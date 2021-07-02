@@ -1,7 +1,7 @@
 import VShape from "../v-shape";
 import VPath from '../v-path';
 import VRect from '../v-rect';
-import { scaleLinear, scaleQuantile } from "d3-scale";
+import { scaleLinear, scaleQuantile, scaleLog } from "d3-scale";
 import {
     processColorStr,
     DefaultValues,
@@ -66,42 +66,6 @@ async function draw(obj) {
                 throw new Error(`No sufficient information for custom fill color`)
             }
             if (!this.isNormalFill) return;
-            //background color list 
-            let formatBgColorList = [];
-            if (this.backgroundColorList) {
-                formatBgColorList.push(...this.backgroundColorList);
-                for (let i = this.backgroundColorList.length; i < this.customFillValues.length; i++) {
-                    formatBgColorList.push("transparent");
-                }
-            } else {
-                for (let i = 0; i < this.backgroundColorList.length; i++) {
-                    formatBgColorList.push("transparent")
-                }
-            }
-            //foreground color list
-            let formatFgColorList = [];
-            if (this.foregroundColorList) {
-                formatFgColorList.push(...this.foregroundColorList);
-                for (let i = this.foregroundColorList.length; i < this.customFillValues.length; i++) {
-                    formatFgColorList.push("white");
-                }
-            } else {
-                for (let i = 0; i < this.customFillValues.length; i++) {
-                    formatFgColorList.push("white");
-                }
-            }
-            //pattern fill list
-            let formatPatternList = [];
-            if (this.fillPatternList) {
-                formatPatternList.push(...this.fillPatternList);
-                for (let i = this.fillPatternList.length; i < this.customFillValues.length; i++) {
-                    formatPatternList.push(null);
-                }
-            } else {
-                for (let i = 0; i < this.customFillValues.length; i++) {
-                    formatPatternList.push(null);
-                }
-            }
             let rangeCheck = {};
             for (let i = 0; i < this.customFillValues.length; i++) {
                 let ele = this.customFillValues[i];
@@ -110,39 +74,39 @@ async function draw(obj) {
                 if (fillValues.length === 0) {
                     fillValues.push(mn, mx);
                     rangeCheck[mn] = mx;
-                    bgColors.push(formatBgColorList[0]);
-                    fgColors.push(formatFgColorList[0]);
-                    fillPatterns.push(formatPatternList[0]);
+                    bgColors.push(this.backgroundColorList[0]);
+                    fgColors.push(this.foregroundColorList[0]);
+                    fillPatterns.push(this.fillPatternList[0]);
                 } else {
                     if (mn > fillValues[fillValues.length - 1]) { //case: lowVal > maximum of fillValues => push both lowVal and highVal
                         rangeCheck[mn] = mx;
                         fillValues.push(mn, mx);
-                        bgColors.push(formatBgColorList[i]);
-                        fgColors.push(formatFgColorList[i]);
-                        fillPatterns.push(formatPatternList[i]);
+                        bgColors.push("transparent", this.backgroundColorList[i]);
+                        fgColors.push("white", this.foregroundColorList[i]);
+                        fillPatterns.push(null, this.fillPatternList[i]);
                         continue;
                     } else if (mn === fillValues[fillValues.length - 1]) { //case: lowVal = maximum of fillValues => just push highVal
                         rangeCheck[fillValues[fillValues.length - 1]] = mx;
                         fillValues.push(mx);
-                        bgColors.push(formatBgColorList[i]);
-                        fgColors.push(formatFgColorList[i]);
-                        fillPatterns.push(formatPatternList[i]);
+                        bgColors.push(this.backgroundColorList[i]);
+                        fgColors.push(this.foregroundColorList[i]);
+                        fillPatterns.push(this.fillPatternList[i]);
                         continue;
                     }
 
                     if (mx < fillValues[0]) { //case: highVal < minimum of fillValues => unshift both lowVal and highVal
                         rangeCheck[mn] = mx;
                         fillValues.unshift(mn, mx);
-                        bgColors.unshift(formatBgColorList[i], "transparent");
-                        fgColors.unshift(formatFgColorList[i], "white");
-                        fillPatterns.unshift(formatPatternList[i], null);
+                        bgColors.unshift(this.backgroundColorList[i], "transparent");
+                        fgColors.unshift(this.foregroundColorList[i], "white");
+                        fillPatterns.unshift(this.fillPatternList[i], null);
                         continue;
                     } else if (mx === fillValues[0]) { //case: highVal = minimum of fillValues => just unshift lowVal
                         rangeCheck[mn] = mx;
                         fillValues.unshift(mn);
-                        bgColors.unshift(formatBgColorList[i]);
-                        fgColors.unshift(formatFgColorList[i]);
-                        fillPatterns.unshift(formatPatternList[i]);
+                        bgColors.unshift(this.backgroundColorList[i]);
+                        fgColors.unshift(this.foregroundColorList[i]);
+                        fillPatterns.unshift(this.fillPatternList[i]);
                         continue;
                     }
 
@@ -157,14 +121,14 @@ async function draw(obj) {
                     }
 
                     let idx = fillValues.indexOf(mn);
-                    if (fillValues[idx] + 1) {
+                    if (fillValues[idx + 1]) {
                         if (mx > fillValues[idx + 1]) {
                             throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
                         } else if (mx === fillValues[idx + 1]) {
                             rangeCheck[mn] = mx;
-                            bgColors.splice(idx, 0, formatBgColorList[i]);
-                            fgColors.splice(idx, 0, formatFgColorList[i]);
-                            fillPatterns.splice(idx, 0, formatPatternList[i]);
+                            bgColors.splice(idx, 1, this.backgroundColorList[i]);
+                            fgColors.splice(idx, 1, this.foregroundColorList[i]);
+                            fillPatterns.splice(idx, 1, this.fillPatternList[i]);
                         }
                     }
                 }
@@ -214,6 +178,7 @@ async function draw(obj) {
         if (!this.checkTriangle[i]) {
             shadingIdx++;
         }
+        if (polygon.some(point => point.x === null)) continue;
         if (!this.isNormalFill) {
             let polygonMaxX = Math.max(...polygon.map(point => point["x"]));
             if (posXFillColor > this.realLeft || (posXFillColor === this.realLeft && polygonMaxX > this.realLeft)) {
@@ -251,6 +216,9 @@ async function draw(obj) {
                         obj.beginTextureFill(fillPatterns[index].texture);
                     }
                 } else {
+                    if (transformColor(posXFillColor) === 'transparent') {
+                        continue;
+                    }
                     myFillColor = processColorStr(transformColor(posXFillColor));
                     obj.beginFill(
                         myFillColor.color,
@@ -273,54 +241,6 @@ async function draw(obj) {
                 break;
         }
     };
-
-    this.shadingPathLeft = [];
-    this.shadingPathRight = [];
-    for (let i = 0; i < this.cPolygonList.length; i++) {
-        let polygon = this.cPolygonList[i];
-        if (polygon.length === 4) {
-            if (i === 0) {
-                if (polygon[0]["x"] > polygon[1]["x"]) {
-                    this.shadingPathLeft.push(polygon[1], polygon[2]);
-                    this.shadingPathRight.push(polygon[0], polygon[3]);
-                } else {
-                    this.shadingPathLeft.push(polygon[0], polygon[3]);
-                    this.shadingPathRight.push(polygon[1], polygon[2]);
-                }
-            } else {
-                if (polygon[2]["x"] < polygon[3]["x"]) {
-                    this.shadingPathLeft.push(polygon[2]);
-                    this.shadingPathRight.push(polygon[3]);
-                } else {
-                    this.shadingPathLeft.push(polygon[3]);
-                    this.shadingPathRight.push(polygon[2]);
-                }
-            }
-        } else {
-            if (i === 0) {
-                if (polygon[0]["x"] < polygon[1]["x"]) {
-                    this.shadingPathLeft.push(polygon[0], polygon[2]);
-                    this.shadingPathRight.push(polygon[1], polygon[2]);
-                } else {
-                    this.shadingPathLeft.push(polygon[1], polygon[2]);
-                    this.shadingPathRight.push(polygon[0], polygon[2]);
-                }
-            } else {
-                if (this.checkTriangle[i]) {
-                    this.shadingPathLeft.push(polygon[2]);
-                    this.shadingPathRight.push(polygon[2]);
-                } else {
-                    if (polygon[0]["x"] < polygon[1]["x"]) {
-                        this.shadingPathLeft.push(polygon[0]);
-                        this.shadingPathRight.push(polygon[1]);
-                    } else {
-                        this.shadingPathLeft.push(polygon[1]);
-                        this.shadingPathRight.push(polygon[0]);
-                    }
-                }
-            }
-        }
-    }
 
     obj.x = getPosX(this.coordinate, this.posX);
     obj.y = getPosY(this.coordinate, this.posY);
@@ -440,8 +360,6 @@ let component = {
     template,
     data: function () {
         return {
-            shadingPathLeft: [],
-            shadingPathRight: [],
             checkTriangle: [],
             notIsArray: '',
         }
@@ -490,6 +408,18 @@ let component = {
                 return this.positiveSideColor.maxColor;
             }
         },
+        cRealRightSet: function () {
+            if (isNaN(this.leftRealMaxX) || isNaN(this.leftRealMinX)) return;
+            if (this.realRight.length) {
+                return new Set(this.realRight.map(point => point.x));
+            }
+        },
+        cRealLeftSet: function () {
+            if (isNaN(this.leftRealMinX) || isNaN(this.leftRealMaxX)) return;
+            if (this.realLeft.length) {
+                return new Set(this.realLeft.map(point => point.x));
+            }
+        },
         componentType: function () {
             return "VShading";
         },
@@ -498,14 +428,32 @@ let component = {
         draw,
         myDrawPolygon: function (obj, polygon) {
             let res = [];
-            if (this.getTransformX() && this.getTransformY()) {
-                polygon.forEach(item => {
-                    res.push(this.transformX(item.x), this.transformY(item.y));
-                })
+            let transformX = this.getTransformX() || this.$parent.getTransformX(),
+                transformY = this.getTransformY() || this.$parent.getTransformY();
+            if (polygon.some(point => point.x === null)) return;
+            if (!isNaN(this.leftRealMaxX) && !isNaN(this.leftRealMinX)) {
+                const leftTransformX = this.leftTransformX();
+                let point;
+                for (let i = 0; i < polygon.length; i++) {
+                    point = polygon[i];
+                    if (this.cRealRightSet.has(point.x)) {
+                        if (this.cRealLeftSet.has(point.x)) {
+                            let duplicateLeft = this.realLeft.filter(p => p.x === point.x);
+                            let checkLeft = duplicateLeft.some(p => p.y - point.y === 0);
+                            if (checkLeft) {
+                                res.push(leftTransformX(point.x), transformY(point.y));
+                            }
+                            continue;
+                        }
+                        res.push(transformX(point.x), transformY(point.y));
+                    } else {
+                        res.push(leftTransformX(point.x), transformY(point.y));
+                    }
+                }
             } else {
-                polygon.forEach(item => {
-                    res.push(this._getX(item.x), this._getY(item.y));
-                });
+                polygon.forEach(point => {
+                    res.push(transformX(point.x), transformY(point.y));
+                })
             }
             obj.drawPolygon(res);
         },
@@ -517,6 +465,21 @@ let component = {
             let canvas = blendColorImage(imagePattern, myFgColor, myBgColor);
             const texture = Texture.from(canvas);
             return texture;
+        },
+        leftTransformX: function () {
+            let transformFn;
+            if (!isNaN(this.leftRealMinX) && !isNaN(this.leftRealMinX)) {
+                switch (this.xTransform) {
+                    case "linear":
+                        transformFn = scaleLinear();
+                        break;
+                    case "loga":
+                        transformFn = scaleLog();
+                        break;
+                }
+            }
+            return transformFn.domain([this.leftRealMinX, this.leftRealMaxX])
+                .range([0, this.viewWidth || this.$parent.viewWidth]);
         }
     },
     components: {

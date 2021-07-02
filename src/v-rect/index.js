@@ -19,14 +19,10 @@ async function drawRect(obj, align = 0) {
     obj.clear();
     let lw = this.lineWidth || 0;
     let lt = this.lineTransparency || 1.0;
-    let imageUrl = '', fillFlag = false;
+    let fillFlag = false;
     if (this.hasMouseOver) {
         lw = lw ? (lw + 4) : 0;
         lt /= 2;
-    }
-
-    if (this.typeFillColor) {
-        console.log("VRect", this.typeFillColor);
     }
 
     if (this.typeFillColor) {
@@ -47,11 +43,6 @@ async function drawRect(obj, align = 0) {
                 }
                 transformFn = scaleQuantile().domain([0, this.viewWidth]).range(myPalette);
                 break;
-            case "Custom Fills":
-                if (this.imagePatternUrl) {
-                    imageUrl = `https://users.i2g.cloud${this.imagePatternUrl}?service=WI_BACKEND`;
-                    break;
-                }
         }
         if (transformFn) {
             fillFlag = true
@@ -69,8 +60,9 @@ async function drawRect(obj, align = 0) {
             }
         }
     } else {
+        let myFillColor;
         if (this.isSelected) {
-            let myFillColor = processColorStr(0xF0F000, DefaultValues.fillColor, 0.2);
+            myFillColor = processColorStr(0xF0F000, DefaultValues.fillColor, 0.2);
             obj.beginFill(myFillColor.color, myFillColor.transparency);
         } else {
             obj.beginFill(
@@ -81,18 +73,17 @@ async function drawRect(obj, align = 0) {
         }
     }
 
-    if (imageUrl) {
-        let imagePattern = await getImagePattern(imageUrl);
+    if (this.imagePatternUrl) {
+        let imagePattern = await getImagePattern(this.imagePatternUrl);
         let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
 
         const texture = Texture.from(canvas);
         obj.beginTextureFill(texture);
     } else {
-        !fillFlag && obj.beginFill(
-            this.cFillColor.color,
-            this.cFillColor.transparency,
-            this.fillTexture
-        );
+        if (!fillFlag && this.backgroundColor) {
+            let myFillColor = processColorStr(this.backgroundColor);
+            obj.beginFill(myFillColor.color, myFillColor.transparency)
+        }
     }
 
     obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, align);

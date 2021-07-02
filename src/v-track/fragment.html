@@ -56,7 +56,7 @@
                             :type-fill-color="child.typeFillColor"
                             :foreground-color="child.foregroundColorList && child.foregroundColorList.length === 1 ? child.foregroundColorList[0] : null"
                             :background-color="child.backgroundColorList && child.backgroundColorList.length === 1 ? child.backgroundColorList[0] : null"
-                            :image-pattern-url="child.fillPatternList && child.fillPatternList.length === 1 ? child.fillPatternList[0] : null"
+                            :image-pattern-url="getShadingPattern(child)"
                             :min-color="child.getShadingMinColor" 
                             :max-color="child.getShadingMaxColor"
                             :palette="child.palette || child.positiveSidePalette"
