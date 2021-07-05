@@ -177,8 +177,10 @@ async function draw(obj) {
         let posXFillColor = this.shadingControlCurve[shadingIdx].x;
         if (!this.checkTriangle[i]) {
             shadingIdx++;
-        }
-        if (polygon.some(point => point.x === null)) continue;
+        };
+        if (polygon.some(point => point.x === null)) {
+            continue;
+        };
         if (!this.isNormalFill) {
             let polygonMaxX = Math.max(...polygon.map(point => point["x"]));
             if (posXFillColor > this.realLeft || (posXFillColor === this.realLeft && polygonMaxX > this.realLeft)) {
@@ -368,23 +370,50 @@ let component = {
         cPolygonList: function () {
             let begin, end, path = [];
             let bothIsArray = Array.isArray(this.realLeft) && Array.isArray(this.realRight);
+            let transformXFn = this.getTransformX() || this.$parent.getTransformX(),
+                transformYFn = this.getTransformY() || this.$parent.getTransformY();
             if (bothIsArray) {
+                let leftTransformXFn = this.leftTransformX();
                 for (let i = 0; i < this.realLeft.length; i++) {
-                    path.push({ x: this.realLeft[i]["x"], y: this.realLeft[i]["y"] });
-                    path.push({ x: this.realRight[i]["x"], y: this.realRight[i]['y'] });
+                    path.push({
+                        x: this.realLeft[i]["x"] != null ? leftTransformXFn(this.realLeft[i]["x"]) : null,
+                        y: transformYFn(this.realLeft[i]["y"])
+                    });
+                    path.push({
+                        x: this.realRight[i]["x"] != null ? transformXFn(this.realRight[i]["x"]) : null,
+                        y: transformYFn(this.realRight[i]['y'])
+                    });
                 }
             }
             else {
                 if (Array.isArray(this.realLeft) && !Array.isArray(this.realRight)) {
                     this.notIsArray = "Real Right";
-                    path = this.realLeft;
-                    begin = { x: this.realRight, y: path[0]["y"] };
-                    end = { x: this.realRight, y: path[path.length - 1]["y"] };
+                    path = this.realLeft.map(point => ({
+                        x: point.x != null ? transformXFn(point.x) : null,
+                        y: transformYFn(point.y)
+                    }));
+                    begin = {
+                        x: transformXFn(this.realRight),
+                        y: transformYFn(path[0]["y"])
+                    };
+                    end = {
+                        x: transformXFn(this.realRight),
+                        y: transformYFn(path[path.length - 1]["y"])
+                    };
                 } else if (!Array.isArray(this.realLeft) && Array.isArray(this.realRight)) {
                     this.notIsArray = "Real Left";
-                    path = this.realRight;
-                    begin = { x: this.realLeft, y: path[0]["y"] };
-                    end = { x: this.realLeft, y: path[path.length - 1]["y"] };
+                    path = this.realRight.map(point => ({
+                        x: point.x != null ? transformXFn(point.x) : null,
+                        y: transformYFn(point.y)
+                    }));
+                    begin = {
+                        x: transformXFn(this.realLeft),
+                        y: transformYFn(path[0]["y"])
+                    };
+                    end = {
+                        x: transformXFn(this.realLeft),
+                        y: transformYFn(path[path.length - 1]["y"])
+                    };
                 }
                 path = [begin, ...path, end];
             }
@@ -408,18 +437,6 @@ let component = {
                 return this.positiveSideColor.maxColor;
             }
         },
-        cRealRightSet: function () {
-            if (isNaN(this.leftRealMaxX) || isNaN(this.leftRealMinX)) return;
-            if (this.realRight.length) {
-                return new Set(this.realRight.map(point => point.x));
-            }
-        },
-        cRealLeftSet: function () {
-            if (isNaN(this.leftRealMinX) || isNaN(this.leftRealMaxX)) return;
-            if (this.realLeft.length) {
-                return new Set(this.realLeft.map(point => point.x));
-            }
-        },
         componentType: function () {
             return "VShading";
         },
@@ -427,34 +444,9 @@ let component = {
     methods: {
         draw,
         myDrawPolygon: function (obj, polygon) {
-            let res = [];
-            let transformX = this.getTransformX() || this.$parent.getTransformX(),
-                transformY = this.getTransformY() || this.$parent.getTransformY();
             if (polygon.some(point => point.x === null)) return;
-            if (!isNaN(this.leftRealMaxX) && !isNaN(this.leftRealMinX)) {
-                const leftTransformX = this.leftTransformX();
-                let point;
-                for (let i = 0; i < polygon.length; i++) {
-                    point = polygon[i];
-                    if (this.cRealRightSet.has(point.x)) {
-                        if (this.cRealLeftSet.has(point.x)) {
-                            let duplicateLeft = this.realLeft.filter(p => p.x === point.x);
-                            let checkLeft = duplicateLeft.some(p => p.y - point.y === 0);
-                            if (checkLeft) {
-                                res.push(leftTransformX(point.x), transformY(point.y));
-                            }
-                            continue;
-                        }
-                        res.push(transformX(point.x), transformY(point.y));
-                    } else {
-                        res.push(leftTransformX(point.x), transformY(point.y));
-                    }
-                }
-            } else {
-                polygon.forEach(point => {
-                    res.push(transformX(point.x), transformY(point.y));
-                })
-            }
+            let res = [];
+            polygon.forEach(point => res.push(point.x, point.y));
             obj.drawPolygon(res);
         },
         getTexture: async function (bgColor, fgColor, src) {
