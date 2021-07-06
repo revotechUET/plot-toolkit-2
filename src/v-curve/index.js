@@ -30,16 +30,6 @@ let component = {
             }
         }
     },
-    methods: {
-        getShadingPath: function () {
-            let transformXFn = this.getTransformX() || this.$parent.getTransformX();
-            let transformYFn = this.getTransformY() || this.$parent.getTransformY();
-            return this.realPath.map((point) => ({
-                x: transformXFn(point.x) + 2,
-                y: transformYFn(point.y) + 2,
-            }));
-        },
-    },
     mixins: [selectable]
 }
 
