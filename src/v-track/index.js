@@ -284,9 +284,46 @@ let component = {
                             }
                         }
                         if (index !== null) {
-                            let distance1 = Math.sqrt(Math.pow(x - pixelPath[index].x, 2) + Math.pow(y - pixelPath[index].y, 2));
-                            let distance2 = Math.sqrt(Math.pow(x - pixelPath[index + 1].x, 2) + Math.pow(y - pixelPath[index + 1].y, 2));
-                            console.log(distance1, distance2);
+                            let distance1, distance2;
+                            switch (child.wrapMode) {
+                                case "None":
+                                    distance1 = Math.sqrt(Math.pow(x - pixelPath[index].x, 2) + Math.pow(y - pixelPath[index].y, 2));
+                                    distance2 = Math.sqrt(Math.pow(x - pixelPath[index + 1].x, 2) + Math.pow(y - pixelPath[index + 1].y, 2));
+                                    break;
+                                case "Left":
+                                    distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x > child.viewWidth ?
+                                        pixelPath[index].x - child.viewWidth : pixelPath[index].x), 2) +
+                                        Math.pow(y - pixelPath[index].y, 2));
+                                    distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x > child.viewWidth ?
+                                        pixelPath[index + 1].x - child.viewWidth : pixelPath[index + 1].x), 2) +
+                                        Math.pow(y - pixelPath[index + 1].y, 2));
+                                    break;
+                                case "Right":
+                                    distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x < 0 ?
+                                        pixelPath[index].x + child.viewWidth : pixelPath[index].x), 2) +
+                                        Math.pow(y - pixelPath[index].y, 2));
+                                    distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x < 0 ?
+                                        pixelPath[index + 1].x + child.viewWidth : pixelPath[index + 1].x), 2) +
+                                        Math.pow(y - pixelPath[index + 1].y, 2));
+                                    break;
+                                case "Both":
+                                    distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x > child.viewWidth ?
+                                        pixelPath[index].x - child.viewWidth : pixelPath[index].x), 2) +
+                                        Math.pow(y - pixelPath[index].y, 2));
+                                    distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x > child.viewWidth ?
+                                        pixelPath[index + 1].x - child.viewWidth : pixelPath[index + 1].x), 2) +
+                                        Math.pow(y - pixelPath[index + 1].y, 2));
+                                    if (distance1 > 4 && distance2 > 4) {
+                                        distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x < 0 ?
+                                            pixelPath[index].x + child.viewWidth : pixelPath[index].x), 2) +
+                                            Math.pow(y - pixelPath[index].y, 2));
+                                        distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x < 0 ?
+                                            pixelPath[index + 1].x + child.viewWidth : pixelPath[index + 1].x), 2) +
+                                            Math.pow(y - pixelPath[index + 1].y, 2));
+                                    }
+                                    break;
+                            }
+                            // console.log(distance1, distance2);
                             if (distance1 <= 4 || distance2 <= 4) {
                                 this.selectionStates = this.selectionStates.map((child, idx) => {
                                     return idx === i ? true : false

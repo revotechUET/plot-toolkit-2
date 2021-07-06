@@ -6,6 +6,7 @@ import VXone from '../v-xone';
 import VShading from '../v-shading';
 import VCurve from '../v-curve';
 import VContainer from '../v-container';
+import VShape from '../v-shape';
 import axios from 'axios';
 
 const component = {
@@ -21,24 +22,26 @@ const component = {
         },
         zoneContentStyle: {
             type: Object,
-            default: () => {
-                return {
-                    fontSize: 14
-                }
-            }
+            default: () => ({
+                fontSize: 14
+            })
         },
-        clipped: {
-            type: Boolean,
-            default: false,
+        tooltipStyle: {
+            type: Object,
+            default: () => ({
+                fontSize: 13
+            })
         }
     },
     data: function () {
         return {
-            trackBodyScale: 0
+            trackBodyScale: 0,
+            trackHeaderHeight: 100
         }
     },
     components: {
-        Fragment, VTrack, VLayer, VXone, VShading, VCurve, VContainer
+        Fragment, VTrack, VLayer, VXone,
+        VShading, VCurve, VContainer, VShape
     },
     template,
     computed: {
@@ -61,7 +64,7 @@ const component = {
     mounted: async function () {
         console.log("V Plot Created");
         await this.$store.dispatch("getData", { idProject: this.idProject, idPlot: this.idPlot });
-        const y = (this.viewHeight - this.viewPosY) * (this.$store.state.plotBottom - this.$store.state.plotTop)
+        const y = (this.viewHeight - this.trackHeaderHeight) * (this.$store.state.plotBottom - this.$store.state.plotTop)
             / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop);
         this.trackBodyScale = y;
     },
@@ -83,7 +86,9 @@ const component = {
             }
         },
         trackHeaderResize: function ({ width, height }, comp) {
-            this.$emit("plotHeaderResize", height);
+            // this.$emit("plotHeaderResize", height);
+            this.trackHeaderHeight = height + 20;
+            console.log("track height change", height);
         },
         trackResize: function ({ width, height }, comp) {
             let idx;
@@ -301,4 +306,4 @@ const component = {
     }
 }
 
-export default VLayer.extend(component);
+export default VShape.extend(component);

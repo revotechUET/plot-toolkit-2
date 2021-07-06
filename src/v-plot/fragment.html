@@ -1,30 +1,38 @@
-<v-container
-    :view-pos-x="viewPosX" :view-pos-y="0"
+<v-layer
     :view-width="viewWidth" :view-height="viewHeight"
-    layout-direction="horizontal"
-    >   
-    <fragment
-        v-for="(track, idx) in sortedTracks"
-        :key="idx">
-        <v-track
-            v-if="track.idDepthAxis" :name="track.title"
-            :constrained="true"
-            :track-id="track.idDepthAxis" :order-num="track.orderNum"
-            :justification="track.justification" :show-title="track.showTitle"
-            :view-pos-y="-viewPosY"
-            track-type="Depth Track" :unit="track.unitType"
-            :major-tick-length="track.majorTickLength" :minor-ticks="track.minorTickNum"
-            :track-real-min-y="$store.state.currentPlotTop"
-            :track-real-max-y="$store.state.currentPlotBottom"
-            :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
-            :track-header-height="viewPosY" 
-            :track-header-resize="trackHeaderResize"
-            :on-resize="trackResize"
-            :fill-color="track.trackBackground" :fill-transparency="1"
-            x-transform="none" y-transform="linear"
-            :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
-            cursor="crosshair" :enabled="true"
-            />
+    :view-pos-x="0" :view-pos-y="trackHeaderHeight"
+    :clipped="false" :tooltip-style="tooltipStyle"
+    :enabled="true" 
+    :line-width="0.75" line-color="0x101010"
+    :viewport-pos-y="trackHeaderHeight"
+    :ref-line-x="true" :ref-line-y="false"
+    >
+    <v-container
+        :view-pos-x="viewPosX" :view-pos-y="-trackHeaderHeight"
+        :view-width="viewWidth" :view-height="viewHeight"
+        layout-direction="horizontal"
+        >   
+        <fragment
+            v-for="(track, idx) in sortedTracks"
+            :key="idx">
+            <v-track
+                v-if="track.idDepthAxis" :name="track.title"
+                :constrained="true"
+                :track-id="track.idDepthAxis" :order-num="track.orderNum"
+                :justification="track.justification" :show-title="track.showTitle"
+                track-type="Depth Track" :unit="track.unitType"
+                :major-tick-length="track.majorTickLength" :minor-ticks="track.minorTickNum"
+                :track-real-min-y="$store.state.currentPlotTop"
+                :track-real-max-y="$store.state.currentPlotBottom"
+                :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
+                :track-header-height="trackHeaderHeight" 
+                :track-header-resize="trackHeaderResize"
+                :on-resize="trackResize"
+                :fill-color="track.trackBackground" :fill-transparency="1"
+                x-transform="none" y-transform="linear"
+                :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
+                cursor="crosshair" :enabled="true"
+                />
             <v-track
                 v-if="track.idZoneTrack"
                 track-type='Zone Track' :grid="false"
@@ -32,11 +40,10 @@
                 :key="'zone_track' + idx + track.idZoneTrack" :name="track.title"
                 :track-id="track.idZoneTrack" :order-num="track.orderNum"
                 :justification="track.topJustification" :show-title="track.showTitle"
-                :view-pos-y="-viewPosY"
                 :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
                 :track-real-min-y="$store.state.currentPlotTop"
                 :track-real-max-y="$store.state.currentPlotBottom"
-                :track-header-height="viewPosY" 
+                :track-header-height="trackHeaderHeight" 
                 :track-header-resize="trackHeaderResize"
                 :on-resize="trackResize"
                 :fill-color="track.color" :fill-transparency="1"
@@ -66,11 +73,10 @@
                 :key="'track' + idx + track.idTrack" :name="track.title"
                 :track-id="track.idTrack" :order-num="track.orderNum"
                 :justification="track.topJustification" :show-title="track.showTitle"
-                :view-pos-y="-viewPosY"
                 :view-width="convertWidth(track.widthUnit, track.width)" :view-height="viewHeight"
                 :track-real-min-y="$store.state.currentPlotTop"
                 :track-real-max-y="$store.state.currentPlotBottom"
-                :track-header-height="viewPosY" 
+                :track-header-height="trackHeaderHeight" 
                 :track-header-resize="trackHeaderResize"
                 :on-resize="trackResize"
                 :fill-color="track.color" :fill-transparency="1"
@@ -105,7 +111,7 @@
                         :shading-control-curve="getCurveData(shading.idControlCurve)"
                         :left-real-min-x="getLeftShadingRealMinX(shading)"
                         :left-real-max-x="getLeftShadingRealMaxX(shading)"
-                        />
+                    />
                     <v-shading 
                         :name="shading.name" :is-normal-fill="false"
                         v-else
@@ -138,8 +144,9 @@
                     :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
                     :x-transform="line.displayType === 'Linear'? 'linear': 'loga'" y-transform="linear"
                     :view-width="convertWidth(track.widthUnit, track.width)" :view-height="trackBodyScale"
+                    :wrap-mode="line.wrapMode"
                 />
             </v-track>
-    </fragment>
-</v-container>
-${require('../v-layer/fragment.html')}
+        </fragment>
+    </v-container>
+</v-layer>

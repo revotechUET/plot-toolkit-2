@@ -21,16 +21,10 @@ let component = {
         isSelected: function (newValue, oldValue) {
             let obj = this.getPixiObj();
             if (newValue) {
-                let points = this.getShadingPath();
+                let points = this.getPath(-2, -2);
                 obj.lineStyle(2, getColor(this.symbolColor, DefaultValues.lineColor), 0.05, 0.5);
                 obj.moveTo(points[0].x, points[0].y);
-                for (let i = 1; i < points.length; i++) {
-                    if (i < points.length - 1 && !this.realPath[i].x) {
-                        obj.moveTo(points[i + 1].x, points[i + 1].y)
-                    } else {
-                        obj.myLineTo(points[i].x, points[i].y);
-                    }
-                }
+                this.myDrawPath(points);
             } else {
                 this.draw(obj);
             }

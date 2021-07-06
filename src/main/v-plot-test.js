@@ -15,15 +15,11 @@ let app = new Vue({
         <v-scene :transparent="true" :view-width="1000" :view-height="520"
             :view-pos-x="0" :view-pos-y="0">
             <v-plot
-                :view-pos-x="0" :view-pos-y="plotHeaderHeight"
+                :view-pos-x="0" :view-pos-y="0"
                 :view-width="viewWidth" :view-height="viewHeight"
                 :tooltip-style="tooltipStyle" ref="myPlot"
                 :zone-content-style="zoneContentStyle"
                 :enabled="true"
-                @plotHeaderResize="headerResize"
-                :line-width="0.75" line-color="0x101010"
-                :viewport-pos-y="plotHeaderHeight"
-                :ref-line-x="true" :ref-line-y="false"
                 :id-project="1" :id-plot="5" />
         </v-scene>
     `,
@@ -38,11 +34,6 @@ let app = new Vue({
             zoneContentStyle: {
                 fontSize: 14,
             }
-        }
-    },
-    methods: {
-        headerResize: function (height) {
-            this.plotHeaderHeight = height;
         }
     },
     components: {
