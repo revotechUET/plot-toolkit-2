@@ -1,5 +1,5 @@
 <v-layer
-    :view-width="viewWidth" :view-height="viewHeight"
+    :view-width="plotWidth" :view-height="viewHeight"
     :view-pos-x="0" :view-pos-y="trackHeaderHeight"
     :clipped="false" :tooltip-style="tooltipStyle"
     :enabled="true" 
@@ -16,8 +16,8 @@
             v-for="(track, idx) in sortedTracks"
             :key="idx">
             <v-track
-                v-if="track.idDepthAxis" :name="track.title"
-                :constrained="true"
+                v-if="!isNaN(track.idDepthAxis)" :name="track.title"
+                :constrained="true" :key="'dep_track' + idx + track.idDepthAxis"
                 :track-id="track.idDepthAxis" :order-num="track.orderNum"
                 :justification="track.justification" :show-title="track.showTitle"
                 track-type="Depth Track" :unit="track.unitType"
@@ -34,7 +34,7 @@
                 cursor="crosshair" :enabled="true"
                 />
             <v-track
-                v-if="track.idZoneTrack"
+                v-if="!isNaN(track.idZoneTrack)"
                 track-type='Zone Track' :grid="false"
                 :constrained="true"
                 :key="'zone_track' + idx + track.idZoneTrack" :name="track.title"
@@ -51,7 +51,7 @@
                 :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
                 :enabled="true">
                 <v-xone
-                    v-for="(zone, i) in sortedTracks[idx]['zones']"
+                    v-for="(zone, i) in sortedTracks[idx]['zone_set']['zones']"
                     :key="'zone' + i + track.idZoneTrack"
                     :zoneset-id="zone.idZoneSet" :zone-id="zone.idZone"
                     :knob-flags="[true, true]"
@@ -68,7 +68,7 @@
                     :no-fill="false" />
             </v-track>
             <v-track
-                v-if="track.idTrack"
+                v-if="!isNaN(track.idTrack)"
                 :constrained="true"
                 :key="'track' + idx + track.idTrack" :name="track.title"
                 :track-id="track.idTrack" :order-num="track.orderNum"
@@ -94,10 +94,10 @@
                         :type-fill-color="getShadingType(JSON.parse(shading.fill))"
                         :min-color="getShadingMinColor(JSON.parse(shading.fill))"
                         :max-color="getShadingMaxColor(JSON.parse(shading.fill))"
-                        :custom-fill-values="getShadingCustomFills(JSON.parse(shading.fill), shading)"
-                        :fill-pattern-list="getShadingPatternList(JSON.parse(shading.fill))"
-                        :foreground-color-list="getShadingForegroundList(JSON.parse(shading.fill))"
-                        :background-color-list="getShadingBackgroundList(JSON.parse(shading.fill))"
+                        :custom-fill-values="getShadingCustomFills(true, shading)"
+                        :fill-pattern-list="getShadingPatternList(true, shading)"
+                        :foreground-color-list="getShadingForegroundList(true, shading)"
+                        :background-color-list="getShadingBackgroundList(true, shading)"
                         :palette="getShadingPalette(JSON.parse(shading.fill))"
                         :view-width="convertWidth(track.widthUnit, track.width)" :view-height="trackBodyScale"
                         y-transform="linear" :x-transform="getXTransformShading(shading)"
@@ -111,10 +111,15 @@
                         :shading-control-curve="getCurveData(shading.idControlCurve)"
                         :left-real-min-x="getLeftShadingRealMinX(shading)"
                         :left-real-max-x="getLeftShadingRealMaxX(shading)"
+                        :wrap-mode="getShadingWrapMode(shading.idRightLine)"
                     />
                     <v-shading 
                         :name="shading.name" :is-normal-fill="false"
                         v-else
+                        :custom-fill-values="getShadingCustomFills(false ,shading)"
+                        :fill-pattern-list="getShadingPatternList(false, shading)"
+                        :background-color-list="getShadingBackgroundList(false, shading)"
+                        :foreground-color-list="getShadingForegroundList(false, shading)"
                         :type-fill-color="getShadingType(JSON.parse(shading.positiveFill))"
                         :positive-side-color=getObjShadingColor(JSON.parse(shading.positiveFill))
                         :negative-side-color="getObjShadingColor(JSON.parse(shading.negativeFill))"
@@ -125,6 +130,8 @@
                         :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
                         :real-min-x="getShadingRealMinX(shading)"
                         :real-max-x="getShadingRealMaxX(shading)"
+                        :shading-low-value="getShadingControlValue(shading.idControlCurve).minValue"
+                        :shading-high-value="getShadingControlValue(shading.idControlCurve).maxValue"
                         :shading-positive-low-value="JSON.parse(shading.positiveFill).varShading.startX"
                         :shading-positive-high-value="JSON.parse(shading.positiveFill).varShading.endX"
                         :shading-negative-low-value="JSON.parse(shading.negativeFill).varShading.startX"

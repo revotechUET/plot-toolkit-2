@@ -7,8 +7,8 @@ export default {
         zone_tracks: [],
         tracks: [],
         depth_axes: [],
-        curves: [],
-        curveSteps: [],
+        curves: {},
+        curveSteps: {},
         currentPlotTop: 0,
         currentPlotBottom: 0,
         plotTop: 0,
@@ -30,8 +30,10 @@ export default {
         setDepthAxes(state, depthAxis) {
             state.depth_axes.push(depthAxis)
         },
-        setCurves(state, curves) {
-            state.curves.push(curves)
+        setCurves(state, { idCurve, curveData }) {
+            console.log(idCurve, curveData)
+            state.curves[idCurve] = curveData
+            // state.curves.push(curves)
         },
         setCurrentPlotTop(state, top) {
             state.currentPlotTop = top;
@@ -51,8 +53,8 @@ export default {
         setPalettes(state, palettes) {
             state.palettes = palettes;
         },
-        setCurveSteps(state, curveStep) {
-            state.curveSteps.push(curveStep);
+        setCurveSteps(state, { idCurveStep, step }) {
+            state.curveSteps[idCurveStep] = step;
         },
         setDepthTrackWidth(state, { idx, width }) {
             state.depth_axes[idx].width = Number(width);
@@ -65,80 +67,23 @@ export default {
         },
         zoneHeightChange(state, { newStartDepth, newEndDepth, zonesetId, zoneId }) {
             let zoneTrackIdx = state.zone_tracks.findIndex(track => track.idZoneSet === zonesetId);
-            let zoneIdx = state.zone_tracks[zoneTrackIdx].zones.findIndex(zone => zone.idZone === zoneId);
-            state.zone_tracks[zoneTrackIdx].zones[zoneIdx] = {
-                ...state.zone_tracks[zoneTrackIdx].zones[zoneIdx],
-                startDepth: newStartDepth,
-                endDepth: newEndDepth
-            }
+            let zoneIdx = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].findIndex(zone => zone.idZone === zoneId);
+            // state.zone_tracks[zoneTrackIdx]['zone_set']['zones'][zoneIdx] = {
+            //     ...state.zone_tracks[zoneTrackIdx]['zone_set']['zones'][zoneIdx],
+            //     startDepth: newStartDepth,
+            //     endDepth: newEndDepth
+            // }
+            let newZones = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].map((zone, idx) => ({
+                ...zone,
+                startDepth: idx === zoneIdx ? newStartDepth : zone.startDepth,
+                endDepth: idx === zoneIdx ? newEndDepth : zone.endDepth
+            }))
+            state.zone_tracks[zoneTrackIdx]['zone_set']['zones'] = newZones
         }
     },
     actions: {
         async getData({ state, commit }, { idProject, idPlot }) {
             console.log('Get data');
-            const plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/info', {
-                idProject,
-                idPlot
-            });
-            const projectReponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/fullInfo', {
-                idProject
-            });
-            const { wells } = projectReponse.data;
-            console.log(JSON.parse(plotResponse.data.currentState));
-            const { zone_tracks, tracks, depth_axes } = plotResponse.data
-            let { top, bottom, top0, range0 } = JSON.parse(plotResponse.data.currentState);
-
-            for (let i = 0; i < zone_tracks.length; i++) {
-                const zoneTracksResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/zone-track/info', {
-                    idProject,
-                    idPlot,
-                    idZoneTrack: zone_tracks[i].idZoneTrack
-                });
-                commit('setZoneTracks', zoneTracksResponse.data);
-            }
-
-            for (let i = 0; i < tracks.length; i++) {
-                const tracksResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/track/info', {
-                    idProject,
-                    idPlot,
-                    idTrack: tracks[i].idTrack
-                });
-                commit('setTracks', tracksResponse.data);
-                for (const well of wells) {
-                    const { datasets } = well;
-                    let { curves } = datasets[0];
-                    let step = Number(datasets[0].step);
-                    commit("setCurveSteps", curves.map(curve => curve.idCurve).join("-") + `:step${step}`);
-                    curves = curves.filter(curve => {
-                        return tracks[i].lines.map(line => line.idCurve).indexOf(curve.idCurve) >= 0
-                            && state.curves.map(c => Object.keys(c)[0]).indexOf(curve.idCurve) < 0;
-                    })
-                    for (const curve of curves) {
-                        const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
-                            idCurve: curve.idCurve,
-                        });
-                        commit("setCurves", {
-                            [curve.idCurve]: curveReponse.data.map((point, idx) => {
-                                return {
-                                    ...point,
-                                    y: top0 + step * idx
-                                }
-                            })
-                        });
-                    }
-                }
-            }
-
-
-            for (let i = 0; i < depth_axes.length; i++) {
-                const depthAxesResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/depth-axis/info', {
-                    idProject,
-                    idPlot,
-                    idDepthAxis: depth_axes[i].idDepthAxis
-                });
-                commit('setDepthAxes', depthAxesResponse.data);
-            }
-
             const patternResponse = await axios.post('http://112.137.129.214:35280/quangtuan/pattern/list', {
                 idProject,
                 idPlot
@@ -147,15 +92,119 @@ export default {
             const paletteResponse = await axios.post('http://112.137.129.214:35280/quangtuan/pal/all', {
                 idProject,
                 idPlot
-            })
-
-            commit("setCurrentPlotTop", top);
-            commit("setCurrentPlotBottom", bottom);
-            commit("setPlotTop", top0);
-            commit("setPlotBottom", top0 + range0);
-            commit('getPlotData', plotResponse.data);
+            });
             commit('setPatterns', patternResponse.data);
             commit('setPalettes', paletteResponse.data);
+
+            try {
+                let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/info', {
+                    idProject,
+                    idPlot
+                });
+                const projectReponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/fullInfo', {
+                    idProject
+                });
+                const { wells } = projectReponse.data;
+                console.log(JSON.parse(plotResponse.data.currentState));
+                const { zone_tracks, tracks, depth_axes } = plotResponse.data
+
+                let { top, bottom, top0, range0 } = JSON.parse(plotResponse.data.currentState);
+                commit("setCurrentPlotTop", top);
+                commit("setCurrentPlotBottom", bottom);
+                commit("setPlotTop", top0);
+                commit("setPlotBottom", top0 + range0);
+
+                for (let i = 0; i < zone_tracks.length; i++) {
+                    const zoneTracksResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/zone-track/info', {
+                        idProject,
+                        idPlot,
+                        idZoneTrack: zone_tracks[i].idZoneTrack
+                    });
+                    commit('setZoneTracks', zoneTracksResponse.data);
+                }
+
+                for (let i = 0; i < tracks.length; i++) {
+                    const tracksResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/track/info', {
+                        idProject,
+                        idPlot,
+                        idTrack: tracks[i].idTrack
+                    });
+                    commit('setTracks', tracksResponse.data);
+                    for (const well of wells) {
+                        const { datasets } = well;
+                        let { curves } = datasets[0];
+                        let step = Number(datasets[0].step);
+                        commit("setCurveSteps", {
+                            idCurveStep: curves.map(curve => curve.idCurve).join("-"),
+                            step
+                        })
+                        curves = curves.filter(curve => tracks[i].lines.map(line => line.idCurve).indexOf(curve.idCurve) >= 0
+                            && !state.curves[curve.idCurve]);
+                        for (const curve of curves) {
+                            const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
+                                idCurve: curve.idCurve,
+                            });
+                            commit("setCurves", {
+                                idCurve: curve.idCurve,
+                                curveData: curveReponse.data.map((point, idx) => {
+                                    return {
+                                        ...point,
+                                        y: Number(datasets[0].top) + step * idx
+                                    }
+                                })
+                            })
+                        }
+                    }
+                }
+
+                for (let i = 0; i < depth_axes.length; i++) {
+                    const depthAxesResponse = await axios.post('http://112.137.129.214:35280/quangtuan/project/plot/depth-axis/info', {
+                        idProject,
+                        idPlot,
+                        idDepthAxis: depth_axes[i].idDepthAxis
+                    });
+                    commit('setDepthAxes', depthAxesResponse.data);
+                }
+                commit('getPlotData', plotResponse.data);
+            } catch (error) {
+                console.log(error)
+                let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/api/genPlot', {
+                    idPlot,
+                    idProject,
+                    genNum: 3
+                })
+                let data = plotResponse.data
+                let { top0, range0, top, bottom } = data.currentState;
+                commit("setCurrentPlotTop", top);
+                commit("setCurrentPlotBottom", bottom);
+                commit("setPlotTop", top0);
+                commit("setPlotBottom", top0 + range0);
+                data.depth_axes.forEach(depthAxes => commit('setDepthAxes', depthAxes))
+                data.tracks.forEach(track => commit('setTracks', track))
+                data.zone_tracks.forEach(zoneTrack => commit('setZoneTracks', zoneTrack))
+                for (const track of data.tracks) {
+                    for (const line of track.lines) {
+                        if (!state.curves[line.idCurve]) {
+                            const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
+                                idCurve: line.idCurve,
+                            });
+                            commit('setCurves', {
+                                idCurve: line.idCurve,
+                                curveData: curveReponse.data.map((point, idx) => {
+                                    return {
+                                        ...point,
+                                        y: Number(line.top) + line.curve.step * idx
+                                    }
+                                })
+                            })
+                        }
+                    }
+                }
+                data.tracks = []
+                data.depth_axes = []
+                data.zone_tracks = []
+                commit('getPlotData', data)
+            }
 
             console.log('Store setup done')
         },

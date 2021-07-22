@@ -277,7 +277,8 @@ let component = {
                     case "VCurve":
                         let index = null;
                         pixelPath = this.transformPath(child, child.realPath);
-                        for (let j = 0; j < pixelPath.length; j++) {
+                        if (y > pixelPath[pixelPath.length - 1].y) break;
+                        for (let j = 0; j < pixelPath.length - 1; j++) {
                             if (pixelPath[j].y <= y && pixelPath[j + 1].y >= y) {
                                 index = j;
                                 break;

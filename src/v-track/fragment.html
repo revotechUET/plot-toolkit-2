@@ -124,7 +124,7 @@
         <v-axis-ext-mouse
             v-if="trackType === 'Depth Track'"
             clipped="true" axis="y" 
-            ref="axis"
+            ref="axis" :name="name + trackId" 
             :view-width="viewWidth" :view-height="scaleTrackHeight" 
             :real-min-y="realMinY" :real-max-y="realMaxY" 
             :y-transform="yTransform" x-transform="none"
@@ -139,7 +139,7 @@
         <v-rect-ext-mouse-with-mounted-event 
             :view-pos-x="0" :view-pos-y="0"
             v-if="trackType === 'Zone Track'"
-            ref="trackChildren" :name="name"
+            ref="trackChildren" :name="name + trackId" 
             :on-mounted-fn="onRefsReady"
             :view-width="viewWidth" :view-height="scaleTrackHeight"
             x-transform="none" :y-transform="yTransform"

@@ -12,7 +12,7 @@ const store = new Vuex.Store(options);
 let app = new Vue({
     el: "#vue-app",
     template: `
-        <v-scene :transparent="true" :view-width="1000" :view-height="520"
+        <v-scene :transparent="true" :view-width="viewWidth" :view-height="520"
             :view-pos-x="0" :view-pos-y="0">
             <v-plot
                 :view-pos-x="0" :view-pos-y="0"
@@ -30,7 +30,7 @@ let app = new Vue({
                 fontSize: 13
             },
             viewHeight: 500,
-            viewWidth: 1000,
+            viewWidth: 3000,
             zoneContentStyle: {
                 fontSize: 14,
             }
