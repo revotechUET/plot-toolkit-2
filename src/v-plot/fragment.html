@@ -91,7 +91,8 @@
                     <v-shading
                         :name="shading.name"
                         v-if="JSON.parse(shading.fill).display"
-                        :type-fill-color="getShadingType(JSON.parse(shading.fill))"
+                        :shading-type="getShadingType(shading)"
+                        :type-fill-color="getShadingTypeFillColor(JSON.parse(shading.fill))"
                         :min-color="getShadingMinColor(JSON.parse(shading.fill))"
                         :max-color="getShadingMaxColor(JSON.parse(shading.fill))"
                         :custom-fill-values="getShadingCustomFills(true, shading)"
@@ -117,10 +118,11 @@
                         :name="shading.name" :is-normal-fill="false"
                         v-else
                         :custom-fill-values="getShadingCustomFills(false ,shading)"
+                        :shading-type="getShadingType(shading)"
                         :fill-pattern-list="getShadingPatternList(false, shading)"
                         :background-color-list="getShadingBackgroundList(false, shading)"
                         :foreground-color-list="getShadingForegroundList(false, shading)"
-                        :type-fill-color="getShadingType(JSON.parse(shading.positiveFill))"
+                        :type-fill-color="getShadingTypeFillColor(JSON.parse(shading.positiveFill))"
                         :positive-side-color=getObjShadingColor(JSON.parse(shading.positiveFill))
                         :negative-side-color="getObjShadingColor(JSON.parse(shading.negativeFill))"
                         :positive-side-palette="getShadingPalette(JSON.parse(shading.positiveFill))"
@@ -139,6 +141,7 @@
                         :real-left="getShadingRealLeft(shading)"
                         :real-right="getShadingRealRight(shading)"
                         :shading-control-curve="getCurveData(shading.idControlCurve)"
+                        :wrap-mode="getShadingWrapMode(shading.idRightLine)"
                     />
                 </fragment>
                 <v-curve

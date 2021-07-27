@@ -447,7 +447,7 @@ let component = {
         },
         getShadingPattern: function (shading) {
             if (shading.fillPatternList && shading.fillPatternList.length === 1) {
-                return `https://users.i2g.cloud${shading.fillPatternList[0]}?service=WI_BACKEND`;
+                return shading.fillPatternList[0] && `https://users.i2g.cloud${shading.fillPatternList[0]}?service=WI_BACKEND`;
             }
             return null;
         }

@@ -168,11 +168,12 @@ export default {
                 commit('getPlotData', plotResponse.data);
             } catch (error) {
                 console.log(error)
-                let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/api/genPlot', {
-                    idPlot,
-                    idProject,
-                    genNum: 3
-                })
+                // let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/api/genPlot', {
+                //     idPlot,
+                //     idProject,
+                //     genNum: 2
+                // })
+                let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/api/genPlotById', [2, 9, 4])
                 let data = plotResponse.data
                 let { top0, range0, top, bottom } = data.currentState;
                 commit("setCurrentPlotTop", top);
@@ -185,15 +186,24 @@ export default {
                 for (const track of data.tracks) {
                     for (const line of track.lines) {
                         if (!state.curves[line.idCurve]) {
-                            const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
-                                idCurve: line.idCurve,
-                            });
+                            // const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
+                            //     idCurve: line.idCurve,
+                            // });
+                            // commit('setCurves', {
+                            //     idCurve: line.idCurve,
+                            //     curveData: curveReponse.data.map((point, idx) => {
+                            //         return {
+                            //             ...point,
+                            //             y: Number(line.top) + line.curve.step * idx
+                            //         }
+                            //     })
+                            // })
                             commit('setCurves', {
                                 idCurve: line.idCurve,
-                                curveData: curveReponse.data.map((point, idx) => {
+                                curveData: line.curveData.map((point, idx) => {
                                     return {
                                         ...point,
-                                        y: Number(line.top) + line.curve.step * idx
+                                        y: Number(line.top) + Number(line.curve.step) * idx
                                     }
                                 })
                             })

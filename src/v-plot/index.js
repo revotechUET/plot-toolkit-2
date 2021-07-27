@@ -137,7 +137,14 @@ const component = {
                 zoneId
             })
         },
-        getShadingType: function (typeFill) {
+        getShadingType: function (shading) {
+            if (JSON.parse(shading.fill).display) {
+                return JSON.parse(shading.fill).shadingType;
+            } else {
+                return JSON.parse(shading.negativeFill).shadingType;
+            }
+        },
+        getShadingTypeFillColor: function (typeFill) {
             let shadingType = 'Custom Fills';
             if (typeFill.shadingType === 'varShading') {
                 switch (typeFill.varShading.varShadingType) {
@@ -210,14 +217,18 @@ const component = {
                 let negativeFill = JSON.parse(shading.negativeFill)
                 let positiveFill = JSON.parse(shading.positiveFill)
                 let result = []
-                if (!negativeFill.display || negativeFill.pattern.name === 'none') {
+                if (!negativeFill.display
+                    || negativeFill.pattern.name === 'none'
+                    || negativeFill.pattern.name === 'Solid') {
                     result.push(null)
                 } else {
                     if (negativeFill.shadingType === 'pattern') {
                         result.push(this.$store.state.patterns[negativeFill.pattern.name].src)
                     }
                 }
-                if (!positiveFill.display || positiveFill.pattern.name === 'none') {
+                if (!positiveFill.display
+                    || positiveFill.pattern.name === 'none'
+                    || positiveFill.pattern.name === 'Solid') {
                     result.push(null)
                 } else {
                     if (positiveFill.shadingType === 'pattern') {
@@ -303,13 +314,13 @@ const component = {
             return [];
         },
         getShadingMinColor: function (typeFill) {
-            if (this.getShadingType(typeFill) === "Custom Fills") {
+            if (this.getShadingTypeFillColor(typeFill) === "Custom Fills") {
                 return;
             }
             return typeFill.varShading.gradient.startColor || typeFill.varShading.startX;
         },
         getShadingMaxColor: function (typeFill) {
-            if (this.getShadingType(typeFill) === "Custom Fills") {
+            if (this.getShadingTypeFillColor(typeFill) === "Custom Fills") {
                 return;
             }
             return typeFill.varShading.gradient.endColor || typeFill.varShading.endX;

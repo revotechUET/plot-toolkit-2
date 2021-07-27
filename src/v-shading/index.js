@@ -23,7 +23,6 @@ async function draw(obj) {
 		fillPatterns = [],
 		fgColors = [],
 		mn, mx,
-		myFillColor,
 		transformColor,
 		positiveTransformColor,
 		negativeTransformColor,
@@ -138,6 +137,12 @@ async function draw(obj) {
 					texture: null
 				}
 			})
+			for (let i = 0; i < fillPatterns.length; i++) {
+				if (fillPatterns[i].src) {
+					const texture = await this.getTexture(bgColors[i], fgColors[i], fillPatterns[i].src);
+					fillPatterns[i].texture = texture;
+				}
+			}
 			transformColor = scaleQuantile().domain(fillValues).range(bgColors);
 			if (!this.isNormalFill) {
 				if (!isNaN(this.realLeft)) {
@@ -179,8 +184,10 @@ async function draw(obj) {
 			throw new Error(`No sufficient information for type fill color : ${this.typeFillColor}`);
 	}
 
-	let shadingIdx = 0;
+	let shadingIdx = 0; // index for checking 2 curve(realLeft & realRight) of shading intersect
 	let posRealLeft;
+	let posXFillColor;
+	let polygon;
 	if (!isNaN(this.realLeft)) {
 		posRealLeft = this.transformX(this.realLeft)
 	}
@@ -189,8 +196,12 @@ async function draw(obj) {
 		.range([0, this.viewWidth || this.$parent.viewWidth])
 
 	for (let i = 0; i < this.cPolygonList.length; i++) {
-		let polygon = this.cPolygonList[i];
-		let posXFillColor = this.shadingControlCurve[shadingIdx].x;
+		let myFillColor;
+		polygon = this.cPolygonList[i];
+		posXFillColor = this.shadingControlCurve[shadingIdx].x;
+		if (i && this.checkTriangle[i - 1]) {
+			posXFillColor = this.shadingControlCurve[shadingIdx + 1].x;
+		}
 		if (!this.checkTriangle[i]) {
 			shadingIdx++;
 		};
@@ -211,59 +222,39 @@ async function draw(obj) {
 		}
 		switch (this.typeFillColor) {
 			case "Gradient":
-				if (this.isNormalFill) {
-					myFillColor = processColorStr(transformColor(posXFillColor));
-				}
-				obj.beginFill(
-					myFillColor.color,
-					myFillColor.transparency
-				);
-				this.myDrawPolygon(obj, polygon);
-				obj.endFill();
+				this.myDrawPolygon2(obj, polygon, myFillColor, posXFillColor, negativeTransformColor, positiveTransformColor);
 				break;
 			case "Custom Fills":
-				if (fillValues.length !== 2 &&
+				if (this.isNormalFill && this.shadingType === 'varShading' &&
 					(posXFillColor < fillValues[0] || posXFillColor > fillValues[fillValues.length - 1])) {
 					break;
 				}
-				let index;
+				let index = 0;
 				for (let j = 0; j < fillValues.length; j++) {
 					if (fillValues[j] <= posXFillColor) {
 						index = j;
 					}
 				}
-				if (index === fillValues.length - 1) index--;
+				if (index === fillValues.length - 1) {
+					index--;
+				}
 				if (fillPatterns[index] && fillPatterns[index].src) {
-					if (!fillPatterns[index].texture) {
-						const texture = await this.getTexture(bgColors[index], fgColors[index], fillPatterns[index].src);
-						obj.beginTextureFill(texture);
-						fillPatterns[index].texture = texture;
-					} else {
-						obj.beginTextureFill(fillPatterns[index].texture);
-					}
+					obj.beginTextureFill(fillPatterns[index].texture);
 				} else {
 					if (transformColor(posXFillColor) === 'transparent') {
 						continue;
 					}
-					myFillColor = processColorStr(transformColor(posXFillColor));
+					myFillColor = processColorStr(bgColors[index]);
 					obj.beginFill(
 						myFillColor.color,
 						myFillColor.transparency
 					);
 				}
-				this.myDrawPolygon(obj, polygon);
+				await this.myDrawPolygon(obj, polygon, myFillColor, fillPatterns, bgColors, fgColors);
 				obj.endFill();
 				break;
 			case "Palette":
-				if (this.isNormalFill) {
-					myFillColor = processColorStr(transformColor(posXFillColor));
-				}
-				obj.beginFill(
-					myFillColor.color,
-					myFillColor.transparency
-				);
-				this.myDrawPolygon(obj, polygon);
-				obj.endFill();
+				this.myDrawPolygon2(obj, polygon, myFillColor, posXFillColor, negativeTransformColor, positiveTransformColor);
 				break;
 		}
 	};
@@ -362,6 +353,7 @@ let component = {
 		shadingControlCurve: Array,
 		minColor: [Number, String, Array],
 		maxColor: [Number, String, Array],
+		shadingType: String,
 		typeFillColor: String,
 		customFillValues: Array,
 		foregroundColorList: Array,
@@ -468,56 +460,126 @@ let component = {
 	},
 	methods: {
 		draw,
-		myDrawPolygon: function (obj, polygon) {
+		myDrawPolygon: async function (obj, polygon, fillColor, fillPatterns, bgColors, fgColors) {
 			if (polygon.some(point => point.x === null)) return;
-			let res = [], leftFlag, rightFlag;
+			let leftFlag, rightFlag;
 			switch (this.wrapMode) {
 				case "Left":
 					leftFlag = polygon.some(point => point.x > this.viewWidth);
 					if (leftFlag) {
-						this.drawLeftPolygon(obj, polygon);
-						polygon.forEach(point => res.push(point.x - this.viewWidth, point.y));
+						await this.drawWrapMode(...arguments, 0);
 					} else {
+						let res = [];
 						polygon.forEach(point => res.push(point.x, point.y));
+						obj.drawPolygon(res);
 					}
 					break;
 				case "Right":
 					rightFlag = polygon.some(point => point.x < 0);
 					if (rightFlag) {
-						this.drawRightPolygon(obj, polygon);
-						polygon.forEach(point => res.push(point.x + this.viewWidth, point.y));
+						await this.drawWrapMode(...arguments, 1);
 					} else {
+						let res = [];
 						polygon.forEach(point => res.push(point.x, point.y));
+						obj.drawPolygon(res);
 					}
 					break;
 				case "Both":
 					leftFlag = polygon.some(point => point.x > this.viewWidth);
 					rightFlag = polygon.some(point => point.x < 0);
 					if (!leftFlag && !rightFlag) {
+						let res = [];
 						polygon.forEach(point => res.push(point.x, point.y));
+						obj.drawPolygon(res);
 					} else {
 						if (leftFlag) {
-							this.drawLeftPolygon(obj, polygon);
-							polygon.forEach(point => res.push(point.x - this.viewWidth, point.y));
+							await this.drawWrapMode(...arguments, 0);
 						}
 						if (rightFlag) {
-							this.drawRightPolygon(obj, polygon);
-							polygon.forEach(point => res.push(point.x + this.viewWidth, point.y));
+							await this.drawWrapMode(...arguments, 1);
 						}
 					}
 					break;
 				default:
+					let res = [];
 					polygon.forEach(point => res.push(point.x, point.y));
+					obj.drawPolygon(res);
 			}
-			obj.drawPolygon(res);
 		},
-		drawLeftPolygon(obj, polygon) {
+		myDrawPolygon2: function (obj, polygon, myFillColor, posXFillColor, negativeTransformColor, positiveTransformColor) {
+			if (this.isNormalFill) {
+				myFillColor = processColorStr(transformColor(posXFillColor));
+			} else {
+				let res = [], leftFlag, rightFlag;
+				switch (this.wrapMode) {
+					case "Left":
+						leftFlag = polygon.some(point => point.x > this.viewWidth);
+						break;
+					case "Right":
+						rightFlag = polygon.some(point => point.x < 0);
+						break;
+					case "Both":
+						leftFlag = polygon.some(point => point.x > this.viewWidth);
+						rightFlag = polygon.some(point => point.x < 0);
+						break;
+					default:
+				}
+				if (leftFlag) {
+					polygon.forEach(point => res.push(point.x - this.viewWidth, point.y));
+					let { color, transparency } = processColorStr(negativeTransformColor(posXFillColor));
+					obj.beginFill(color, transparency);
+					obj.drawPolygon(res);
+				}
+				if (rightFlag) {
+					res = [];
+					polygon.forEach(point => res.push(point.x + this.viewWidth, point.y));
+					let { color, transparency } = processColorStr(positiveTransformColor(posXFillColor));
+					obj.beginFill(color, transparency);
+					obj.drawPolygon(res);
+				}
+			}
+			obj.beginFill(
+				myFillColor.color,
+				myFillColor.transparency
+			);
+			this.drawPolygon(obj, polygon);
+			obj.endFill();
+		},
+		drawWrapMode: async function (obj, polygon, fillColor, fillPatterns, bgColors, fgColors, index) {
+			let res = [];
+			if (this.shadingType === 'pattern') {
+				if (fillPatterns.length === 1) {
+					if (fillPatterns[0].src) {
+						obj.beginTextureFill(fillPatterns[0].texture)
+					} else {
+						let { color, transparency } = processColorStr(bgColors[0]);
+						obj.beginFill(color, transparency);
+					}
+				} else {
+					if (fillPatterns[index].src) {
+						obj.beginTextureFill(fillPatterns[index]);
+					} else {
+						let { color, transparency } = processColorStr(bgColors[index]);
+						obj.beginFill(color, transparency);
+					}
+				}
+				!index ?
+					polygon.forEach(point => res.push(point.x - this.viewWidth, point.y))
+					: polygon.forEach(point => res.push(point.x + this.viewWidth, point.y));
+				obj.drawPolygon(res);
+				if (fillPatterns.length > 1) {
+					let reverseIdx = index ? 0 : 1;
+					if (fillPatterns[reverseIdx].src) {
+						obj.beginTextureFill(fillPatterns[reverseIdx].texture);
+					} else {
+						obj.beginFill(fillColor.color, fillColor.transparency);
+					}
+				}
+			}
+			this.drawPolygon(obj, polygon);
+		},
+		drawPolygon(obj, polygon) {
 			let arr = [];
-			polygon.forEach(point => arr.push(point.x, point.y));
-			obj.drawPolygon(arr);
-		},
-		drawRightPolygon(obj, polygon) {
-			let arr = []
 			polygon.forEach(point => arr.push(point.x, point.y));
 			obj.drawPolygon(arr);
 		},
