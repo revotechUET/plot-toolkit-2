@@ -8,7 +8,7 @@ import factoryFn from '../mixins';
 
 console.log('Load v-viewport');
 let component = {
-    props: ["viewportWidth", "viewportHeight", "pan", "onPan", "onZoom"],
+    props: ["viewportWidth", "viewportHeight", "pan", "onPan", "onZoom", "viewportScroll"],
     template,
     created: function () {
         eventManager.on('wheel', (evt) => {
@@ -155,6 +155,7 @@ let component = {
                 else if (y < this.viewportHeight - this.height) {
                     y = this.viewportHeight - this.height
                 }
+                this.viewportScroll && this.viewportScroll(y - this.offsetY);
                 this.offsetY = y;
             }
             requestAnimationFrame(() => {

@@ -1,5 +1,6 @@
 import template from './template.html';
 import { Fragment } from 'vue-fragment';
+import { mapGetters } from 'vuex';
 import VTrack from '../v-track';
 import VLayer from '../v-layer';
 import VXone from '../v-xone';
@@ -7,7 +8,7 @@ import VShading from '../v-shading';
 import VCurve from '../v-curve';
 import VContainer from '../v-container';
 import VShape from '../v-shape';
-import axios from 'axios';
+import VRect from '../v-rect';
 
 const component = {
     name: 'v-plot',
@@ -31,31 +32,47 @@ const component = {
             default: () => ({
                 fontSize: 13
             })
+        },
+        onmousedown: {
+            type: Function,
+            default: function () {
+                this.selectedIdTrack = null;
+            }
         }
     },
     data: function () {
         return {
             trackBodyScale: 0,
-            trackHeaderHeight: 100
+            trackHeaderHeight: 100,
+            selectedIdTrack: null,
+            validateDragging: false,
+            draggingPosX: 0
         }
     },
     components: {
         Fragment, VTrack, VLayer, VXone,
-        VShading, VCurve, VContainer, VShape
+        VShading, VCurve, VContainer, VShape, VRect
     },
     template,
     computed: {
         cName: function () {
             return (this.$store.state.plot || {}).name;
         },
-        sortedTracks: function () {
-            let sTracks = [];
-            if (!this.$store.state.plot) {
-                return [];
+        // sortedTracks: function () {
+        //     let sTracks = [];
+        //     if (!this.$store.state.plot) {
+        //         return [];
+        //     }
+        //     sTracks = [...this.$store.state.depth_axes, ...this.$store.state.zone_tracks, ...this.$store.state.tracks];
+        //     sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
+        //     return sTracks;
+        // },
+        trackPosList: function () {
+            let res = [0];
+            for (let i = 0; i < this.sortedTracks.length - 1; i++) {
+                res.push(res[i] + this.convertWidth(this.sortedTracks[i].widthUnit, this.sortedTracks[i].width));
             }
-            sTracks = [...this.$store.state.depth_axes, ...this.$store.state.zone_tracks, ...this.$store.state.tracks];
-            sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
-            return sTracks;
+            return res;
         },
         plotWidth: function () {
             let plotWidth = 0
@@ -66,7 +83,10 @@ const component = {
         },
         componentType: function () {
             return "VPlot";
-        }
+        },
+        ...mapGetters({
+            sortedTracks: 'sortedTracks'
+        })
     },
     mounted: async function () {
         console.log("V Plot Created");
@@ -92,9 +112,9 @@ const component = {
                     return (width / 93).toFixed(4);
             }
         },
-        trackHeaderResize: function ({ width, height }, comp) {
+        trackHeaderResize: function ({ width, height }, comp, showTitle) {
             // this.$emit("plotHeaderResize", height);
-            this.trackHeaderHeight = height + 20;
+            this.trackHeaderHeight = showTitle ? height + 20 : height;
             console.log("track height change", height);
         },
         trackResize: function ({ width, height }, comp) {
@@ -163,19 +183,6 @@ const component = {
             let line = this.getLine(shading.idRightLine)
             return !line ? "linear" : line.displayType === "Linear" ? "linear" : "loga"
         },
-        // getShadingCustomFills: function (typeFill, shading) {
-        //     let { shadingType } = typeFill;
-        //     if (shadingType === "pattern") {
-        //         let realMinX = this.getLine(shading.idRightLine).minValue;
-        //         let realMaxX = this.getLine(shading.idRightLine).maxValue;
-        //         return [{ lowVal: realMinX, highVal: realMaxX }]
-        //     }
-        //     let { content } = typeFill.varShading.customFills;
-        //     if (!content) return [];
-        //     return content.map(({ lowVal, highVal }) => {
-        //         return { lowVal, highVal }
-        //     })
-        // },
         getShadingCustomFills: function (isNormalFill, shading) {
             let realMinX = this.getLine(shading.idRightLine).minValue
             let realMaxX = this.getLine(shading.idRightLine).maxValue
@@ -189,7 +196,7 @@ const component = {
             } else {
                 let { shadingType } = JSON.parse(shading.negativeFill)
                 if (shadingType === 'pattern') {
-                    if (shading.leftFixedValue) {
+                    if (typeof shading.leftFixedValue === "number") {
                         return [
                             { lowVal: realMinX, highVal: shading.leftFixedValue },
                             { lowVal: shading.leftFixedValue, highVal: realMaxX }
@@ -393,7 +400,7 @@ const component = {
         },
         getShadingWrapMode: function (idLine) {
             let line = this.getLine(idLine);
-            return line.wrapMode;
+            return line && line.wrapMode;
         },
         getLine: function (idLine) {
             for (const track of this.$store.state.tracks) {
@@ -403,6 +410,96 @@ const component = {
                     }
                 }
             }
+        },
+        onTrackMouseDown: function (trackId) {
+            this.selectedIdTrack = trackId;
+        },
+        onTrackTitleDragging: function (globalPosX, trackOrderNum) {
+            if (globalPosX > this.plotWidth) return;
+            let track = this.sortedTracks.filter(track => track.orderNum === trackOrderNum)[0];
+            let numberOfTrack = this.trackPosList.length;
+            let idx = 0;
+            while (globalPosX > this.trackPosList[idx] && idx < numberOfTrack) {
+                idx++;
+            }
+            idx--;
+            let rangeCheck = this.trackPosList[idx]
+                + this.convertWidth(this.sortedTracks[idx].widthUnit, this.sortedTracks[idx].width);
+            if (this.sortedTracks[idx].orderNum !== trackOrderNum) {
+                if (globalPosX - this.trackPosList[idx] < 25) {
+                    this.validateDragging = true;
+                    this.draggingPosX = this.trackPosList[idx];
+                    console.log("Validate Drag")
+                } else if (rangeCheck - globalPosX < 25) {
+                    this.validateDragging = true;
+                    this.draggingPosX = rangeCheck - 25;
+                    console.log("Validate Drag");
+                } else {
+                    this.validateDragging = false;
+                }
+            } else {
+                this.validateDragging = false;
+            }
+        },
+        onTrackTitleDragEnd: function (globalPosX, trackDragOrder, trackDragType) {
+            this.validateDragging = false;
+            let numberOfTrack = this.trackPosList.length;
+            if (globalPosX > this.plotWidth) return;
+            let trackDragIdx = this.sortedTracks.findIndex(track => track.orderNum === trackDragOrder);
+            let idx = 0;
+            while (globalPosX > this.trackPosList[idx] && idx < numberOfTrack) {
+                idx++;
+            }
+            idx--;
+            if (idx === trackDragIdx) return;
+            let rangeCheck = this.trackPosList[idx]
+                + this.convertWidth(this.sortedTracks[idx].widthUnit, this.sortedTracks[idx].width);
+            let flag;
+            if (trackDragIdx < idx) {
+                if (globalPosX - this.trackPosList[idx] < 25) return;
+                if (rangeCheck - globalPosX < 25) {
+                    flag = true;
+                }
+            }
+            if (trackDragIdx > idx) {
+                if (rangeCheck - globalPosX < 25) return;
+                if (globalPosX - this.trackPosList[idx] < 25) {
+                    flag = true;
+                }
+            }
+            if (flag) {
+                let trackDrag = this.sortedTracks[trackDragIdx];
+                let track = this.sortedTracks[idx];
+                let idTrackDrag, idTrack, trackType;
+                if (Number.isInteger(trackDrag.idTrack)) {
+                    idTrackDrag = trackDrag.idTrack
+                } else if (Number.isInteger(trackDrag.idZoneTrack)) {
+                    idTrackDrag = trackDrag.idZoneTrack;
+                } else {
+                    idTrackDrag = trackDrag.idDepthAxis;
+                }
+                if (Number.isInteger(track.idTrack)) {
+                    idTrack = track.idTrack;
+                    trackType = null;
+                } else if (Number.isInteger(track.idZoneTrack)) {
+                    idTrack = track.idZoneTrack;
+                    trackType = "Zone Track";
+                } else {
+                    trackType = "Depth Track"
+                    idTrack = track.idDepthAxis;
+                }
+                this.$store.dispatch('updateTrackOrder', {
+                    trackDragType,
+                    newTrackDragOrder: track.orderNum,
+                    idTrackDrag,
+                    trackType,
+                    newOrder: trackDragOrder,
+                    idTrack
+                });
+            }
+        },
+        onTrackScroll: function (realOffsetY) {
+            this.$store.commit('plotOffsetChange', realOffsetY)
         }
     }
 }

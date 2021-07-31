@@ -61,76 +61,97 @@ async function draw(obj) {
 			}
 			break;
 		case "Custom Fills": //transform discrete
-			if (!this.customFillValues) {
+			if (!this.customFillValues && this.shadingType === 'varShading') {
 				throw new Error(`No sufficient information for custom fill color`)
 			}
-			let rangeCheck = {};
-			for (let i = 0; i < this.customFillValues.length; i++) {
-				let ele = this.customFillValues[i];
-				mn = Math.min(ele["lowVal"], ele["highVal"]);
-				mx = Math.max(ele["lowVal"], ele["highVal"]);
-				if (fillValues.length === 0) {
-					fillValues.push(mn, mx);
-					rangeCheck[mn] = mx;
+			if (this.shadingType === 'pattern' && !this.customFillValues) {
+				await this.myDrawPolygon3(obj);
+				return;
+			}
+			let flag = false;
+			if (this.shadingType === 'pattern' && !this.isNormalFill) {
+				if (this.realLeft < this.shadingLowValue && this.realLeft < this.shadingHighValue) {
+					flag = true;
+					fillValues.push(this.realLeft);
+					bgColors.push(this.backgroundColorList[1]);
+					fgColors.push(this.foregroundColorList[1]);
+					fillPatterns.push(this.fillPatternList[1]);
+				} else if (this.realLeft > this.shadingLowValue && this.realLeft > this.shadingHighValue) {
+					flag = true;
+					fillValues.push(this.realLeft);
 					bgColors.push(this.backgroundColorList[0]);
 					fgColors.push(this.foregroundColorList[0]);
-					fillPatterns.push(this.fillPatternList[0]);
-				} else {
-					if (mn > fillValues[fillValues.length - 1]) { //case: lowVal > maximum of fillValues => push both lowVal and highVal
-						rangeCheck[mn] = mx;
+					fillPatterns.push(this.fillPatternList[1]);
+				}
+			}
+			let rangeCheck = {};
+			if (!flag) {
+				for (let i = 0; i < this.customFillValues.length; i++) {
+					let ele = this.customFillValues[i];
+					mn = Math.min(ele["lowVal"], ele["highVal"]);
+					mx = Math.max(ele["lowVal"], ele["highVal"]);
+					if (fillValues.length === 0) {
 						fillValues.push(mn, mx);
-						bgColors.push("transparent", this.backgroundColorList[i]);
-						fgColors.push("white", this.foregroundColorList[i]);
-						fillPatterns.push(null, this.fillPatternList[i]);
-						continue;
-					} else if (mn === fillValues[fillValues.length - 1]) { //case: lowVal = maximum of fillValues => just push highVal
-						rangeCheck[fillValues[fillValues.length - 1]] = mx;
-						fillValues.push(mx);
-						bgColors.push(this.backgroundColorList[i]);
-						fgColors.push(this.foregroundColorList[i]);
-						fillPatterns.push(this.fillPatternList[i]);
-						continue;
-					}
-
-					if (mx < fillValues[0]) { //case: highVal < minimum of fillValues => unshift both lowVal and highVal
 						rangeCheck[mn] = mx;
-						fillValues.unshift(mn, mx);
-						bgColors.unshift(this.backgroundColorList[i], "transparent");
-						fgColors.unshift(this.foregroundColorList[i], "white");
-						fillPatterns.unshift(this.fillPatternList[i], null);
-						continue;
-					} else if (mx === fillValues[0]) { //case: highVal = minimum of fillValues => just unshift lowVal
-						rangeCheck[mn] = mx;
-						fillValues.unshift(mn);
-						bgColors.unshift(this.backgroundColorList[i]);
-						fgColors.unshift(this.foregroundColorList[i]);
-						fillPatterns.unshift(this.fillPatternList[i]);
-						continue;
-					}
-
-					let flag = false;
-					for (let j = 0; j < fillValues.length; j++) {
-						if (fillValues[j] === mn) {
-							flag = true;
-						}
-					}
-					if (rangeCheck[mn] || !flag) {
-						throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
-					}
-
-					let idx = fillValues.indexOf(mn);
-					if (fillValues[idx + 1]) {
-						if (mx > fillValues[idx + 1]) {
-							throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
-						} else if (mx === fillValues[idx + 1]) {
+						bgColors.push(this.backgroundColorList[0]);
+						fgColors.push(this.foregroundColorList[0]);
+						fillPatterns.push(this.fillPatternList[0]);
+					} else {
+						if (mn > fillValues[fillValues.length - 1]) { //case: lowVal > maximum of fillValues => push both lowVal and highVal
 							rangeCheck[mn] = mx;
-							bgColors.splice(idx, 1, this.backgroundColorList[i]);
-							fgColors.splice(idx, 1, this.foregroundColorList[i]);
-							fillPatterns.splice(idx, 1, this.fillPatternList[i]);
+							fillValues.push(mn, mx);
+							bgColors.push("transparent", this.backgroundColorList[i]);
+							fgColors.push("white", this.foregroundColorList[i]);
+							fillPatterns.push(null, this.fillPatternList[i]);
+							continue;
+						} else if (mn === fillValues[fillValues.length - 1]) { //case: lowVal = maximum of fillValues => just push highVal
+							rangeCheck[fillValues[fillValues.length - 1]] = mx;
+							fillValues.push(mx);
+							bgColors.push(this.backgroundColorList[i]);
+							fgColors.push(this.foregroundColorList[i]);
+							fillPatterns.push(this.fillPatternList[i]);
+							continue;
+						}
+
+						if (mx < fillValues[0]) { //case: highVal < minimum of fillValues => unshift both lowVal and highVal
+							rangeCheck[mn] = mx;
+							fillValues.unshift(mn, mx);
+							bgColors.unshift(this.backgroundColorList[i], "transparent");
+							fgColors.unshift(this.foregroundColorList[i], "white");
+							fillPatterns.unshift(this.fillPatternList[i], null);
+							continue;
+						} else if (mx === fillValues[0]) { //case: highVal = minimum of fillValues => just unshift lowVal
+							rangeCheck[mn] = mx;
+							fillValues.unshift(mn);
+							bgColors.unshift(this.backgroundColorList[i]);
+							fgColors.unshift(this.foregroundColorList[i]);
+							fillPatterns.unshift(this.fillPatternList[i]);
+							continue;
+						}
+
+						let flag = false;
+						for (let j = 0; j < fillValues.length; j++) {
+							if (fillValues[j] === mn) {
+								flag = true;
+							}
+						}
+						if (rangeCheck[mn] || !flag) {
+							throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
+						} let idx = fillValues.indexOf(mn);
+						if (fillValues[idx + 1]) {
+							if (mx > fillValues[idx + 1]) {
+								throw new Error(`Range duplicated: ${fillValues} with: ${mn} and ${mx}`);
+							} else if (mx === fillValues[idx + 1]) {
+								rangeCheck[mn] = mx;
+								bgColors.splice(idx, 1, this.backgroundColorList[i]);
+								fgColors.splice(idx, 1, this.foregroundColorList[i]);
+								fillPatterns.splice(idx, 1, this.fillPatternList[i]);
+							}
 						}
 					}
 				}
 			}
+
 			fillPatterns = fillPatterns.map((item, idx) => {
 				return {
 					src: fillPatterns[idx],
@@ -151,7 +172,7 @@ async function draw(obj) {
 						.range([bgColors[1]]);
 					negativeTransformColor = scaleQuantile()
 						.domain([this.shadingNegativeLowValue, this.shadingNegativeHighValue])
-						.range([bgColors[0]])
+						.range([bgColors[0]]);
 				}
 			}
 			break;
@@ -235,7 +256,7 @@ async function draw(obj) {
 						index = j;
 					}
 				}
-				if (index === fillValues.length - 1) {
+				if (index === fillValues.length - 1 && fillValues.length !== 1) {
 					index--;
 				}
 				if (fillPatterns[index] && fillPatterns[index].src) {
@@ -374,7 +395,8 @@ let component = {
 		negativeSideColor: Object,
 		positiveSidePalette: Array,
 		negativeSidePalette: Array,
-		wrapMode: String
+		wrapMode: String,
+		leftWrapMode: String
 	},
 	template,
 	data: function () {
@@ -460,6 +482,7 @@ let component = {
 	},
 	methods: {
 		draw,
+		//draw Custom fills
 		myDrawPolygon: async function (obj, polygon, fillColor, fillPatterns, bgColors, fgColors) {
 			if (polygon.some(point => point.x === null)) return;
 			let leftFlag, rightFlag;
@@ -506,6 +529,7 @@ let component = {
 					obj.drawPolygon(res);
 			}
 		},
+		//draw gradient - palette
 		myDrawPolygon2: function (obj, polygon, myFillColor, posXFillColor, negativeTransformColor, positiveTransformColor) {
 			if (this.isNormalFill) {
 				myFillColor = processColorStr(transformColor(posXFillColor));
@@ -544,6 +568,103 @@ let component = {
 			);
 			this.drawPolygon(obj, polygon);
 			obj.endFill();
+		},
+		//draw shading based on 2 curve
+		myDrawPolygon3: async function (obj) {
+			let fillPatterns = [], texture;
+			for (let i = 0; i < this.fillPatternList.length; i++) {
+				if (this.fillPatternList[i]) {
+					texture = await this.getTexture(this.backgroundColorList[i],
+						this.foregroundColorList[i], this.fillPatternList[i]);
+					fillPatterns.push(texture)
+				} else {
+					fillPatterns.push(null);
+				}
+			}
+			let leftTransformXFn = this.leftTransformX();
+			let rightTransformFn = this.getTransformX();
+			let polygon, shadingIdx = 0, rightCurvePoint, leftCurvePoint;
+			for (let i = 0; i < this.cPolygonList.length; i++) {
+				polygon = this.cPolygonList[i];
+				rightCurvePoint = rightTransformFn(this.realRight[shadingIdx].x);
+				leftCurvePoint = leftTransformXFn(this.realLeft[shadingIdx].x);
+				if (i && this.checkTriangle[i - 1]) {
+					rightCurvePoint = rightTransformFn(this.realRight[shadingIdx + 1].x);
+					leftCurvePoint = leftTransformXFn(this.realLeft[shadingIdx + 1].x);
+				}
+				if (rightCurvePoint === leftCurvePoint) continue;
+				else if (rightCurvePoint > leftCurvePoint) {
+					if (fillPatterns[1]) {
+						obj.beginTextureFill(fillPatterns[1]);
+					} else if (this.backgroundColorList[1] !== 'transparent') {
+						let { color, transparency } = processColorStr(this.backgroundColorList[1]);
+						obj.beginFill(color, transparency);
+					}
+				} else if (rightCurvePoint < leftCurvePoint) {
+					if (fillPatterns[0]) {
+						obj.beginTextureFill(fillPatterns[0]);
+					} else if (this.backgroundColorList[0] !== 'transparent') {
+						let { color, transparency } = processColorStr(this.backgroundColorList[0]);
+						obj.beginFill(color, transparency);
+					}
+				}
+				this.drawPolygon(obj, polygon);
+				let leftFlag, rightFlag;
+				switch (this.wrapMode) {
+					case "Left":
+						leftFlag = polygon.some(point => point.x > this.viewWidth);
+						break;
+					case "Right":
+						rightFlag = polygon.some(point => point.x < 0);
+						break;
+					case "Both":
+						leftFlag = polygon.some(point => point.x > this.viewWidth);
+						rightFlag = polygon.some(point => point.x < 0);
+						break;
+					default:
+				}
+				let res = [];
+				if (leftFlag) {
+					polygon.forEach(point => res.push(point.x - this.viewWidth, point.y));
+					obj.drawPolygon(res);
+				}
+				if (rightFlag) {
+					res = [];
+					polygon.forEach(point => res.push(point.x + this.viewWidth, point.y));
+					obj.drawPolygon(res);
+				}
+				switch (this.leftWrapMode) {
+					case "Left":
+						leftFlag = polygon.some(point => point.x > this.viewWidth);
+						break;
+					case "Right":
+						rightFlag = polygon.some(point => point.x < 0);
+						break;
+					case "Both":
+						leftFlag = polygon.some(point => point.x > this.viewWidth);
+						rightFlag = polygon.some(point => point.x < 0);
+						break;
+					default:
+						leftFlag = rightFlag = null;
+				}
+				res = [];
+				if (leftFlag) {
+					polygon.forEach(point => res.push(point.x - this.viewWidth, point.y));
+					obj.drawPolygon(res);
+				}
+				if (rightFlag) {
+					res = [];
+					polygon.forEach(point => res.push(point.x + this.viewWidth, point.y));
+					obj.drawPolygon(res);
+				}
+				if (!this.checkTriangle[i]) {
+					shadingIdx++;
+				};
+				obj.endFill();
+			}
+			obj.x = getPosX(this.coordinate, this.posX);
+			obj.y = getPosY(this.coordinate, this.posY);
+			obj.rotation = this.rotation || 0;
 		},
 		drawWrapMode: async function (obj, polygon, fillColor, fillPatterns, bgColors, fgColors, index) {
 			let res = [];

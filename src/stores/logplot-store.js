@@ -14,8 +14,17 @@ export default {
         plotTop: 0,
         plotBottom: 0,
         patterns: null,
-        palettes: null
+        palettes: null,
     }),
+    getters: {
+        sortedTracks: state => {
+            if (!state.plot) return [];
+            let sTracks = [];
+            sTracks = [...state.depth_axes, ...state.zone_tracks, ...state.tracks];
+            sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
+            return sTracks;
+        }
+    },
     mutations: {
         getPlotData(state, plot) {
             console.log('Update plot');
@@ -65,6 +74,53 @@ export default {
         setTrackWidth(state, { idx, width }) {
             state.tracks[idx].width = Number(width);
         },
+        setNewTrackOrder(state, { trackDragType, trackDragIdx, newTrackDragOrder,
+            trackType, trackIdx, newOrder }) {
+            switch (trackDragType) {
+                case "Depth Track":
+                    // state.depth_axes[trackDragIdx].orderNum = newTrackDragOrder;
+                    state.depth_axes = state.depth_axes.map((track, idx) => ({
+                        ...track,
+                        orderNum: idx === trackDragIdx ? newTrackDragOrder : track.orderNum
+                    }));
+                    break;
+                case "Zone Track":
+                    // state.zone_tracks[trackDragIdx].orderNum = newTrackDragOrder;
+                    state.zone_tracks = state.zone_tracks.map((track, idx) => ({
+                        ...track,
+                        orderNum: idx === trackDragIdx ? newTrackDragOrder : track.orderNum
+                    }));
+                    break;
+                default:
+                    // state.tracks[trackDragIdx].orderNum = newTrackDragOrder;
+                    state.tracks = state.tracks.map((track, idx) => ({
+                        ...track,
+                        orderNum: idx === trackDragIdx ? newTrackDragOrder : track.orderNum
+                    }))
+            }
+            switch (trackType) {
+                case "Depth Track":
+                    // state.depth_axes[trackIdx].orderNum = newOrder;
+                    state.depth_axes = state.depth_axes.map((track, idx) => ({
+                        ...track,
+                        orderNum: idx === trackIdx ? newOrder : track.orderNum
+                    }));
+                    break;
+                case "Zone Track":
+                    // state.zone_tracks[trackIdx].orderNum = newOrder;
+                    state.zone_tracks = state.zone_tracks.map((track, idx) => ({
+                        ...track,
+                        orderNum: idx === trackIdx ? newOrder : track.orderNum
+                    }));
+                    break;
+                default:
+                    // state.tracks[trackIdx].orderNum = newOrder;
+                    state.tracks = state.tracks.map((track, idx) => ({
+                        ...track,
+                        orderNum: idx === trackIdx ? newOrder : track.orderNum
+                    }))
+            }
+        },
         zoneHeightChange(state, { newStartDepth, newEndDepth, zonesetId, zoneId }) {
             let zoneTrackIdx = state.zone_tracks.findIndex(track => track.idZoneSet === zonesetId);
             let zoneIdx = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].findIndex(zone => zone.idZone === zoneId);
@@ -79,6 +135,10 @@ export default {
                 endDepth: idx === zoneIdx ? newEndDepth : zone.endDepth
             }))
             state.zone_tracks[zoneTrackIdx]['zone_set']['zones'] = newZones
+        },
+        plotOffsetChange: function (state, realOffsetY) {
+            state.currentPlotTop = state.currentPlotTop + realOffsetY;
+            state.currentPlotBottom = state.currentPlotBottom + realOffsetY;
         }
     },
     actions: {
@@ -229,6 +289,37 @@ export default {
                 default:
                     commit("setTrackWidth", { idx, width });
             }
+        },
+        updateTrackOrder({ state, commit },
+            { trackDragType, newTrackDragOrder, idTrackDrag, trackType, newOrder, idTrack }) {
+            let trackDragIdx, trackIdx;
+            switch (trackDragType) {
+                case "Depth Track":
+                    trackDragIdx = state.depth_axes.findIndex(track => track.idDepthAxis === idTrackDrag);
+                    break;
+                case "Zone Track":
+                    trackDragIdx = state.zone_tracks.findIndex(track => track.idZoneTrack === idTrackDrag);
+                    break;
+                default:
+                    trackDragIdx = state.tracks.findIndex(track => track.idTrack === idTrackDrag);
+                    break;
+            }
+            switch (trackType) {
+                case "Depth Track":
+                    trackIdx = state.depth_axes.findIndex(track => track.idDepthAxis === idTrack);
+                    break;
+                case "Zone Track":
+                    trackIdx = state.zone_tracks.findIndex(track => track.idZoneTrack === idTrack);
+                    break;
+                default:
+                    trackIdx = state.tracks.findIndex(track => track.idTrack === idTrack);
+                    break;
+            }
+            commit("setNewTrackOrder",
+                {
+                    trackDragType, trackDragIdx, newTrackDragOrder,
+                    trackType, trackIdx, newOrder
+                });
         }
     }
 }

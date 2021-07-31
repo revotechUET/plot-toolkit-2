@@ -8,7 +8,7 @@
         :enabled="true" :draggable="true"
         cursor="all-scroll" :clipped="true"
         :on-drag="onTitleDrag"
-        :onmousemove="onTitleDragMove"
+        :onmouseup="onTitleDragEnd" :onmousemove="onTitleDragging"
         :fill-color="trackTitleFillColor"> <!-- TO BE CHANGED  -->
         <v-textbox :content="name"
             :content-style="headerContentStyle"
@@ -19,9 +19,9 @@
     </v-rect>
     <v-resizable :view-pos-x="0" :view-pos-y="showTitle ? 20 : 0"
         :view-height="showTitle ? trackHeaderHeight - 20 : trackHeaderHeight" :view-width="viewWidth"
-        direction="vertical" :knob-flags="[false, true]"
+        direction="vertical" :knob-flags="[false, true]" :enabled="true"
         :fill-color="fillColor || 0xFFFFFF" :fill-transparency="0.2"
-        :size="5" :on-resize="trackHeaderResize"
+        :size="5" :on-resize="(...arguments) => trackHeaderResize(...arguments, showTitle)"
         x-transform="none" y-transform="none">
         <v-viewport :view-pos-x="0" :view-pos-y="0"
             :view-width="viewWidth" :view-height="Math.max(showTitle ? trackHeaderHeight - 20 : trackHeaderHeight, trackHeaderChildrenHeight)"
@@ -116,6 +116,7 @@
     </v-resizable>
     <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight"
         ref="viewportBody" :clipped="true"
+        :viewport-scroll="onViewportScroll"
         :view-width="viewWidth" :view-height="scaleTrackHeight"
         :viewport-width="viewWidth" :viewport-height="viewHeight - trackHeaderHeight"
         x-transform="none" :y-transform="yTransform"

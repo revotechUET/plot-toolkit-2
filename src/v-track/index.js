@@ -13,7 +13,6 @@ import VHeaderCurve from '../v-header-curve';
 import VHeaderShading from '../v-header-shading';
 import template from './template.html';
 import VShape from '../v-shape';
-import selectable from '../mixins/selectable';
 import { scaleLinear, } from 'd3';
 import eventManager from '../event-manager';
 
@@ -86,6 +85,10 @@ let component = {
         showValueGrid: {
             type: Boolean,
             default: true
+        },
+        isSelected: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -93,7 +96,7 @@ let component = {
             return "VTrack";
         },
         checkSelected: function () {
-            return this.selectionStates.some(item => item);
+            return this.selectionStates.some(item => item) || this.isSelected;
         },
         cRatioScreen: function () {
             let ratio = this.getCentimeterFromPixel() *
@@ -129,12 +132,24 @@ let component = {
     },
     methods: {
         registerEvents: function () {
-            eventManager.on("viewport-scroll", val => {
-                this.$refs.viewportBody.offsetY = val;
+            eventManager.on("viewport-scroll", (val, trackId) => {
+                if (trackId === this.trackId) {
+                    return;
+                }
+                if (this.$refs.viewportBody.offsetY !== val) {
+                    this.$refs.viewportBody.offsetY = val;
+                }
             });
+        },
+        onViewportScroll: function (offsetY) {
+            let realOffsetYScroll = scaleLinear()
+                .domain([this.realMinY, this.realMaxY]).range([0, this.scaleTrackHeight])
+                .invert(-offsetY) - this.realMinY;
+            this.$emit("trackScroll", realOffsetYScroll);
         },
         onHeaderMouseDown: function (target, localPos, globalPos, evt) {
             this.selectionStates = this.selectionStates.map(state => false);
+            this.$emit("trackMouseDown", this.trackId);
         },
         onChildRemove: function (childHeight) {
             this.trackHeaderChildrenHeight -= childHeight;
@@ -143,16 +158,11 @@ let component = {
             let name = target.hostComponent.name.split(" ");
             let typeMouseDown = evt.data.button;
             let idx = Number(name[name.length - 1]);
-            if (!this.selectionStates[idx]) {
-                this.selectionStates = this.selectionStates.map((item, index) => {
-                    this.$refs.trackChildren.$children[index].isSelected = index !== idx ? false : true;
-                    return index === idx ? true : false
-                })
-
-            } else {
-                this.selectionStates.splice(idx, 1, false);
-                this.$refs.trackChildren.$children[idx].isSelected = false;
-            }
+            this.selectionStates = this.selectionStates.map((item, index) => {
+                this.$refs.trackChildren.$children[index].isSelected = index !== idx ? false : true;
+                return index === idx ? true : false
+            });
+            this.$emit("trackMouseDown", this.trackId);
             this.afterMouseDown && this.afterMouseDown(evt, this.$refs.trackChildren.$children[idx].componentType, typeMouseDown);
         },
         onRefsReady: function () {
@@ -193,6 +203,7 @@ let component = {
             let typeMouseDown = evt.data.button;
             let pixelPathLeft, pixelPathRight, pixelPath, child, exitFlag = false, contextType = "VTrack";
             let xPos, children = this.$refs.trackChildren.$children;
+            this.$emit("trackMouseDown", this.trackId);
             for (let i = 0; i < children.length; i++) {
                 child = children[i];
                 switch (child.componentType) {
@@ -423,14 +434,17 @@ let component = {
                 });
             }
         },
-        onTitleDragMove: function (target, localPos, globalPos, evts) {
+        onTitleDragging: function (target, localPos, globalPos, evts) {
             if (target.hostComponent.dragging) {
                 if (globalPos.y < target.hostComponent.viewHeight) {
                     return;
                 }
-                if (globalPos.x < this.viewPosX || globalPos.x > this.viewPosX + this.viewWidth) {
-                    console.log(globalPos.x, globalPos.y);
-                }
+                this.$emit("trackTitleDragging", globalPos.x, this.orderNum);
+            }
+        },
+        onTitleDragEnd: function (target, localPos, globalPos, evts) {
+            if (globalPos.y > 0 && globalPos.y < this.viewHeight) {
+                this.$emit("trackTitleDragEnd", globalPos.x, this.orderNum, this.trackType)
             }
         },
         onTitleDrag: function (target) {
@@ -459,6 +473,7 @@ let component = {
         }
         console.log("Track draw");
         //calculate offset for viewport
+        console.log(this.$refs)
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
             / (this.trackRealMaxY - this.trackRealMinY);
         this.scaleTrackHeight = y;
@@ -481,8 +496,12 @@ let component = {
             () => {
                 return this.$refs.viewportBody.offsetY;
             },
-            (val) => {
-                eventManager.emit("viewport-scroll", val);
+            (newVal, oldVal) => {
+                // let myVal = oldVal - newVal;
+                // let realOffsetYScroll = scaleLinear()
+                //     .domain([this.realMinY, this.realMaxY]).range([0, this.scaleTrackHeight])
+                //     .invert(myVal) - this.realMinY;
+                eventManager.emit("viewport-scroll", newVal, this.trackId);
             }
         )
     },
@@ -504,9 +523,13 @@ let component = {
             this.selectionStates.forEach((state, idx) => {
                 this.$refs.trackChildren.$children[idx].isSelected = state;
             })
-        }
+        },
+        isSelected: function () {
+            if (!this.isSelected) {
+                this.selectionStates = this.selectionStates.map(state => false);
+            }
+        },
     },
-    mixins: [selectable],
 }
 
 export default VResizable.extend(component);

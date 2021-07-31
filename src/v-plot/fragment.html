@@ -7,10 +7,15 @@
     :viewport-pos-y="trackHeaderHeight"
     :ref-line-x="true" :ref-line-y="false"
     >
+    <v-rect
+        v-if="validateDragging" :view-pos-x="draggingPosX" :view-pos-y="-trackHeaderHeight"
+        :view-width="25" :view-height="viewHeight"
+        fill-color="#66c2ff" :fill-transparency="0.5"
+    />
     <v-container
         :view-pos-x="viewPosX" :view-pos-y="-trackHeaderHeight"
         :view-width="viewWidth" :view-height="viewHeight"
-        layout-direction="horizontal"
+        layout-direction="horizontal" ref="sortedTracks"
         >   
         <fragment
             v-for="(track, idx) in sortedTracks"
@@ -31,7 +36,9 @@
                 :fill-color="track.trackBackground" :fill-transparency="1"
                 x-transform="none" y-transform="linear"
                 :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
-                cursor="crosshair" :enabled="true"
+                cursor="crosshair" :enabled="true" :is-selected="selectedIdTrack === track.idDepthAxis"
+                @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
+                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
                 />
             <v-track
                 v-if="!isNaN(track.idZoneTrack)"
@@ -49,7 +56,9 @@
                 :fill-color="track.color" :fill-transparency="1"
                 x-transform="none" y-transform="linear"
                 :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
-                :enabled="true">
+                :enabled="true" :is-selected="selectedIdTrack === track.idZoneTrack"
+                @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
+                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd">
                 <v-xone
                     v-for="(zone, i) in sortedTracks[idx]['zone_set']['zones']"
                     :key="'zone' + i + track.idZoneTrack"
@@ -84,7 +93,9 @@
                 :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
                 :major-ticks="track.majorTicks" :minor-ticks="track.minorTicks"
                 :show-depth-grid="track.showDepthGrid" :show-value-grid="track.showValueGrid"
-                :enabled="true">
+                :enabled="true" :is-selected="selectedIdTrack === track.idTrack"
+                @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
+                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd">
                 <fragment
                     v-for="(shading, idx) in track.shadings"
                     :key="shading.name + shading.idControlCurve + shading.idShading">
@@ -140,8 +151,11 @@
                         :shading-negative-high-value="JSON.parse(shading.negativeFill).varShading.endX"
                         :real-left="getShadingRealLeft(shading)"
                         :real-right="getShadingRealRight(shading)"
+                        :left-real-min-x="getLeftShadingRealMinX(shading)"
+                        :left-real-max-x="getLeftShadingRealMaxX(shading)"
                         :shading-control-curve="getCurveData(shading.idControlCurve)"
                         :wrap-mode="getShadingWrapMode(shading.idRightLine)"
+                        :left-wrap-mode="getShadingWrapMode(shading.idLeftLine)"
                     />
                 </fragment>
                 <v-curve
