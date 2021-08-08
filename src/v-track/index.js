@@ -136,7 +136,7 @@ let component = {
                 if (trackId === this.trackId) {
                     return;
                 }
-                if (this.$refs.viewportBody.offsetY !== val) {
+                if (this.$refs.viewportBody && this.$refs.viewportBody.offsetY !== val) {
                     this.$refs.viewportBody.offsetY = val;
                 }
             });
@@ -473,7 +473,6 @@ let component = {
         }
         console.log("Track draw");
         //calculate offset for viewport
-        console.log(this.$refs)
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
             / (this.trackRealMaxY - this.trackRealMinY);
         this.scaleTrackHeight = y;
@@ -492,18 +491,16 @@ let component = {
         }
         let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
         this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
-        this.$watch(
-            () => {
-                return this.$refs.viewportBody.offsetY;
-            },
-            (newVal, oldVal) => {
-                // let myVal = oldVal - newVal;
-                // let realOffsetYScroll = scaleLinear()
-                //     .domain([this.realMinY, this.realMaxY]).range([0, this.scaleTrackHeight])
-                //     .invert(myVal) - this.realMinY;
-                eventManager.emit("viewport-scroll", newVal, this.trackId);
-            }
-        )
+        if (this.$refs.viewportBody) {
+            this.$watch(
+                () => {
+                    return this.$refs.viewportBody.offsetY;
+                },
+                (newVal) => {
+                    eventManager.emit("viewport-scroll", newVal, this.trackId);
+                }
+            )
+        }
     },
     watch: {
         trackChildren: function (newValue, oldValue) {

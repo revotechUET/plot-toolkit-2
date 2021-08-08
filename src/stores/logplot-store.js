@@ -192,27 +192,29 @@ export default {
                     commit('setTracks', tracksResponse.data);
                     for (const well of wells) {
                         const { datasets } = well;
-                        let { curves } = datasets[0];
-                        let step = Number(datasets[0].step);
-                        commit("setCurveSteps", {
-                            idCurveStep: curves.map(curve => curve.idCurve).join("-"),
-                            step
-                        })
-                        curves = curves.filter(curve => tracks[i].lines.map(line => line.idCurve).indexOf(curve.idCurve) >= 0
-                            && !state.curves[curve.idCurve]);
-                        for (const curve of curves) {
-                            const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
-                                idCurve: curve.idCurve,
-                            });
-                            commit("setCurves", {
-                                idCurve: curve.idCurve,
-                                curveData: curveReponse.data.map((point, idx) => {
-                                    return {
-                                        ...point,
-                                        y: Number(datasets[0].top) + step * idx
-                                    }
-                                })
+                        for (let j = 0; j < datasets.length; j++) {
+                            let { curves } = datasets[j];
+                            let step = Number(datasets[j].step);
+                            commit("setCurveSteps", {
+                                idCurveStep: curves.map(curve => curve.idCurve).join("-"),
+                                step
                             })
+                            curves = curves.filter(curve => tracks[i].lines.map(line => line.idCurve).indexOf(curve.idCurve) >= 0
+                                && !state.curves[curve.idCurve]);
+                            for (const curve of curves) {
+                                const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
+                                    idCurve: curve.idCurve,
+                                });
+                                commit("setCurves", {
+                                    idCurve: curve.idCurve,
+                                    curveData: curveReponse.data.map((point, idx) => {
+                                        return {
+                                            ...point,
+                                            y: Number(datasets[0].top) + step * idx
+                                        }
+                                    })
+                                })
+                            }
                         }
                     }
                 }
@@ -246,18 +248,6 @@ export default {
                 for (const track of data.tracks) {
                     for (const line of track.lines) {
                         if (!state.curves[line.idCurve]) {
-                            // const curveReponse = await axios.post('http://112.137.129.214:35280/quangtuan/curve/getData', {
-                            //     idCurve: line.idCurve,
-                            // });
-                            // commit('setCurves', {
-                            //     idCurve: line.idCurve,
-                            //     curveData: curveReponse.data.map((point, idx) => {
-                            //         return {
-                            //             ...point,
-                            //             y: Number(line.top) + line.curve.step * idx
-                            //         }
-                            //     })
-                            // })
                             commit('setCurves', {
                                 idCurve: line.idCurve,
                                 curveData: line.curveData.map((point, idx) => {

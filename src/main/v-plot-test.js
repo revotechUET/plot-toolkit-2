@@ -20,7 +20,7 @@ let app = new Vue({
                 :tooltip-style="tooltipStyle" ref="myPlot"
                 :zone-content-style="zoneContentStyle"
                 :enabled="true"
-                :id-project="1" :id-plot="5" />
+                :id-project="12" :id-plot="325" />
         </v-scene>
     `,
     data: function () {
