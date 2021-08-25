@@ -142,7 +142,7 @@ export default {
         }
     },
     actions: {
-        async getData({ state, commit }, { idProject, idPlot }) {
+        async getData({ state, commit }, { idProject, idPlot, listCurve }) {
             console.log('Get data');
             const patternResponse = await axios.post('http://112.137.129.214:35280/quangtuan/pattern/list', {
                 idProject,
@@ -235,7 +235,10 @@ export default {
                 //     idProject,
                 //     genNum: 2
                 // })
-                let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/api/genPlotById', [2, 9, 4])
+                let plotResponse = await axios.post('http://112.137.129.214:35280/quangtuan/api/genPlotById', {
+                    idProject: idProject,
+                    listCurve: listCurve
+                })
                 let data = plotResponse.data
                 let { top0, range0, top, bottom } = data.currentState;
                 commit("setCurrentPlotTop", top);

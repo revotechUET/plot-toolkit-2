@@ -15,11 +15,9 @@ const component = {
     props: {
         idProject: {
             type: Number,
-            required: true
         },
         idPlot: {
             type: Number,
-            required: true
         },
         zoneContentStyle: {
             type: Object,
@@ -38,7 +36,8 @@ const component = {
             default: function () {
                 this.selectedIdTrack = null;
             }
-        }
+        },
+        listCurve: Array
     },
     data: function () {
         return {
@@ -90,7 +89,11 @@ const component = {
     },
     mounted: async function () {
         console.log("V Plot Created");
-        await this.$store.dispatch("getData", { idProject: this.idProject, idPlot: this.idPlot });
+        await this.$store.dispatch("getData", {
+            idProject: this.idProject,
+            idPlot: this.idPlot,
+            listCurve: this.listCurve
+        });
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.$store.state.plotBottom - this.$store.state.plotTop)
             / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop);
         this.trackBodyScale = y;
