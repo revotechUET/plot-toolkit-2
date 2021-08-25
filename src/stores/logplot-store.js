@@ -210,7 +210,7 @@ export default {
                                     curveData: curveReponse.data.map((point, idx) => {
                                         return {
                                             ...point,
-                                            y: Number(datasets[0].top) + step * idx
+                                            y: Number(datasets[j].top) + step * idx
                                         }
                                     })
                                 })
