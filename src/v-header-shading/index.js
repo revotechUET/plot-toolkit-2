@@ -1,9 +1,10 @@
 import { Fragment } from 'vue-fragment';
 import { Text } from 'pixi.js';
 import VTextbox from '../v-textbox';
-import VRect from '../v-rect';
+// import VRect from '../v-rect';
 import selectable from '../mixins/selectable';
-import template from './template.html';
+import baseRect from '../mixins/base-rect';
+// import template from './template.html';
 
 let component = {
     props: {
@@ -12,7 +13,14 @@ let component = {
         contentStyle: Object,
         shadingName: String,
     },
-    template,
+    template: `<div>
+        <div v-if="debug" class="v-object">{{compProps}}
+            ${require('./fragment.html')}
+        </div>
+        <fragment v-if="!debug" props="compProps">
+            ${require('./fragment.html')}
+        </fragment>
+    </div>`,
     components: {
         VTextbox, Fragment
     },
@@ -33,7 +41,8 @@ let component = {
             return textHeight;
         },
     },
-    mixins: [selectable]
+    mixins: [selectable, baseRect]
 }
 
-export default VRect.extend(component);
+// export default VRect.extend(component);
+export default component;

@@ -4,13 +4,21 @@ import { Graphics } from 'pixi.js';
 import { getPosX, getPosY, getColor, getTransparency, DefaultValues } from '../utils';
 import template from "./template.html";
 import eventManager from '../event-manager';
+import baseShape from '../mixins/base-shape';
 
 let component = {
     props: ["enabled", "lineWidth", "lineColor", "lineTransparency",
         "refLineX", "refLineY",
         "tooltipStyle", "viewportPosX", "viewportPosY"
     ],
-    template,
+    template: `<div>
+        <div v-if="debug" class="v-object" style="padding-left:12px;">{{compProps}}
+            ${require('./fragment.html')}
+        </div>
+        <fragment v-if="!debug" :props="compProps">
+            ${require('./fragment.html')}
+        </fragment>
+    </div>`,
     components: { VTextboxSticky: VTextboxFactory({ 'sticky': true }) },
     data: function () {
         return {
@@ -236,6 +244,8 @@ let component = {
             eventManager.on('tooltip-on', this.addTooltip);
             eventManager.on('tooltip-off', this.removeTooltip);
         }
-    }
+    },
+    mixins: [baseShape]
 }
-export default VShape.extend(component);
+// export default VShape.extend(component);
+export default component;

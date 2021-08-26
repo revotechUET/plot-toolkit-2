@@ -1,11 +1,11 @@
-//import {Fragment} from 'vue-fragment';
+import { Fragment } from 'vue-fragment';
 import { autoDetectRenderer, utils, Container } from 'pixi.js';
-import VObject from '../v-object';
 import template from './template.html';
 import style from './style.less';
 import layoutMixin from '../mixins/layout';
 import { debounce } from 'lodash';
 import eventManager from '../event-manager';
+import baseObject from '../mixins/base-object';
 function getPixiApp(force) {
     if (!this.pixiApp || force) {
         const renderer = autoDetectRenderer({
@@ -44,16 +44,16 @@ function rawRenderGraphic(obj) {
 let component = {
     props: ['transparent'],
     components: {
-        //Fragment
+        Fragment
     },
-    template,
+    // template,
     mounted: function () {
         this.$el.appendChild(this.getPixiApp().renderer.view)
     },
     computed: {
         componentType: function () {
             return "VScene";
-        }
+        },
     },
     methods: {
         getPixiApp, getPixiObj,
@@ -80,7 +80,8 @@ let component = {
             this.$el.appendChild(app.renderer.view);
         }
     },
-    mixins: [layoutMixin]
+    mixins: [layoutMixin, baseObject]
 };
 
-export default VObject.extend(component);
+// export default VObject.extend(component);
+export default component;

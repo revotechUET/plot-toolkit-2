@@ -1,11 +1,12 @@
-import VContainer from "../v-container";
+// import VContainer from "../v-container";
+import baseContainer from '../mixins/base-container';
 let component = {
     props: ['type', 'direction'],
     computed: {
-        componentType: function() {return "VLayout"}
+        componentType: function () { return "VLayout" }
     },
     methods: {
-        relayout: function(comp) {
+        relayout: function (comp) {
             console.log(comp);
             let idx = this.$children.filter(child => child.constrained).findIndex(child => comp === child);
             if (idx < 0) return;
@@ -13,11 +14,11 @@ let component = {
                 this.$children[i].makeScene();
             }
         },
-        getChildX: function(component) {
+        getChildX: function (component) {
             let x = 0;
             let idx = this.$children.filter(child => child.constrained).findIndex(child => component === child);
             if (idx < 0) return;
-            switch(this.direction) {
+            switch (this.direction) {
                 case "horizontal":
                     for (let i = 0; i < idx; i++) {
                         x += this.$children[i].width;
@@ -27,11 +28,11 @@ let component = {
                     return 0;
             }
         },
-        getChildY: function(component) {
+        getChildY: function (component) {
             let y = 0;
             let idx = this.$children.filter(child => child.constrained).findIndex(child => component === child);
             if (idx < 0) return;
-            switch(this.direction) {
+            switch (this.direction) {
                 case "vertical":
                     for (let i = 0; i < idx; i++) {
                         y += this.$children[i].height;
@@ -41,6 +42,8 @@ let component = {
                     return 0;
             }
         }
-    }
+    },
+    mixins: [baseContainer]
 }
-export default VContainer.extend(component);
+// export default VContainer.extend(component);
+export default component;

@@ -23,7 +23,6 @@ const app = new Vue({
                 :on-resize="resize"
                 :view-pos-x="40" :view-pos-y="0" 
                 :view-width="width1" :view-height="height1" size="10">
-            >
               <v-text-box
                 content="content"
                 :view-pos-x="10"
@@ -42,7 +41,7 @@ const app = new Vue({
     height1: 400
   },
   methods: {
-    resize: function({ width, height }) {
+    resize: function ({ width, height }) {
       console.log("Resize", width, height);
       this.width1 = width;
       this.height1 = height;

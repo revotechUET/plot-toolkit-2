@@ -34,6 +34,7 @@ import VContainer from '../v-container';
 import { scaleLinear, scaleLog } from 'd3-scale';
 import factoryFn from '../mixins';
 import selectable from '../mixins/selectable';
+import baseResizable from '../mixins/base-resizable';
 
 let component = {
     props: {
@@ -46,7 +47,25 @@ let component = {
         zoneId: Number,
         zonesetId: Number
     },
-    template,
+    template: `<fragment>
+        ${require('../v-resizable/fragment.html')}
+        <div v-if="debug" style="padding-left:12px;">{{compProps}}
+            <v-text-box v-if="noLabel == true"
+                :content="content" :content-style="contentStyle"
+                :view-pos-x="textPosX"
+                :view-pos-y="textPosY"
+                :rotation="labelRotation"
+            />
+        </div>
+        <fragment v-if="!debug">
+            <v-text-box
+                :content="content" :content-style="contentStyle"
+                :view-pos-x="textPosX"
+                :view-pos-y="textPosY"
+                :rotation="labelRotation"
+                />
+        </fragment>
+    </fragment>`,
     components: {
         Fragment, VTextBox, VResizable, VContainer
     },
@@ -198,10 +217,11 @@ let component = {
             pixiObj.endFill();
         }
     },
-    mixins: [selectable]
+    mixins: [selectable, baseResizable]
 }
 
-let VXone = VResizable.extend(component);
+// let VXone = VResizable.extend(component);
+let VXone = component;
 
 export function VXoneFactory(opts) {
     return factoryFn(VXone, opts);

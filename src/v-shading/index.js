@@ -14,6 +14,7 @@ import {
 import template from './template.html';
 import selectable from '../mixins/selectable';
 import { Texture, utils } from "pixi.js";
+import baseShape from '../mixins/base-shape';
 
 async function draw(obj) {
 	console.log("isShading draw");
@@ -398,7 +399,14 @@ let component = {
 		wrapMode: String,
 		leftWrapMode: String
 	},
-	template,
+	template: `<fragment>
+		<div v-if="debug" style="padding-left:12px;">{{compProps}}
+				${require('./fragment.html')}
+		</div>
+		<fragment v-if="!debug" :props="compProps">
+				${require('./fragment.html')}
+		</fragment>
+	</fragment>`,
 	data: function () {
 		return {
 			checkTriangle: [],
@@ -732,7 +740,8 @@ let component = {
 	components: {
 		VRect, VPath
 	},
-	mixins: [selectable]
+	mixins: [selectable, baseShape]
 };
 
-export default VShape.extend(component);
+// export default VShape.extend(component);
+export default component;

@@ -1,6 +1,6 @@
-import VPath from '../v-path';
 import selectable from '../mixins/selectable';
 import { getColor, DefaultValues } from "../utils";
+import basePath from '../mixins/base-path';
 
 let component = {
     props: {
@@ -13,9 +13,6 @@ let component = {
         componentType: function () {
             return "VCurve"
         }
-    },
-    components: {
-        VPath
     },
     watch: {
         isSelected: function (newValue, oldValue) {
@@ -30,7 +27,8 @@ let component = {
             }
         }
     },
-    mixins: [selectable]
+    mixins: [selectable, basePath]
 }
 
-export default VPath.extend(component);
+// export default VPath.extend(component);
+export default component;

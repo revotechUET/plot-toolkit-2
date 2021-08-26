@@ -1,16 +1,16 @@
 import VResizable from "../v-resizable";
-
+import baseResizable from '../mixins/base-resizable';
 import { Text, TextStyle } from "pixi.js";
 
 let component = {
 	props: ["content", "contentStyle", "marginTop", "marginLeft"],
-	data: function() {
+	data: function () {
 		return {
 			_content: null,
 		};
 	},
 	methods: {
-		draw: function(obj) {
+		draw: function (obj) {
 			obj.clear();
 			let lw = parseInt(this.lineWidth);
 			lw = isNaN(lw) ? 0 : lw;
@@ -41,30 +41,33 @@ let component = {
 				text.mask = this.getMaskObj();
 			}
 		},
-		getContent: function() {
+		getContent: function () {
 			if (!this._content) {
 				this._content = new Text(this.content);
 				this.getPixiObj().addChild(this._content);
 			}
 			return this._content;
 		},
-		getWidthOfText: function() {
+		getWidthOfText: function () {
 			return 200;
 		},
-		getHeightOfText: function() {
+		getHeightOfText: function () {
 			return 100;
 		},
 	},
 	computed: {
-		width: function() {
+		width: function () {
 			if (!isNaN(this.viewWidth)) return this.viewWidth;
 			return this.getWidthOfText();
 		},
-		height: function() {
+		height: function () {
 			if (!isNaN(this.viewHeight)) return this.viewHeight;
 			return this.getHeightOfText();
 		},
 	},
+	mixins: [baseResizable]
 };
 
-export default VResizable.extend(component);
+// export default VResizable.extend(component);
+
+export default component;

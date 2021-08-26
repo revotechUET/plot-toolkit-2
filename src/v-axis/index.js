@@ -1,8 +1,8 @@
-import VRect from '../v-rect';
 import { getColor, formatNumber, genLogTickValues, logMajorTest, DefaultValues, getTransparency } from '../utils';
 import { Container, Text } from 'pixi.js';
 import factoryFn from '../mixins';
 import { debounce } from 'lodash';
+import baseRect from '../mixins/base-rect';
 
 const TICK_SIZE = 5;
 const TICK_SIZE_MAJOR = 8;
@@ -354,10 +354,12 @@ let component = {
         makeSceneDebounce: function () {
             this._makeSceneDebounce();
         }
-    }
+    },
+    mixins: [baseRect],
 }
 
-let VAxis = VRect.extend(component);
+// let VAxis = VRect.extend(component);
+let VAxis = component;
 export default VAxis;
 
 export function VAxisFactory(opts) {

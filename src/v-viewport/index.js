@@ -5,11 +5,19 @@ import VRect from "../v-rect";
 import eventManager from '../event-manager';
 import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from '../utils';
 import factoryFn from '../mixins';
+import baseContainer from '../mixins/base-container';
 
 console.log('Load v-viewport');
 let component = {
     props: ["viewportWidth", "viewportHeight", "pan", "onPan", "onZoom", "viewportScroll"],
-    template,
+    template: `<div>
+        <div v-if="debug" class="v-object">{{compProps}}
+            ${require('./fragment.html')}
+        </div>
+        <fragment v-if="!debug" :props="compProps">
+            ${require('./fragment.html')}
+        </fragment>
+    </div>`,
     created: function () {
         eventManager.on('wheel', (evt) => {
             // if((evt.metaKey || evt.ctrlKey) && this.pixiObj.containsPoint({x:evt.offsetX, y:evt.offsetY})) {
@@ -165,10 +173,12 @@ let component = {
     },
     components: {
         VContainer, VRect
-    }
+    },
+    mixins: [baseContainer]
 }
 
-let VViewport = VContainer.extend(component);
+// let VViewport = VContainer.extend(component);
+let VViewport = component;
 
 export function VViewportFactory(opts) {
     return factoryFn(VViewport, opts);

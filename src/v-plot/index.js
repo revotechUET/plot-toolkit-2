@@ -9,6 +9,7 @@ import VCurve from '../v-curve';
 import VContainer from '../v-container';
 import VShape from '../v-shape';
 import VRect from '../v-rect';
+import baseShape from '../mixins/base-shape';
 
 const component = {
     name: 'v-plot',
@@ -52,7 +53,14 @@ const component = {
         Fragment, VTrack, VLayer, VXone,
         VShading, VCurve, VContainer, VShape, VRect
     },
-    template,
+    template: `<div>
+        <div v-if="debug" class="v-object">{{compProps}}
+            ${require('./fragment.html')}
+        </div>
+        <fragment v-if="!debug" props="compProps">
+            ${require('./fragment.html')}
+        </fragment>
+    </div>`,
     computed: {
         cName: function () {
             return (this.$store.state.plot || {}).name;
@@ -504,7 +512,9 @@ const component = {
         onTrackScroll: function (realOffsetY) {
             this.$store.commit('plotOffsetChange', realOffsetY)
         }
-    }
+    },
+    mixins: [baseShape]
 }
 
-export default VShape.extend(component);
+// export default VShape.extend(component);
+export default component;

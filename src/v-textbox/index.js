@@ -1,6 +1,7 @@
 import VRect from "../v-rect";
 import { Text, TextStyle } from "pixi.js";
 import factoryFn from "../mixins";
+import baseRect from '../mixins/base-rect';
 
 let component = {
     props: ["content", "contentStyle", "padding"],
@@ -50,8 +51,10 @@ let component = {
             return text.getLocalBounds().height;
         },
     },
+    mixins: [baseRect]
 };
-let VTextbox = VRect.extend(component);
+// let VTextbox = VRect.extend(component);
+let VTextbox = component;
 export default VTextbox;
 
 export function VTextboxFactory(opts) {

@@ -9,6 +9,7 @@ import {
     getPosY,
 } from "../utils";
 import { Texture } from "pixi.js";
+import baseShape from '../mixins/base-shape';
 
 async function draw(obj) {
     obj.clear();
@@ -46,6 +47,9 @@ async function draw(obj) {
 let component = {
     methods: {
         draw,
-    }
+    },
+    mixins: [baseShape],
 };
-export default VShape.extend(component);
+
+// export default VShape.extend(component);
+export default component;

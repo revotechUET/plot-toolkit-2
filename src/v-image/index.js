@@ -1,5 +1,6 @@
-import VShape from "../v-shape";
+// import VShape from "../v-shape";
 import { Loader, Texture, Sprite, SCALE_MODES } from "pixi.js";
+import baseShape from '../mixins/base-shape';
 
 function isDataURL(s) {
     return !!s.match(isDataURL.regex);
@@ -94,9 +95,11 @@ let component = {
         imageUrl: function () {
             this.handleImageUrlChange(this.imageUrl);
         }
-    }
+    },
+    mixins: [baseShape]
 };
-let VImage = VShape.extend(component);
+// let VImage = VShape.extend(component);
+let VImage = component;
 export function VImageFactory(opts) {
     return factoryFn(VImage, opts);
 }

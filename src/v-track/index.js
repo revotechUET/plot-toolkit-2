@@ -15,6 +15,7 @@ import template from './template.html';
 import VShape from '../v-shape';
 import { scaleLinear, } from 'd3';
 import eventManager from '../event-manager';
+import baseResizable from '../mixins/base-resizable'
 
 let component = {
     props: {
@@ -120,7 +121,16 @@ let component = {
             nChildren: 0
         }
     },
-    template,
+    template: `<div>
+        <div v-if="debug" class="v-object">{{compProps}}
+            ${require('../v-resizable/fragment.html')}
+            ${require('./fragment.html')}
+        </div>
+        <fragment v-if="!debug" props="compProps">
+            ${require('../v-resizable/fragment.html')}
+            ${require('./fragment.html')}
+        </fragment>
+    </div>`,
     components: {
         VPath, VRect, VResizable, VViewport, VHeaderCurve,
         VContainer, Fragment, VTextbox, VShape, VHeaderShading,
@@ -527,6 +537,8 @@ let component = {
             }
         },
     },
+    mixins: [baseResizable]
 }
 
-export default VResizable.extend(component);
+// export default VResizable.extend(component);
+export default component;

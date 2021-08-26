@@ -8,12 +8,25 @@ import onDestroyed from './on-destroyed';
 const features = {
     sticky, layout, extMouseListener, selectable, onMounted, onDestroyed
 }
+// export default function factoryFn(baseComp, opts) {
+//     let outComponent = baseComp;
+//     for (let key in features) {
+//         if (opts[key]) {
+//             outComponent = outComponent.extend(features[key]);
+//         }
+//     }
+//     return outComponent;
+// }
+
 export default function factoryFn(baseComp, opts) {
-    let outComponent = baseComp;
+    let newMixins = []
     for (let key in features) {
         if (opts[key]) {
-            outComponent = outComponent.extend(features[key]);
+            newMixins.push(features[key])
         }
     }
-    return outComponent;
+    return {
+        ...baseComp,
+        mixins: [...baseComp.mixins, ...newMixins]
+    }
 }
