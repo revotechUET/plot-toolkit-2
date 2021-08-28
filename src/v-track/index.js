@@ -90,7 +90,9 @@ let component = {
         isSelected: {
             type: Boolean,
             default: false
-        }
+        },
+        onPlotZoom: Function,
+        trackViewportBodyHeight: Number
     },
     computed: {
         componentType: function () {
@@ -108,7 +110,6 @@ let component = {
     data: function () {
         return {
             kursor: "default",
-            scaleTrackHeight: 0,
             trackHeaderChildrenHeight: 0,
             headerContentStyle: {
                 fontFamily: 'Arial',
@@ -141,6 +142,9 @@ let component = {
         VAxisExtMouse: VAxisFactory({ extMouseListener: true })
     },
     methods: {
+        onViewportZoom: function (deltaY, offsetX, offsetY, evt) {
+            this.onPlotZoom && this.onPlotZoom(deltaY, offsetX, offsetY, this.name)
+        },
         registerEvents: function () {
             eventManager.on("viewport-scroll", (val, trackId) => {
                 if (trackId === this.trackId) {
@@ -153,7 +157,7 @@ let component = {
         },
         onViewportScroll: function (offsetY) {
             let realOffsetYScroll = scaleLinear()
-                .domain([this.realMinY, this.realMaxY]).range([0, this.scaleTrackHeight])
+                .domain([this.realMinY, this.realMaxY]).range([0, this.trackViewportBodyHeight])
                 .invert(-offsetY) - this.realMinY;
             this.$emit("trackScroll", realOffsetYScroll);
         },
@@ -394,7 +398,7 @@ let component = {
             })
         },
         getLinearLine: function (point1, point2, num = 0) {
-            let res = {};
+            let res = { };
             let a = (point1["y"] - point2['y']) / (point1["x"] - point2["x"]);
             let b = point1["y"] - a * point1["x"];
             num ? res[`a${num}`] = a : res['a'] = a;
@@ -482,10 +486,6 @@ let component = {
             throw new Error(`Error in VTrack with range: ${this.trackRealMinY} and ${this.trackRealMaxY}`);
         }
         console.log("Track draw");
-        //calculate offset for viewport
-        const y = (this.viewHeight - this.trackHeaderHeight) * (this.realMaxY - this.realMinY)
-            / (this.trackRealMaxY - this.trackRealMinY);
-        this.scaleTrackHeight = y;
 
         if (this.trackType !== 'Depth Track') {
             let children = this.$refs.trackChildren.$children;
@@ -499,7 +499,7 @@ let component = {
         } else {
             this.trackHeaderChildrenHeight += this.textHeaderHeight(this.unit || 'M') + this.textHeaderHeight(this.cRatioScreen) + 20;
         }
-        let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, y]);
+        let transformFn = scaleLinear().domain([this.realMinY, this.realMaxY]).range([0, this.trackViewportBodyHeight]);
         this.$refs.viewportBody.offsetY -= transformFn(this.trackRealMinY);
         if (this.$refs.viewportBody) {
             this.$watch(

@@ -10,6 +10,7 @@ import VContainer from '../v-container';
 import VShape from '../v-shape';
 import VRect from '../v-rect';
 import baseShape from '../mixins/base-shape';
+import { scaleLinear } from 'd3-scale';
 
 const component = {
     name: 'v-plot',
@@ -63,7 +64,7 @@ const component = {
     </div>`,
     computed: {
         cName: function () {
-            return (this.$store.state.plot || {}).name;
+            return (this.$store.state.plot || { }).name;
         },
         // sortedTracks: function () {
         //     let sTracks = [];
@@ -92,7 +93,9 @@ const component = {
             return "VPlot";
         },
         ...mapGetters({
-            sortedTracks: 'sortedTracks'
+            sortedTracks: 'sortedTracks',
+            currentPlotBottom: 'currentPlotBottom',
+            currentPlotTop: 'currentPlotTop'
         })
     },
     mounted: async function () {
@@ -106,7 +109,27 @@ const component = {
             / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop);
         this.trackBodyScale = y;
     },
+    watch: {
+        currentPlotBottom: function () {
+            this.trackBodyScale = (this.viewHeight - this.trackHeaderHeight) * (this.$store.state.plotBottom - this.$store.state.plotTop)
+                / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop)
+        },
+        currentPlotTop: function () {
+            this.trackBodyScale = (this.viewHeight - this.trackHeaderHeight) * (this.$store.state.plotBottom - this.$store.state.plotTop)
+                / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop)
+        }
+    },
     methods: {
+        onPlotZoom: function (deltaY, offsetX, offsetY, trackName) {
+            let transformFn = scaleLinear().domain([0, this.viewHeight])
+                .range([0, this.$store.state.plotBottom - this.$store.state.plotTop])
+            let offset = transformFn(Math.abs(deltaY))
+            offset = deltaY < 0 ? -offset : offset;
+            if ((this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop < 20 && deltaY < 0)) {
+                return;
+            }
+            this.$store.commit("zoomPlot", offset)
+        },
         convertWidth: function (widthUnit, width) {
             switch (widthUnit) {
                 case "cm":
@@ -510,7 +533,12 @@ const component = {
             }
         },
         onTrackScroll: function (realOffsetY) {
-            this.$store.commit('plotOffsetChange', realOffsetY)
+            if (!realOffsetY ||
+                this.$store.state.currentPlotTop + realOffsetY < this.$store.state.plotTop ||
+                this.$store.state.currentPlotBottom + realOffsetY > this.$store.state.plotBottom) {
+                return;
+            }
+            this.$store.commit('plotViewChange', realOffsetY)
         }
     },
     mixins: [baseShape]

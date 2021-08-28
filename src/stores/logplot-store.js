@@ -7,8 +7,8 @@ export default {
         zone_tracks: [],
         tracks: [],
         depth_axes: [],
-        curves: {},
-        curveSteps: {},
+        curves: { },
+        curveSteps: { },
         currentPlotTop: 0,
         currentPlotBottom: 0,
         plotTop: 0,
@@ -23,6 +23,12 @@ export default {
             sTracks = [...state.depth_axes, ...state.zone_tracks, ...state.tracks];
             sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
             return sTracks;
+        },
+        currentPlotBottom: state => {
+            return state.currentPlotBottom;
+        },
+        currentPlotTop: state => {
+            return state.currentPlotTop;
         }
     },
     mutations: {
@@ -136,9 +142,24 @@ export default {
             }))
             state.zone_tracks[zoneTrackIdx]['zone_set']['zones'] = newZones
         },
-        plotOffsetChange: function (state, realOffsetY) {
+        plotViewChange: function (state, realOffsetY) {
             state.currentPlotTop = state.currentPlotTop + realOffsetY;
             state.currentPlotBottom = state.currentPlotBottom + realOffsetY;
+        },
+        zoomPlot: function (state, offset) {
+            if (state.currentPlotBottom === state.plotBottom && offset > 0) {
+                if (state.currentPlotTop - offset > state.plotTop) {
+                    state.currentPlotTop -= offset
+                } else {
+                    state.currentPlotTop = state.plotTop
+                }
+                return;
+            }
+            if (state.currentPlotBottom + offset > state.plotBottom) {
+                state.currentPlotBottom = state.plotBottom
+                return;
+            }
+            state.currentPlotBottom += offset;
         }
     },
     actions: {

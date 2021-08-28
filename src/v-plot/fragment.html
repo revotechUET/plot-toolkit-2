@@ -39,6 +39,7 @@
                 cursor="crosshair" :enabled="true" :is-selected="selectedIdTrack === track.idDepthAxis"
                 @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
                 @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
+                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale"
                 />
             <v-track
                 v-if="!isNaN(track.idZoneTrack)"
@@ -58,7 +59,8 @@
                 :real-min-y="$store.state.plotTop" :real-max-y="$store.state.plotBottom"
                 :enabled="true" :is-selected="selectedIdTrack === track.idZoneTrack"
                 @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
-                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd">
+                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
+                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale">
                 <v-xone
                     v-for="(zone, i) in sortedTracks[idx]['zone_set']['zones']"
                     :key="'zone' + i + track.idZoneTrack"
@@ -95,7 +97,8 @@
                 :show-depth-grid="track.showDepthGrid" :show-value-grid="track.showValueGrid"
                 :enabled="true" :is-selected="selectedIdTrack === track.idTrack"
                 @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
-                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd">
+                @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
+                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale">
                 <fragment
                     v-for="(shading, idx) in track.shadings"
                     :key="shading.name + shading.idControlCurve + shading.idShading">
