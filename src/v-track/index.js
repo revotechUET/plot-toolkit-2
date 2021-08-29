@@ -124,12 +124,12 @@ let component = {
     },
     template: `<div>
         <div v-if="debug" class="v-object">{{compProps}}
-            ${require('../v-resizable/fragment.html')}
             ${require('./fragment.html')}
+            ${require('../v-resizable/fragment.html')}
         </div>
         <fragment v-if="!debug" props="compProps">
-            ${require('../v-resizable/fragment.html')}
             ${require('./fragment.html')}
+            ${require('../v-resizable/fragment.html')}
         </fragment>
     </div>`,
     components: {
@@ -407,6 +407,10 @@ let component = {
         },
 
         genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
+            if (!comp.pixiObj) {
+                console.log('get v-axis pixiObj')
+                comp.getPixiObj()
+            }
             let localPos = comp.pixiObj.toLocal(globalPos);
             const width = comp.viewWidth;
             let yCoord = comp.transformY.invert(localPos.y);

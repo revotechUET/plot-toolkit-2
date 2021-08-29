@@ -125,7 +125,8 @@ const component = {
                 .range([0, this.$store.state.plotBottom - this.$store.state.plotTop])
             let offset = transformFn(Math.abs(deltaY))
             offset = deltaY < 0 ? -offset : offset;
-            if ((this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop < 20 && deltaY < 0)) {
+            if ((this.$store.state.currentPlotBottom + deltaY - this.$store.state.currentPlotTop < 10
+                && deltaY < 0)) {
                 return;
             }
             this.$store.commit("zoomPlot", offset)
@@ -541,7 +542,10 @@ const component = {
             this.$store.commit('plotViewChange', realOffsetY)
         }
     },
-    mixins: [baseShape]
+    mixins: [baseShape],
+    destroyed: function () {
+        this.$store.commit('removeState')
+    }
 }
 
 // export default VShape.extend(component);

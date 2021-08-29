@@ -130,11 +130,6 @@ export default {
         zoneHeightChange(state, { newStartDepth, newEndDepth, zonesetId, zoneId }) {
             let zoneTrackIdx = state.zone_tracks.findIndex(track => track.idZoneSet === zonesetId);
             let zoneIdx = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].findIndex(zone => zone.idZone === zoneId);
-            // state.zone_tracks[zoneTrackIdx]['zone_set']['zones'][zoneIdx] = {
-            //     ...state.zone_tracks[zoneTrackIdx]['zone_set']['zones'][zoneIdx],
-            //     startDepth: newStartDepth,
-            //     endDepth: newEndDepth
-            // }
             let newZones = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].map((zone, idx) => ({
                 ...zone,
                 startDepth: idx === zoneIdx ? newStartDepth : zone.startDepth,
@@ -145,6 +140,20 @@ export default {
         plotViewChange: function (state, realOffsetY) {
             state.currentPlotTop = state.currentPlotTop + realOffsetY;
             state.currentPlotBottom = state.currentPlotBottom + realOffsetY;
+        },
+        removeState: function (state) {
+            state.plot = null;
+            state.zone_tracks = [];
+            state.tracks = [];
+            state.depth_axes = [];
+            state.curves = { };
+            state.curveSteps = { };
+            state.currentPlotTop = 0;
+            state.currentPlotBottom = 0;
+            state.plotTop = 0;
+            state.plotBottom = 0;
+            state.patterns = null;
+            state.palettes = null;
         },
         zoomPlot: function (state, offset) {
             if (state.currentPlotBottom === state.plotBottom && offset > 0) {
