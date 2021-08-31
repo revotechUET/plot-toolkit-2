@@ -66,15 +66,10 @@ const component = {
         cName: function () {
             return (this.$store.state.plot || { }).name;
         },
-        // sortedTracks: function () {
-        //     let sTracks = [];
-        //     if (!this.$store.state.plot) {
-        //         return [];
-        //     }
-        //     sTracks = [...this.$store.state.depth_axes, ...this.$store.state.zone_tracks, ...this.$store.state.tracks];
-        //     sTracks = sTracks.sort((track1, track2) => (track1.orderNum || "").localeCompare(track2.orderNum || ""));
-        //     return sTracks;
-        // },
+        //use for handling when signal with multiple plots
+        cPlotSignal: function () {
+            return `${this.idPlot}-${this.idProject}-${this.listCurve ? this.listCurve.toString() : []}`
+        },
         trackPosList: function () {
             let res = [0];
             for (let i = 0; i < this.sortedTracks.length - 1; i++) {
@@ -129,6 +124,7 @@ const component = {
                 && deltaY < 0)) {
                 return;
             }
+            console.log(this.cPlotSignal)
             this.$store.commit("zoomPlot", offset)
         },
         convertWidth: function (widthUnit, width) {

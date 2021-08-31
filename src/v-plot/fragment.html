@@ -40,6 +40,7 @@
                 @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
                 @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
                 :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale"
+                :plot-signal="cPlotSignal"
                 />
             <v-track
                 v-if="!isNaN(track.idZoneTrack)"
@@ -60,7 +61,8 @@
                 :enabled="true" :is-selected="selectedIdTrack === track.idZoneTrack"
                 @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
                 @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
-                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale">
+                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale"
+                :plot-signal="cPlotSignal">
                 <v-xone
                     v-for="(zone, i) in sortedTracks[idx]['zone_set']['zones']"
                     :key="'zone' + i + track.idZoneTrack"
@@ -98,7 +100,8 @@
                 :enabled="true" :is-selected="selectedIdTrack === track.idTrack"
                 @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll"
                 @trackMouseDown="onTrackMouseDown" @trackTitleDragEnd="onTrackTitleDragEnd"
-                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale">
+                :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale"
+                :plot-signal="cPlotSignal">
                 <fragment
                     v-for="(shading, idx) in track.shadings"
                     :key="shading.name + shading.idControlCurve + shading.idShading">

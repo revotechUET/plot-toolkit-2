@@ -92,7 +92,8 @@ let component = {
             default: false
         },
         onPlotZoom: Function,
-        trackViewportBodyHeight: Number
+        trackViewportBodyHeight: Number,
+        plotSignal: String //handle when signal with multiple plots
     },
     computed: {
         componentType: function () {
@@ -406,50 +407,53 @@ let component = {
             return res;
         },
 
-        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
-            if (!comp.pixiObj) {
-                console.log('get v-axis pixiObj')
-                comp.getPixiObj()
-            }
-            let localPos = comp.pixiObj.toLocal(globalPos);
-            const width = comp.viewWidth;
-            let yCoord = comp.transformY.invert(localPos.y);
-            let depthInfo = ` MD(Ref): ${yCoord.toFixed(2)} (M) \n MD: ${yCoord.toFixed(2)} (M)`;
-            let tooltipPosY = this.trackHeaderHeight;
-            if (this.trackType === 'Depth Track' || this.trackType === 'Zone Track' || !this.$refs.trackChildren) {
-                comp.signal('tooltip-on', comp, {
-                    content: depthInfo,
-                    viewWidth: width,
-                    viewHeight: this.textHeight(depthInfo),
-                    fillColor: 0xF0F000,
-                    fillTransparency: 0.7,
-                    tooltipPosY
-                });
-            } else {
-                let children = this.$refs.trackChildren.$children.filter(child => child.componentType === "VCurve");
-                let curveInfoList = [];
-                for (let i = 0; i < children.length; i++) {
-                    children[i].realPath.some(point => {
-                        if (point.y > yCoord) {
-                            let content = ` ${children[i].name}: ${!point.x ? point.x : point.x.toFixed(2)} (${children[i].unit})`
-                            curveInfoList.push({
-                                content,
-                                color: children[i].symbolColor,
-                                viewHeight: this.textHeight(content),
-                            })
-                            return true;
-                        }
-                    })
+        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines, plotSignal) {
+            //handle when signal with multiple plots
+            if (plotSignal && this.plotSignal && this.plotSignal === plotSignal) {
+                if (!comp.pixiObj) {
+                    console.log('get v-axis pixiObj')
+                    comp.getPixiObj()
                 }
-                comp.signal('tooltip-on', comp, {
-                    curveInfoList,
-                    content: depthInfo,
-                    viewWidth: width,
-                    viewHeight: this.textHeight(depthInfo),
-                    fillColor: 0xF0F000,
-                    fillTransparency: 0.7,
-                    tooltipPosY
-                });
+                let localPos = comp.pixiObj.toLocal(globalPos);
+                const width = comp.viewWidth;
+                let yCoord = comp.transformY.invert(localPos.y);
+                let depthInfo = ` MD(Ref): ${yCoord.toFixed(2)} (M) \n MD: ${yCoord.toFixed(2)} (M)`;
+                let tooltipPosY = this.trackHeaderHeight;
+                if (this.trackType === 'Depth Track' || this.trackType === 'Zone Track' || !this.$refs.trackChildren) {
+                    comp.signal('tooltip-on', comp, {
+                        content: depthInfo,
+                        viewWidth: width,
+                        viewHeight: this.textHeight(depthInfo),
+                        fillColor: 0xF0F000,
+                        fillTransparency: 0.7,
+                        tooltipPosY
+                    });
+                } else {
+                    let children = this.$refs.trackChildren.$children.filter(child => child.componentType === "VCurve");
+                    let curveInfoList = [];
+                    for (let i = 0; i < children.length; i++) {
+                        children[i].realPath.some(point => {
+                            if (point.y > yCoord) {
+                                let content = ` ${children[i].name}: ${!point.x ? point.x : point.x.toFixed(2)} (${children[i].unit})`
+                                curveInfoList.push({
+                                    content,
+                                    color: children[i].symbolColor,
+                                    viewHeight: this.textHeight(content),
+                                })
+                                return true;
+                            }
+                        })
+                    }
+                    comp.signal('tooltip-on', comp, {
+                        curveInfoList,
+                        content: depthInfo,
+                        viewWidth: width,
+                        viewHeight: this.textHeight(depthInfo),
+                        fillColor: 0xF0F000,
+                        fillTransparency: 0.7,
+                        tooltipPosY
+                    });
+                }
             }
         },
         onTitleDragging: function (target, localPos, globalPos, evts) {
