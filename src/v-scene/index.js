@@ -4,8 +4,9 @@ import template from './template.html';
 import style from './style.less';
 import layoutMixin from '../mixins/layout';
 import { debounce } from 'lodash';
-import eventManager from '../event-manager';
 import baseObject from '../mixins/base-object';
+import { EventEmitter } from '@pixi/utils';
+
 function getPixiApp(force) {
     if (!this.pixiApp || force) {
         const renderer = autoDetectRenderer({
@@ -15,7 +16,7 @@ function getPixiApp(force) {
             antialias: true
         });
         renderer.view.onwheel = (evt) => {
-            eventManager.emit('wheel', evt);
+            this.getEventManager().emit('wheel', evt);
         }
         const stage = new Container();
         stage.sortableChildren = true;
@@ -28,7 +29,7 @@ function getPixiApp(force) {
     return this.pixiApp;
 }
 function getPixiObj() {
-    return (this.getPixiApp() || {}).stage;
+    return (this.getPixiApp() || { }).stage;
 }
 function rawRenderGraphic(obj) {
     let app = this.getPixiApp();
@@ -55,8 +56,15 @@ let component = {
             return "VScene";
         },
     },
+    eventManager: null,
     methods: {
         getPixiApp, getPixiObj,
+        getEventManager: function () {
+            if (!this.eventManager) {
+                this.eventManager = new EventEmitter()
+            }
+            return this.eventManager;
+        },
         getRenderer: function () {
             return this.getPixiApp().renderer;
         },

@@ -15,7 +15,7 @@ async function makeScene() {
     this.coordinate.x = this.$parent.getChildX(this);
     this.coordinate.y = this.$parent.getChildY(this);
   }
-  else this.coordinate = {}
+  else this.coordinate = { }
 
   maskObj && await this.drawMask(maskObj);
   pixiObj && await this.draw(pixiObj);
@@ -95,7 +95,7 @@ export default {
       kursor: null,
       pixiObj: null,
       maskObj: null,
-      coordinate: {},
+      coordinate: { },
       intFillTransparency: 1
     };
   },
@@ -126,7 +126,7 @@ export default {
     componentTypePrefix: function () { return "" },
     componentType: function () { return this.componentTypePrefix + " VObject" },
     compProps: function () {
-      let hash = {};
+      let hash = { };
       for (let key of this.watchedKeys) {
         hash[key] = this[key];
       }
@@ -216,6 +216,9 @@ export default {
     },
     getParent: function () {
       return this.$parent;
+    },
+    getEventManager: function () {
+      return this.$parent.getEventManager();
     },
     getRenderer: function () {
       if (!this._renderer) {

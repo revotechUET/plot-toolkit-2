@@ -67,9 +67,9 @@ const component = {
             return (this.$store.state.plot || { }).name;
         },
         //use for handling when signal with multiple plots
-        cPlotSignal: function () {
-            return `${this.idPlot}-${this.idProject}-${this.listCurve ? this.listCurve.toString() : []}`
-        },
+        // cPlotSignal: function () {
+        //     return `${this.idPlot}-${this.idProject}-${this.listCurve ? this.listCurve.toString() : []}`
+        // },
         trackPosList: function () {
             let res = [0];
             for (let i = 0; i < this.sortedTracks.length - 1; i++) {
@@ -115,7 +115,7 @@ const component = {
         }
     },
     methods: {
-        onPlotZoom: function (deltaY, offsetX, offsetY, trackName) {
+        onPlotZoom: function (deltaY) {
             let transformFn = scaleLinear().domain([0, this.viewHeight])
                 .range([0, this.$store.state.plotBottom - this.$store.state.plotTop])
             let offset = transformFn(Math.abs(deltaY))
@@ -124,7 +124,6 @@ const component = {
                 && deltaY < 0)) {
                 return;
             }
-            console.log(this.cPlotSignal)
             this.$store.commit("zoomPlot", offset)
         },
         convertWidth: function (widthUnit, width) {

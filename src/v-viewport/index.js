@@ -2,12 +2,10 @@ import template from "./template.html";
 import { Graphics, Point } from 'pixi.js';
 import VContainer from "../v-container";
 import VRect from "../v-rect";
-import eventManager from '../event-manager';
 import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from '../utils';
 import factoryFn from '../mixins';
 import baseContainer from '../mixins/base-container';
 
-console.log('Load v-viewport');
 let component = {
     props: ["viewportWidth", "viewportHeight", "pan", "onPan", "onZoom", "viewportScroll"],
     template: `<div>
@@ -19,11 +17,12 @@ let component = {
         </fragment>
     </div>`,
     created: function () {
-        eventManager.on('wheel', (evt) => {
+        this.getEventManager().on('wheel', (evt) => {
             // if((evt.metaKey || evt.ctrlKey) && this.pixiObj.containsPoint({x:evt.offsetX, y:evt.offsetY})) {
             if (this.pixiObj.containsPoint({ x: evt.offsetX, y: evt.offsetY })) {
                 evt.stopPropagation();
                 evt.preventDefault();
+                // console.log(this.$parent.plotSignal)
                 if (evt.metaKey || evt.ctrlKey) {
                     this.onZoom && this.onZoom(evt.deltaY, evt.offsetX, evt.offsetY, evt);
                 }

@@ -3,7 +3,6 @@ import { VTextboxFactory } from '../v-textbox';
 import { Graphics } from 'pixi.js';
 import { getPosX, getPosY, getColor, getTransparency, DefaultValues } from '../utils';
 import template from "./template.html";
-import eventManager from '../event-manager';
 import baseShape from '../mixins/base-shape';
 
 let component = {
@@ -172,18 +171,18 @@ let component = {
             this.mouseGlobalX = globalPos.x;
             this.mouseGlobalY = globalPos.y;
             //handle when signal with multiple plots
-            if (this.getParent().componentType === 'VPlot') {
-                let plotSignal = this.getParent().cPlotSignal
-                eventManager.emit('ext-mousepos', target, globalPos, localPos, {
-                    refLineX: this.refLineX,
-                    refLineY: this.refLineY
-                }, plotSignal);
-            } else {
-                eventManager.emit('ext-mousepos', target, globalPos, localPos, {
-                    refLineX: this.refLineX,
-                    refLineY: this.refLineY
-                });
-            }
+            // if (this.getParent().componentType === 'VPlot') {
+            //     let plotSignal = this.getParent().cPlotSignal
+            //     this.getEventManager().emit('ext-mousepos', target, globalPos, localPos, {
+            //         refLineX: this.refLineX,
+            //         refLineY: this.refLineY
+            //     }, plotSignal);
+            // } else {
+            this.getEventManager().emit('ext-mousepos', target, globalPos, localPos, {
+                refLineX: this.refLineX,
+                refLineY: this.refLineY
+            });
+            // }
             requestAnimationFrame(() => {
                 this.drawRefLines();
                 this.rawRenderGraphic();
@@ -250,8 +249,8 @@ let component = {
                 .on("mousemove", handleMouseMove)
                 .on('mouseup', handleMouseUp);
 
-            eventManager.on('tooltip-on', this.addTooltip);
-            eventManager.on('tooltip-off', this.removeTooltip);
+            this.getEventManager().on('tooltip-on', this.addTooltip);
+            this.getEventManager().on('tooltip-off', this.removeTooltip);
         }
     },
     mixins: [baseShape]
