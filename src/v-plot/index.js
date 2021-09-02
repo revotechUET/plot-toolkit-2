@@ -94,7 +94,6 @@ const component = {
         })
     },
     mounted: async function () {
-        console.log("V Plot Created");
         await this.$store.dispatch("getData", {
             idProject: this.idProject,
             idPlot: this.idPlot,
@@ -459,11 +458,11 @@ const component = {
                 if (globalPosX - this.trackPosList[idx] < 25) {
                     this.validateDragging = true;
                     this.draggingPosX = this.trackPosList[idx];
-                    console.log("Validate Drag")
+                    // console.log("Validate Drag")
                 } else if (rangeCheck - globalPosX < 25) {
                     this.validateDragging = true;
                     this.draggingPosX = rangeCheck - 25;
-                    console.log("Validate Drag");
+                    // console.log("Validate Drag");
                 } else {
                     this.validateDragging = false;
                 }

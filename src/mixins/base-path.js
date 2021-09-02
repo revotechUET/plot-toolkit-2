@@ -3,7 +3,6 @@ import baseShape from './base-shape';
 
 function draw(obj) {
   obj.clear();
-  console.log('VPath draw');
   let lw = this.lineWidth || 1;
   let lt = this.lineTransparency || 1.0;
   let symbolColor = this.symbolColor;

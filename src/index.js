@@ -16,7 +16,7 @@ export { default as VViewport } from './v-viewport';
 export { default as VZone } from './v-zone';
 export { default as VTrack } from './v-track';
 export { default as VPlot } from './v-plot';
-export { default as vuxStoreOptions } from './stores/logplot-store';
+export { default as vuexStoreOptions } from './stores/logplot-store';
 /*
 import {default as VScene} from './v-scene';
 import {default as VAxis} from './v-axis';
