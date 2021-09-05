@@ -18,8 +18,8 @@ function drawOneXTick(obj, thisComp, container, i, majorTickIdx) {
         let viewHeight = thisComp.viewHeight;
         if (thisComp.tickLabelPosition == "sticky") {
             let viewport = thisComp.getContainingViewport();
-            offsetY = (viewport || { }).offsetY || 0;
-            viewHeight = (viewport || { }).viewportHeight || viewHeight;
+            offsetY = (viewport || {}).offsetY || 0;
+            viewHeight = (viewport || {}).viewportHeight || viewHeight;
         }
 
         obj.moveTo(x, 0 - offsetY);
@@ -40,7 +40,7 @@ function drawOneXTick(obj, thisComp, container, i, majorTickIdx) {
             break;
         case "sticky":
             let viewport = thisComp.getContainingViewport();
-            let offsetY = (viewport || { }).offsetY || 0;
+            let offsetY = (viewport || {}).offsetY || 0;
             const yTickPos = -(thisComp.viewHeight / 2) + TICK_SIZE + 5 - offsetY;
             container.drawLabel(majorTickIdx, x, yTickPos, thisComp.tickValues[i], { top: 0.5, left: 0, xTranslate: 0.5, yTranslate: 0.5 });
             break;
@@ -63,8 +63,8 @@ function drawOneYTick(obj, thisComp, container, i, majorTickIdx) {
         let viewWidth = thisComp.viewWidth;
         if (thisComp.tickLabelPosition == "sticky") {
             let viewport = thisComp.getContainingViewport();
-            offsetX = (viewport || { }).offsetX || 0;
-            viewWidth = (viewport || { }).viewportWidth || viewWidth;
+            offsetX = (viewport || {}).offsetX || 0;
+            viewWidth = (viewport || {}).viewportWidth || viewWidth;
         }
         obj.moveTo(0 - offsetX, y);
         obj.lineTo(tickSize - offsetX, y);
@@ -84,7 +84,7 @@ function drawOneYTick(obj, thisComp, container, i, majorTickIdx) {
             break;
         case "sticky":
             let viewport = thisComp.getContainingViewport();
-            let offsetX = (viewport || { }).offsetX || 0;
+            let offsetX = (viewport || {}).offsetX || 0;
             const xTickPos = -(thisComp.viewWidth / 2) + TICK_SIZE + 5 - offsetX;
             container.drawLabel(majorTickIdx, xTickPos, y, thisComp.tickValues[i], { top: 0, left: 0.5, xTranslate: 0, yTranslate: 0.5 });
             break;
@@ -161,7 +161,7 @@ let component = {
                     break;
             }
 
-            let hash = { };
+            let hash = {};
             for (let key of watchedProps) {
                 hash[key] = this[key];
             }
@@ -178,7 +178,7 @@ let component = {
                     break;
             }
 
-            let hash = { };
+            let hash = {};
             for (let key of watchedProps) {
                 hash[key] = this[key];
             }
@@ -195,7 +195,7 @@ let component = {
                     break;
             }
 
-            let hash = { };
+            let hash = {};
             for (let key of watchedProps) {
                 hash[key] = this[key];
             }
@@ -203,7 +203,7 @@ let component = {
         },
 
         containingViewportOffset: function () {
-            let viewport = this.getContainingViewport() || { };
+            let viewport = this.getContainingViewport() || {};
             if (this.axis === "x") {
                 return viewport.offsetY;
             }
@@ -296,7 +296,7 @@ let component = {
                     break;
             }
             if (!this.majorTickLength) {
-                let N = this.majorTicks * this.minorTicks;
+                let N = Math.abs(this.majorTicks) * this.minorTicks;
                 let step = (maxVal - minVal) / N;
                 if (isNaN(maxVal) || isNaN(minVal) || isNaN(step)) return [];
                 let tickIndices = [...Array(N + 1).keys()];
