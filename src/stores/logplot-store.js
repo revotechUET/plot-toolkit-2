@@ -7,8 +7,8 @@ export default {
         zone_tracks: [],
         tracks: [],
         depth_axes: [],
-        curves: { },
-        curveSteps: { },
+        curves: {},
+        curveSteps: {},
         currentPlotTop: 0,
         currentPlotBottom: 0,
         plotTop: 0,
@@ -33,7 +33,6 @@ export default {
     },
     mutations: {
         getPlotData(state, plot) {
-            console.log('Update plot');
             state.plot = plot;
         },
         setZoneTracks(state, zoneTrack) {
@@ -46,7 +45,6 @@ export default {
             state.depth_axes.push(depthAxis)
         },
         setCurves(state, { idCurve, curveData }) {
-            console.log(idCurve, curveData)
             state.curves[idCurve] = curveData
             // state.curves.push(curves)
         },
@@ -146,8 +144,8 @@ export default {
             state.zone_tracks = [];
             state.tracks = [];
             state.depth_axes = [];
-            state.curves = { };
-            state.curveSteps = { };
+            state.curves = {};
+            state.curveSteps = {};
             state.currentPlotTop = 0;
             state.currentPlotBottom = 0;
             state.plotTop = 0;

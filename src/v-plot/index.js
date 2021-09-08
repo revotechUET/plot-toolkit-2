@@ -39,7 +39,8 @@ const component = {
                 this.selectedIdTrack = null;
             }
         },
-        listCurve: Array
+        listCurve: Array,
+        onMounted: Function
     },
     data: function () {
         return {
@@ -64,7 +65,7 @@ const component = {
     </div>`,
     computed: {
         cName: function () {
-            return (this.$store.state.plot || { }).name;
+            return (this.$store.state.plot || {}).name;
         },
         //use for handling when signal with multiple plots
         // cPlotSignal: function () {
@@ -102,6 +103,7 @@ const component = {
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.$store.state.plotBottom - this.$store.state.plotTop)
             / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop);
         this.trackBodyScale = y;
+        this.onMounted && this.onMounted(this.listCurve)
     },
     watch: {
         currentPlotBottom: function () {
