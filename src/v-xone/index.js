@@ -200,7 +200,6 @@ let component = {
         '$parent.viewHeight': function () {
             this.topPosY = this.$parent.transformY(this.realMinY);
             this.bottomPosY = this.topPosY + this.height;
-            console.log(this.$parent.viewHeight);
         },
         isSelected: function (newValue, oldValue) {
             let pixiObj = this.getPixiObj();
@@ -217,7 +216,12 @@ let component = {
             pixiObj.endFill();
         }
     },
-    mixins: [selectable, baseResizable]
+    mixins: [selectable, baseResizable],
+    mounted: function () {
+        this.getEventManager().on('plot-zoom', () => {
+            this.makeScene()
+        })
+    }
 }
 
 // let VXone = VResizable.extend(component);

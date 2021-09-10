@@ -40,7 +40,7 @@ const component = {
             }
         },
         listCurve: Array,
-        onMounted: Function
+        onPlotReady: Function
     },
     data: function () {
         return {
@@ -67,10 +67,6 @@ const component = {
         cName: function () {
             return (this.$store.state.plot || {}).name;
         },
-        //use for handling when signal with multiple plots
-        // cPlotSignal: function () {
-        //     return `${this.idPlot}-${this.idProject}-${this.listCurve ? this.listCurve.toString() : []}`
-        // },
         trackPosList: function () {
             let res = [0];
             for (let i = 0; i < this.sortedTracks.length - 1; i++) {
@@ -81,7 +77,13 @@ const component = {
         plotWidth: function () {
             let plotWidth = 0
             for (const track of this.sortedTracks) {
-                plotWidth += this.convertWidth(track.widthUnit, track.width)
+                if (!isNaN(track.idZoneTrack)) {
+                    if (track['zone_set'] !== null) {
+                        plotWidth += this.convertWidth(track.widthUnit, track.width)
+                    }
+                } else {
+                    plotWidth += this.convertWidth(track.widthUnit, track.width)
+                }
             }
             return plotWidth;
         },
@@ -103,7 +105,7 @@ const component = {
         const y = (this.viewHeight - this.trackHeaderHeight) * (this.$store.state.plotBottom - this.$store.state.plotTop)
             / (this.$store.state.currentPlotBottom - this.$store.state.currentPlotTop);
         this.trackBodyScale = y;
-        this.onMounted && this.onMounted(this.listCurve)
+        this.onPlotReady && this.onPlotReady(this.listCurve)
     },
     watch: {
         currentPlotBottom: function () {
@@ -126,6 +128,7 @@ const component = {
                 return;
             }
             this.$store.commit("zoomPlot", offset)
+            this.getEventManager().emit('plot-zoom', {})
         },
         convertWidth: function (widthUnit, width) {
             switch (widthUnit) {

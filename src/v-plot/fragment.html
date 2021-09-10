@@ -42,7 +42,7 @@
                 :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale"
                 />
             <v-track
-                v-if="!isNaN(track.idZoneTrack)"
+                v-if="!isNaN(track.idZoneTrack) && track['zone_set'] !== null"
                 track-type='Zone Track' :grid="false"
                 :constrained="true"
                 :key="'zone_track' + idx + track.idZoneTrack" :name="track.title"

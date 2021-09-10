@@ -170,19 +170,10 @@ let component = {
             };
             this.mouseGlobalX = globalPos.x;
             this.mouseGlobalY = globalPos.y;
-            //handle when signal with multiple plots
-            // if (this.getParent().componentType === 'VPlot') {
-            //     let plotSignal = this.getParent().cPlotSignal
-            //     this.getEventManager().emit('ext-mousepos', target, globalPos, localPos, {
-            //         refLineX: this.refLineX,
-            //         refLineY: this.refLineY
-            //     }, plotSignal);
-            // } else {
             this.getEventManager().emit('ext-mousepos', target, globalPos, localPos, {
                 refLineX: this.refLineX,
                 refLineY: this.refLineY
             });
-            // }
             requestAnimationFrame(() => {
                 this.drawRefLines();
                 this.rawRenderGraphic();
