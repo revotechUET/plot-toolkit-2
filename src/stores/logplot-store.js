@@ -130,8 +130,8 @@ export default {
             let zoneIdx = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].findIndex(zone => zone.idZone === zoneId);
             let newZones = state.zone_tracks[zoneTrackIdx]['zone_set']['zones'].map((zone, idx) => ({
                 ...zone,
-                startDepth: idx === zoneIdx ? newStartDepth : zone.startDepth,
-                endDepth: idx === zoneIdx ? newEndDepth : zone.endDepth
+                startDepth: idx === zoneIdx && (newStartDepth === 0 || newStartDepth) ? newStartDepth : zone.startDepth,
+                endDepth: idx === zoneIdx && (newEndDepth === 0 || newEndDepth) ? newEndDepth : zone.endDepth
             }))
             state.zone_tracks[zoneTrackIdx]['zone_set']['zones'] = newZones
         },

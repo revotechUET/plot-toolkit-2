@@ -75,7 +75,7 @@ let component = {
             topPosX: null,
             bottomPosX: null,
             // vertical
-            topPosY: this.viewPosY,
+            topPosY: this.viewPosY || this.$parent.transformY(this.realMinY),
             bottomPosY: null,
             // label
             textWidth: new Text(this.content).getLocalBounds.width,
@@ -200,6 +200,7 @@ let component = {
         '$parent.viewHeight': function () {
             this.topPosY = this.$parent.transformY(this.realMinY);
             this.bottomPosY = this.topPosY + this.height;
+            this.makeScene();
         },
         isSelected: function (newValue, oldValue) {
             let pixiObj = this.getPixiObj();
@@ -218,9 +219,7 @@ let component = {
     },
     mixins: [selectable, baseResizable],
     mounted: function () {
-        this.getEventManager().on('plot-zoom', () => {
-            this.makeScene()
-        })
+        this.bottomPosY = this.$parent.transformY(this.realMinY) + this.height;
     }
 }
 

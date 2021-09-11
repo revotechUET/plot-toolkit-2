@@ -15,7 +15,7 @@ let app = new Vue({
     template: `
         <fragment>
             <v-scene
-                :transparent="true" :view-width="viewWidth" :view-height="520"
+                :transparent="true" :view-width="viewWidth" :view-height="viewHeight"
                 :view-pos-x="0" :view-pos-y="0">
                 <v-plot
                     v-if="show"

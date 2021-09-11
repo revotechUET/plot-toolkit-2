@@ -128,7 +128,6 @@ const component = {
                 return;
             }
             this.$store.commit("zoomPlot", offset)
-            this.getEventManager().emit('plot-zoom', {})
         },
         convertWidth: function (widthUnit, width) {
             switch (widthUnit) {
