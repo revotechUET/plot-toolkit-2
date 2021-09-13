@@ -447,97 +447,99 @@ const component = {
         onTrackMouseDown: function (trackId) {
             this.selectedIdTrack = trackId;
         },
-        onTrackTitleDragging: function (globalPosX, trackOrderNum) {
-            if (globalPosX > this.plotWidth) return;
-            let track = this.sortedTracks.filter(track => track.orderNum === trackOrderNum)[0];
-            let numberOfTrack = this.trackPosList.length;
-            let idx = 0;
-            while (globalPosX > this.trackPosList[idx] && idx < numberOfTrack) {
-                idx++;
-            }
-            idx--;
-            let rangeCheck = this.trackPosList[idx]
-                + this.convertWidth(this.sortedTracks[idx].widthUnit, this.sortedTracks[idx].width);
-            if (this.sortedTracks[idx].orderNum !== trackOrderNum) {
-                if (globalPosX - this.trackPosList[idx] < 25) {
-                    this.validateDragging = true;
-                    this.draggingPosX = this.trackPosList[idx];
-                    // console.log("Validate Drag")
-                } else if (rangeCheck - globalPosX < 25) {
-                    this.validateDragging = true;
-                    this.draggingPosX = rangeCheck - 25;
-                    // console.log("Validate Drag");
-                } else {
-                    this.validateDragging = false;
-                }
-            } else {
-                this.validateDragging = false;
-            }
-        },
-        onTrackTitleDragEnd: function (globalPosX, trackDragOrder, trackDragType) {
-            this.validateDragging = false;
-            let numberOfTrack = this.trackPosList.length;
-            if (globalPosX > this.plotWidth) return;
-            let trackDragIdx = this.sortedTracks.findIndex(track => track.orderNum === trackDragOrder);
-            let idx = 0;
-            while (globalPosX > this.trackPosList[idx] && idx < numberOfTrack) {
-                idx++;
-            }
-            idx--;
-            if (idx === trackDragIdx) return;
-            let rangeCheck = this.trackPosList[idx]
-                + this.convertWidth(this.sortedTracks[idx].widthUnit, this.sortedTracks[idx].width);
-            let flag;
-            if (trackDragIdx < idx) {
-                if (globalPosX - this.trackPosList[idx] < 25) return;
-                if (rangeCheck - globalPosX < 25) {
-                    flag = true;
-                }
-            }
-            if (trackDragIdx > idx) {
-                if (rangeCheck - globalPosX < 25) return;
-                if (globalPosX - this.trackPosList[idx] < 25) {
-                    flag = true;
-                }
-            }
-            if (flag) {
-                let trackDrag = this.sortedTracks[trackDragIdx];
-                let track = this.sortedTracks[idx];
-                let idTrackDrag, idTrack, trackType;
-                if (Number.isInteger(trackDrag.idTrack)) {
-                    idTrackDrag = trackDrag.idTrack
-                } else if (Number.isInteger(trackDrag.idZoneTrack)) {
-                    idTrackDrag = trackDrag.idZoneTrack;
-                } else {
-                    idTrackDrag = trackDrag.idDepthAxis;
-                }
-                if (Number.isInteger(track.idTrack)) {
-                    idTrack = track.idTrack;
-                    trackType = null;
-                } else if (Number.isInteger(track.idZoneTrack)) {
-                    idTrack = track.idZoneTrack;
-                    trackType = "Zone Track";
-                } else {
-                    trackType = "Depth Track"
-                    idTrack = track.idDepthAxis;
-                }
-                this.$store.dispatch('updateTrackOrder', {
-                    trackDragType,
-                    newTrackDragOrder: track.orderNum,
-                    idTrackDrag,
-                    trackType,
-                    newOrder: trackDragOrder,
-                    idTrack
-                });
-            }
-        },
+
+        //need to fix
+        // onTrackTitleDragging: function (globalPosX, trackOrderNum) {
+        //     if (globalPosX > this.plotWidth) return;
+        //     let track = this.sortedTracks.filter(track => track.orderNum === trackOrderNum)[0];
+        //     let numberOfTrack = this.trackPosList.length;
+        //     let idx = 0;
+        //     while (globalPosX > this.trackPosList[idx] && idx < numberOfTrack) {
+        //         idx++;
+        //     }
+        //     idx--;
+        //     let rangeCheck = this.trackPosList[idx]
+        //         + this.convertWidth(this.sortedTracks[idx].widthUnit, this.sortedTracks[idx].width);
+        //     if (this.sortedTracks[idx].orderNum !== trackOrderNum) {
+        //         if (globalPosX - this.trackPosList[idx] < 25) {
+        //             this.validateDragging = true;
+        //             this.draggingPosX = this.trackPosList[idx];
+        //             // console.log("Validate Drag")
+        //         } else if (rangeCheck - globalPosX < 25) {
+        //             this.validateDragging = true;
+        //             this.draggingPosX = rangeCheck - 25;
+        //             // console.log("Validate Drag");
+        //         } else {
+        //             this.validateDragging = false;
+        //         }
+        //     } else {
+        //         this.validateDragging = false;
+        //     }
+        // },
+        // onTrackTitleDragEnd: function (globalPosX, trackDragOrder, trackDragType) {
+        //     this.validateDragging = false;
+        //     let numberOfTrack = this.trackPosList.length;
+        //     if (globalPosX > this.plotWidth) return;
+        //     let trackDragIdx = this.sortedTracks.findIndex(track => track.orderNum === trackDragOrder);
+        //     let idx = 0;
+        //     while (globalPosX > this.trackPosList[idx] && idx < numberOfTrack) {
+        //         idx++;
+        //     }
+        //     idx--;
+        //     if (idx === trackDragIdx) return;
+        //     let rangeCheck = this.trackPosList[idx]
+        //         + this.convertWidth(this.sortedTracks[idx].widthUnit, this.sortedTracks[idx].width);
+        //     let flag;
+        //     if (trackDragIdx < idx) {
+        //         if (globalPosX - this.trackPosList[idx] < 25) return;
+        //         if (rangeCheck - globalPosX < 25) {
+        //             flag = true;
+        //         }
+        //     }
+        //     if (trackDragIdx > idx) {
+        //         if (rangeCheck - globalPosX < 25) return;
+        //         if (globalPosX - this.trackPosList[idx] < 25) {
+        //             flag = true;
+        //         }
+        //     }
+        //     if (flag) {
+        //         let trackDrag = this.sortedTracks[trackDragIdx];
+        //         let track = this.sortedTracks[idx];
+        //         let idTrackDrag, idTrack, trackType;
+        //         if (Number.isInteger(trackDrag.idTrack)) {
+        //             idTrackDrag = trackDrag.idTrack
+        //         } else if (Number.isInteger(trackDrag.idZoneTrack)) {
+        //             idTrackDrag = trackDrag.idZoneTrack;
+        //         } else {
+        //             idTrackDrag = trackDrag.idDepthAxis;
+        //         }
+        //         if (Number.isInteger(track.idTrack)) {
+        //             idTrack = track.idTrack;
+        //             trackType = null;
+        //         } else if (Number.isInteger(track.idZoneTrack)) {
+        //             idTrack = track.idZoneTrack;
+        //             trackType = "Zone Track";
+        //         } else {
+        //             trackType = "Depth Track"
+        //             idTrack = track.idDepthAxis;
+        //         }
+        //         this.$store.dispatch('updateTrackOrder', {
+        //             trackDragType,
+        //             newTrackDragOrder: track.orderNum,
+        //             idTrackDrag,
+        //             trackType,
+        //             newOrder: trackDragOrder,
+        //             idTrack
+        //         });
+        //     }
+        // },
         onTrackScroll: function (realOffsetY) {
-            if (!realOffsetY ||
-                this.$store.state.currentPlotTop + realOffsetY < this.$store.state.plotTop ||
-                this.$store.state.currentPlotBottom + realOffsetY > this.$store.state.plotBottom) {
-                return;
-            }
-            this.$store.commit('plotViewChange', realOffsetY)
+            // if (!realOffsetY ||
+            //     this.$store.state.currentPlotTop + realOffsetY < this.$store.state.plotTop ||
+            //     this.$store.state.currentPlotBottom + realOffsetY > this.$store.state.plotBottom) {
+            //     return;
+            // }
+            // this.$store.commit('plotViewChange', realOffsetY)
         }
     },
     mixins: [baseShape],

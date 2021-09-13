@@ -159,7 +159,7 @@ let component = {
             let realOffsetYScroll = scaleLinear()
                 .domain([this.realMinY, this.realMaxY]).range([0, this.trackViewportBodyHeight])
                 .invert(-offsetY) - this.realMinY;
-            this.$emit("trackScroll", realOffsetYScroll);
+            // this.$emit("trackScroll", realOffsetYScroll);
         },
         onHeaderMouseDown: function (target, localPos, globalPos, evt) {
             this.selectionStates = this.selectionStates.map(state => false);
@@ -398,7 +398,7 @@ let component = {
             })
         },
         getLinearLine: function (point1, point2, num = 0) {
-            let res = { };
+            let res = {};
             let a = (point1["y"] - point2['y']) / (point1["x"] - point2["x"]);
             let b = point1["y"] - a * point1["x"];
             num ? res[`a${num}`] = a : res['a'] = a;

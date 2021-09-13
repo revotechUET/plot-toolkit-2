@@ -115,13 +115,13 @@
     </v-resizable>
     <v-viewport :view-pos-x="0" :view-pos-y="trackHeaderHeight"
         ref="viewportBody" :clipped="true"
-        :viewport-scroll="onViewportScroll"
         :view-width="viewWidth" :view-height="trackViewportBodyHeight"
         :viewport-width="viewWidth" :viewport-height="viewHeight - trackHeaderHeight"
         x-transform="none" :y-transform="yTransform"
         :on-zoom="onViewportZoom"
         line-color="0x000000" :line-width="1"
         :real-min-y="realMinY" :real-max-y="realMaxY">
+        <!-- :viewport-scroll="onViewportScroll" -->
         <v-axis-ext-mouse
             v-if="trackType === 'Depth Track'"
             clipped="true" axis="y" 
