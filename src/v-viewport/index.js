@@ -22,9 +22,8 @@ let component = {
             if (this.pixiObj.containsPoint({ x: evt.offsetX, y: evt.offsetY })) {
                 evt.stopPropagation();
                 evt.preventDefault();
-                // console.log(this.$parent.plotSignal)
                 if (evt.metaKey || evt.ctrlKey) {
-                    this.onZoom && this.onZoom(evt.deltaY / 20, evt.offsetX, evt.offsetY, evt);
+                    this.onZoom && this.onZoom(evt.deltaY / 10);
                 }
                 else {
                     let panFn = this.onPan ? this.onPan : this.onPanDefault;

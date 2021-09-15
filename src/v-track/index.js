@@ -1,6 +1,5 @@
 import { Fragment } from 'vue-fragment';
 import { Text } from 'pixi.js';
-import VPath from '../v-path';
 import VRect from '../v-rect';
 import { VAxisFactory } from '../v-axis';
 import { VRectFactory } from '../v-rect';
@@ -12,7 +11,6 @@ import VTextbox from '../v-textbox';
 import VHeaderCurve from '../v-header-curve';
 import VHeaderShading from '../v-header-shading';
 import template from './template.html';
-import VShape from '../v-shape';
 import { scaleLinear, } from 'd3';
 import baseResizable from '../mixins/base-resizable'
 
@@ -92,11 +90,15 @@ let component = {
         },
         onPlotZoom: Function,
         trackViewportBodyHeight: Number,
-        // plotSignal: String //handle when signal with multiple plots
     },
     computed: {
         componentType: function () {
             return "VTrack";
+        },
+        watchedKeys: function () {
+            return [...Object.keys(this.$props).filter(v => (
+                v !== 'isSelected'
+            ))];
         },
         checkSelected: function () {
             return this.selectionStates.some(item => item) || this.isSelected;
@@ -133,8 +135,8 @@ let component = {
         </fragment>
     </div>`,
     components: {
-        VPath, VRect, VResizable, VViewport, VHeaderCurve,
-        VContainer, Fragment, VTextbox, VShape, VHeaderShading,
+        VRect, VResizable, VViewport, VHeaderCurve,
+        VContainer, Fragment, VTextbox, VHeaderShading,
         VCartersianExtMouse: VCartersianFactory({ extMouseListener: true }),
         VRectWithMountedEvent: VRectFactory({ onMounted: true }),
         VRectExtMouseWithMountedEvent: VRectFactory({ onMounted: true, extMouseListener: true }),
@@ -142,8 +144,8 @@ let component = {
         VAxisExtMouse: VAxisFactory({ extMouseListener: true })
     },
     methods: {
-        onViewportZoom: function (deltaY, offsetX, offsetY, evt) {
-            this.onPlotZoom && this.onPlotZoom(deltaY, offsetX, offsetY, this.name)
+        onViewportZoom: function (deltaY) {
+            this.onPlotZoom && this.onPlotZoom(deltaY)
         },
         registerEvents: function () {
             this.getEventManager().on("viewport-scroll", (val, trackId) => {
@@ -155,12 +157,12 @@ let component = {
                 }
             });
         },
-        onViewportScroll: function (offsetY) {
-            let realOffsetYScroll = scaleLinear()
-                .domain([this.realMinY, this.realMaxY]).range([0, this.trackViewportBodyHeight])
-                .invert(-offsetY) - this.realMinY;
-            // this.$emit("trackScroll", realOffsetYScroll);
-        },
+        // onViewportScroll: function (offsetY) {
+        //     let realOffsetYScroll = scaleLinear()
+        //         .domain([this.realMinY, this.realMaxY]).range([0, this.trackViewportBodyHeight])
+        //         .invert(-offsetY) - this.realMinY;
+        //     this.$emit("trackScroll", realOffsetYScroll);
+        // },
         onHeaderMouseDown: function (target, localPos, globalPos, evt) {
             this.selectionStates = this.selectionStates.map(state => false);
             this.$emit("trackMouseDown", this.trackId);
@@ -268,7 +270,6 @@ let component = {
                                 }
                             }
                         } else {
-                            // pixelPathLeft = this.transformPath(child, child.realLeft);
                             const shadingLeftTransform = child.leftTransformX();
                             pixelPathLeft = child.realLeft.map(point => {
                                 return {
@@ -314,43 +315,29 @@ let component = {
                             switch (child.wrapMode) {
                                 case "None":
                                     distance1 = Math.sqrt(Math.pow(x - pixelPath[index].x, 2) + Math.pow(y - pixelPath[index].y, 2));
-                                    distance2 = Math.sqrt(Math.pow(x - pixelPath[index + 1].x, 2) + Math.pow(y - pixelPath[index + 1].y, 2));
                                     break;
                                 case "Left":
                                     distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x > child.viewWidth ?
                                         pixelPath[index].x - child.viewWidth : pixelPath[index].x), 2) +
                                         Math.pow(y - pixelPath[index].y, 2));
-                                    distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x > child.viewWidth ?
-                                        pixelPath[index + 1].x - child.viewWidth : pixelPath[index + 1].x), 2) +
-                                        Math.pow(y - pixelPath[index + 1].y, 2));
                                     break;
                                 case "Right":
                                     distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x < 0 ?
                                         pixelPath[index].x + child.viewWidth : pixelPath[index].x), 2) +
                                         Math.pow(y - pixelPath[index].y, 2));
-                                    distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x < 0 ?
-                                        pixelPath[index + 1].x + child.viewWidth : pixelPath[index + 1].x), 2) +
-                                        Math.pow(y - pixelPath[index + 1].y, 2));
                                     break;
                                 case "Both":
                                     distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x > child.viewWidth ?
                                         pixelPath[index].x - child.viewWidth : pixelPath[index].x), 2) +
                                         Math.pow(y - pixelPath[index].y, 2));
-                                    distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x > child.viewWidth ?
-                                        pixelPath[index + 1].x - child.viewWidth : pixelPath[index + 1].x), 2) +
-                                        Math.pow(y - pixelPath[index + 1].y, 2));
                                     if (distance1 > 4 && distance2 > 4) {
                                         distance1 = Math.sqrt(Math.pow(x - (pixelPath[index].x < 0 ?
                                             pixelPath[index].x + child.viewWidth : pixelPath[index].x), 2) +
                                             Math.pow(y - pixelPath[index].y, 2));
-                                        distance2 = Math.sqrt(Math.pow(x - (pixelPath[index + 1].x < 0 ?
-                                            pixelPath[index + 1].x + child.viewWidth : pixelPath[index + 1].x), 2) +
-                                            Math.pow(y - pixelPath[index + 1].y, 2));
                                     }
                                     break;
                             }
-                            // console.log(distance1, distance2);
-                            if (distance1 <= 4 || distance2 <= 4) {
+                            if (distance1 <= 4) {
                                 this.selectionStates = this.selectionStates.map((child, idx) => {
                                     return idx === i ? true : false
                                 });
@@ -383,9 +370,6 @@ let component = {
             });
             this.afterMouseDown && this.afterMouseDown(evt, contextType, typeMouseDown);
         },
-        // getPosX: function (posX) {
-        //     return this.$refs.viewportBody.transformX(posX);
-        // },
         getPosY: function (posY) {
             return this.$refs.viewportBody.transformY(posY);
         },
@@ -406,11 +390,8 @@ let component = {
             return res;
         },
 
-        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines, plotSignal) {
-            //handle when signal with multiple plots
-            // if (plotSignal && this.plotSignal && this.plotSignal === plotSignal) {
+        genTooltip: function (comp, target, globalPos, srcLocalPos, refLines) {
             if (!comp.pixiObj) {
-                console.log('get v-axis pixiObj')
                 comp.getPixiObj()
             }
             let localPos = comp.pixiObj.toLocal(globalPos);
@@ -453,7 +434,6 @@ let component = {
                     tooltipPosY
                 });
             }
-            // }
         },
         onTitleDragging: function (target, localPos, globalPos, evts) {
             if (target.hostComponent.dragging) {

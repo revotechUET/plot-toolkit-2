@@ -15,10 +15,10 @@ let app = new Vue({
     template: `
         <fragment>
             <v-scene
+                v-if="show"
                 :transparent="true" :view-width="viewWidth" :view-height="viewHeight"
                 :view-pos-x="0" :view-pos-y="0">
                 <v-plot
-                    v-if="show"
                     :view-pos-x="0" :view-pos-y="0"
                     :view-width="viewWidth" :view-height="viewHeight"
                     :tooltip-style="tooltipStyle" ref="myPlot"

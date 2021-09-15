@@ -190,7 +190,7 @@ let component = {
                 let globalPos = evt.data.global;
                 let localPos = currentTarget.toLocal(globalPos);
 
-                this.processMouseEvent(currentTarget, globalPos, localPos);
+                // this.processMouseEvent(currentTarget, globalPos, localPos);
                 this.onmouseover &&
                     this.onmouseover(
                         evt.currentTarget,
