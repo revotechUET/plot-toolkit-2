@@ -75,6 +75,9 @@
                     :view-width="convertWidth(track.widthUnit, track.width)"
                     :content="zone.zone_template.name"
                     :content-style="zoneContentStyle"
+                    :foreground-color="zone.zone_template.foreground"
+                    :background-color="zone.zone_template.background"
+                    :image-pattern-url="getZonePattern(zone.zone_template.pattern)"
                     :no-label="false"
                     :no-fill="false" />
             </v-track>

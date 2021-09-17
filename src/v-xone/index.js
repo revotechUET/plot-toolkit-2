@@ -26,11 +26,9 @@
 import { Fragment } from 'vue-fragment';
 import VResizable from "../v-resizable";
 import VTextBox from "../v-textbox";
-import VRect from '../v-rect';
 import template from "./template.html";
-import { Text } from "pixi.js";
-import { getTransparency, DefaultValues, processColorStr } from "../utils";
-import VContainer from '../v-container';
+import { Text, Texture } from "pixi.js";
+import { getTransparency, DefaultValues, processColorStr, getImagePattern, blendColorImage } from "../utils";
 import { scaleLinear, scaleLog } from 'd3-scale';
 import factoryFn from '../mixins';
 import selectable from '../mixins/selectable';
@@ -50,24 +48,14 @@ let component = {
     template: `<fragment>
         ${require('../v-resizable/fragment.html')}
         <div v-if="debug" style="padding-left:12px;">{{compProps}}
-            <v-text-box v-if="noLabel == true"
-                :content="content" :content-style="contentStyle"
-                :view-pos-x="textPosX"
-                :view-pos-y="textPosY"
-                :rotation="labelRotation"
-            />
+            ${require('../v-xone/fragment.html')}
         </div>
         <fragment v-if="!debug">
-            <v-text-box
-                :content="content" :content-style="contentStyle"
-                :view-pos-x="textPosX"
-                :view-pos-y="textPosY"
-                :rotation="labelRotation"
-                />
+            ${require('../v-xone/fragment.html')}
         </fragment>
     </fragment>`,
     components: {
-        Fragment, VTextBox, VResizable, VContainer
+        Fragment, VTextBox, VResizable
     },
     data: function () {
         return {
@@ -77,9 +65,6 @@ let component = {
             // vertical
             topPosY: this.viewPosY || this.$parent.transformY(this.realMinY),
             bottomPosY: null,
-            // label
-            textWidth: new Text(this.content).getLocalBounds.width,
-            textHeight: new Text(this.content).getLocalBounds.height,
         }
     },
     computed: {
@@ -87,23 +72,17 @@ let component = {
             return "VZone";
         },
         textPosX: function () {
-            let text = new Text(this.content);
-            let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
-            let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
-            if (textWidth > this.viewWidth || this.labelRotation) {
-                return this.viewWidth / 2 - textHeight / 2;
+            if (this.cTextWidth > this.viewWidth || this.labelRotation) {
+                return this.viewWidth / 2 - this.cTextHeight / 2;
             } else {
-                return this.viewWidth / 2 - textWidth / 2;
+                return this.viewWidth / 2 - this.cTextWidth / 2;
             }
         },
         textPosY: function () {
-            let text = new Text(this.content);
-            let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
-            let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
-            if (textWidth > this.viewWidth || this.labelRotation) {
-                return this.height / 2 + textWidth / 2;
+            if (this.cTextWidth > this.viewWidth || this.labelRotation) {
+                return this.height / 2 + this.cTextWidth / 2;
             } else {
-                return this.height / 2 - textHeight / 2;
+                return this.height / 2 - this.cTextHeight / 2;
             }
         },
         cFillColor: function () {
@@ -117,13 +96,28 @@ let component = {
             return cFc;
         },
         labelRotation: function () {
-            let text = new Text(this.content);
-            let textWidth = text.getLocalBounds().width;
-            if (textWidth > this.viewWidth) {
+            if (this.cTextWidth > this.viewWidth) {
                 return -1.55;
             }
             return 0;
-        }
+        },
+        cZoneSelectedBgColor: function () {
+            if (this.cBackgroundColor && this.cBackgroundColor.substring(0, 4) == "rgb(") {
+                return this.cBackgroundColor.replace("rgb(", "rgba(").replace(")", ", 0.7)");
+            } else {
+                return this.cBackgroundColor
+            }
+        },
+        cTextWidth: function () {
+            let text = new Text(this.content);
+            let textWidth = text.getLocalBounds().width * (this.contentStyle.fontSize || 26) / 26;
+            return textWidth;
+        },
+        cTextHeight: function () {
+            let text = new Text(this.content);
+            let textHeight = text.getLocalBounds().height * (this.contentStyle.fontSize || 26) / 26;
+            return textHeight;
+        },
     },
     methods: {
         knobDragEnd: function (knobIdx, pos, target) {
@@ -202,16 +196,28 @@ let component = {
             this.bottomPosY = this.topPosY + this.height;
             this.makeScene();
         },
-        isSelected: function (newValue, oldValue) {
+        isSelected: async function (newValue, oldValue) {
             let pixiObj = this.getPixiObj();
             pixiObj.clear();
             let lw = parseInt(this.lineWidth);
             lw = isNaN(lw) ? 0 : lw;
             pixiObj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
             if (newValue) {
-                pixiObj.beginFill(this.cFillColor.color, 0.7);
+                if (this.imagePatternUrl) {
+                    let imagePattern = await getImagePattern(this.imagePatternUrl);
+                    let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cZoneSelectedBgColor);
+
+                    const texture = Texture.from(canvas);
+                    pixiObj.beginTextureFill(texture);
+                } else { pixiObj.beginFill(this.cFillColor.color, 0.7); }
             } else {
-                pixiObj.beginFill(this.cFillColor.color, this.cFillColor.transparency);
+                if (this.imagePatternUrl) {
+                    let imagePattern = await getImagePattern(this.imagePatternUrl);
+                    let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
+
+                    const texture = Texture.from(canvas);
+                    pixiObj.beginTextureFill(texture);
+                } else { pixiObj.beginFill(this.cFillColor.color, this.cFillColor.transparency); }
             }
             pixiObj.drawRect(0, 0, this.width, this.height);
             pixiObj.endFill();

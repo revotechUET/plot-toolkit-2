@@ -1,7 +1,17 @@
 import VRect from '../v-rect';
 import layoutMixin from "../mixins/layout";
 import baseShape from './base-shape';
-import { getColor, getPosX, getPosY, getTransparency, DefaultValues } from "../utils";
+import { Texture } from "pixi.js";
+import {
+  getColor,
+  DefaultValues,
+  blendColorImage,
+  getImagePattern,
+  processColorStr,
+  getTransparency,
+  getPosX,
+  getPosY,
+} from "../utils";
 
 const KNOB_OUTLINE_TRANS = 0.01;
 const KNOB_FILL_TRANS = 0.2;
@@ -164,13 +174,19 @@ export default {
       }
       return pPos;
     },
-    draw: function (obj) {
+    draw: async function (obj) {
       obj.clear();
       let lw = parseInt(this.lineWidth);
       lw = isNaN(lw) ? 0 : lw;
       let lt = this.lineTransparency || 1.0;
       obj.lineStyle(lw, this.cLineColor.color, this.cLineColor.transparency, 0);
-      obj.beginFill(this.cFillColor.color, this.cFillColor.transparency);
+      if (this.imagePatternUrl) {
+        let imagePattern = await getImagePattern(this.imagePatternUrl);
+        let canvas = blendColorImage(imagePattern, this.cForegroundColor, this.cBackgroundColor);
+
+        const texture = Texture.from(canvas);
+        obj.beginTextureFill(texture);
+      } else { obj.beginFill(this.cFillColor.color, this.cFillColor.transparency); }
       obj.drawRect(0, 0, this.width, this.height);
 
       obj.endFill();

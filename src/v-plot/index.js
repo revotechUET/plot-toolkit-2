@@ -447,7 +447,11 @@ const component = {
         onTrackMouseDown: function (trackId) {
             this.selectedIdTrack = trackId;
         },
-
+        getZonePattern: function (pattern) {
+            if (pattern) {
+                return `https://users.i2g.cloud/pattern/${pattern}_.png?service=WI_BACKEND`
+            }
+        },
         //need to fix
         // onTrackTitleDragging: function (globalPosX, trackOrderNum) {
         //     if (globalPosX > this.plotWidth) return;

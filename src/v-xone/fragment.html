@@ -1,0 +1,9 @@
+<v-rect v-if="noLabel != true"
+  :view-pos-x="textPosX" :view-pos-y="textPosY"
+  :view-width="cTextWidth" :view-height="cTextHeight"
+  fill-color="0xFFFFFF" :rotation="labelRotation"
+>
+  <v-text-box
+    :content="content" :content-style="contentStyle"
+  />
+</v-rect>
