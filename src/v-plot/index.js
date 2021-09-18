@@ -9,6 +9,7 @@ import VCurve from '../v-curve';
 import VContainer from '../v-container';
 import VShape from '../v-shape';
 import VRect from '../v-rect';
+import VPath from '../v-path';
 import baseShape from '../mixins/base-shape';
 import { scaleLinear } from 'd3-scale';
 
@@ -40,7 +41,11 @@ const component = {
             }
         },
         listCurve: Array,
-        onPlotReady: Function
+        onPlotReady: Function,
+        enableZoneRef: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {
@@ -48,11 +53,11 @@ const component = {
             trackHeaderHeight: 100,
             selectedIdTrack: null,
             validateDragging: false,
-            draggingPosX: 0
+            draggingPosX: 0,
         }
     },
     components: {
-        Fragment, VTrack, VLayer, VXone,
+        Fragment, VTrack, VLayer, VXone, VPath,
         VShading, VCurve, VContainer, VShape, VRect
     },
     template: `<div>
@@ -446,6 +451,11 @@ const component = {
         },
         onTrackMouseDown: function (trackId) {
             this.selectedIdTrack = trackId;
+        },
+        getZoneRefLine(depth) {
+            let y = scaleLinear().domain([this.$store.state.plotTop, this.$store.state.plotBottom])
+                .range([0, this.trackBodyScale])(depth)
+            return [{ x: 0, y }, { x: this.plotWidth, y }];
         },
         getZonePattern: function (pattern) {
             if (pattern) {

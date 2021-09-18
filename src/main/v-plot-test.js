@@ -19,6 +19,7 @@ let app = new Vue({
                 :transparent="true" :view-width="viewWidth" :view-height="viewHeight"
                 :view-pos-x="0" :view-pos-y="0">
                 <v-plot
+                    :enable-zone-ref="enableZoneRef"
                     :view-pos-x="0" :view-pos-y="0"
                     :view-width="viewWidth" :view-height="viewHeight"
                     :tooltip-style="tooltipStyle" ref="myPlot"
@@ -26,7 +27,8 @@ let app = new Vue({
                     :enabled="true"
                     :id-project="12" :id-plot="345" />
             </v-scene>
-            <button @click="toggleShow">Toggle show</button>
+            <button @click="toggleShow">Toggle show</button> <br/>
+            <button @click="toggleZoneRef">{{enableZoneRef ? 'Disable Zone Ref Line' : 'Enable Zone Ref Line'}}</button>
         </fragment>
     `,
     data: function () {
@@ -41,7 +43,8 @@ let app = new Vue({
                 fontSize: 14,
             },
             show: true,
-            count: 0
+            count: 0,
+            enableZoneRef: true
         }
     },
     methods: {
@@ -50,6 +53,9 @@ let app = new Vue({
                 this.count++;
             }
             this.show = !this.show
+        },
+        toggleZoneRef: function () {
+            this.enableZoneRef = !this.enableZoneRef;
         }
     },
     components: {

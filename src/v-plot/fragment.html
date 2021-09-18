@@ -7,6 +7,17 @@
     :viewport-pos-y="trackHeaderHeight"
     :ref-line-x="true" :ref-line-y="false"
     >
+    <fragment v-if="enableZoneRef && $store.state.zone_tracks.length > 0 && $store.state.zone_tracks[0].zone_set.zones.length > 0">
+        <fragment v-for="zone in $store.state.zone_tracks[0].zone_set.zones"
+            :key="zone.idZoneTemplate">
+            <v-path symbol-color="#000" :line-width="1"
+                :view-path="getZoneRefLine(zone.startDepth)" :view-height="trackBodyScale"
+            />
+            <v-path symbol-color="#000" :line-width="1"
+                :view-path="getZoneRefLine(zone.endDepth)" :view-height="trackBodyScale"
+            />
+        </fragment>
+    </fragment>
     <v-rect
         v-if="validateDragging" :view-pos-x="draggingPosX" :view-pos-y="-trackHeaderHeight"
         :view-width="25" :view-height="viewHeight"
