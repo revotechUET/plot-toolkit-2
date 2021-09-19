@@ -183,7 +183,7 @@ let component = {
         },
         onRefsReady: function () {
             if (this.$refs.trackChildren) {
-                return this.$refs.trackChildren.$children;
+                return this.$refs.trackChildren.$children.filter(child => child.componentType !== 'VPath');
             }
             return []
         },
@@ -475,7 +475,7 @@ let component = {
         console.log("Track draw");
 
         if (this.trackType !== 'Depth Track') {
-            let children = this.$refs.trackChildren.$children;
+            let children = this.$refs.trackChildren.$children.filter(child => child.componentType !== 'VPath');
             this.nChildren = children.length;
             this.selectionStates.push(...children.map(child => false));
             let height;
@@ -515,7 +515,7 @@ let component = {
         },
         selectionStates: function () {
             this.selectionStates.forEach((state, idx) => {
-                this.$refs.trackChildren.$children[idx].isSelected = state;
+                this.$refs.trackChildren.$children.filter(child => child.componentType !== 'VPath')[idx].isSelected = state;
             })
         },
         isSelected: function () {

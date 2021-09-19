@@ -7,17 +7,6 @@
     :viewport-pos-y="trackHeaderHeight"
     :ref-line-x="true" :ref-line-y="false"
     >
-    <fragment v-if="enableZoneRef && $store.state.zone_tracks.length > 0 && $store.state.zone_tracks[0].zone_set.zones.length > 0">
-        <fragment v-for="zone in $store.state.zone_tracks[0].zone_set.zones"
-            :key="zone.idZoneTemplate">
-            <v-path symbol-color="#000" :line-width="1"
-                :view-path="getZoneRefLine(zone.startDepth)" :view-height="trackBodyScale"
-            />
-            <v-path symbol-color="#000" :line-width="1"
-                :view-path="getZoneRefLine(zone.endDepth)" :view-height="trackBodyScale"
-            />
-        </fragment>
-    </fragment>
     <v-rect
         v-if="validateDragging" :view-pos-x="draggingPosX" :view-pos-y="-trackHeaderHeight"
         :view-width="25" :view-height="viewHeight"
@@ -112,7 +101,18 @@
                 :enabled="true" :is-selected="selectedIdTrack === track.idTrack"
                 @trackMouseDown="onTrackMouseDown"
                 :on-plot-zoom="onPlotZoom" :track-viewport-body-height="trackBodyScale">
-                <!-- @trackTitleDragging="onTrackTitleDragging" @trackScroll="onTrackScroll" @trackTitleDragEnd="onTrackTitleDragEnd"-->
+                    <v-path
+                        v-if="enableZoneRef && $store.state.zone_tracks.length > 0"
+                        v-for="zone in $store.state.zone_tracks[0].zone_set.zones"
+                        :key="zone.idZoneTemplate + 'startDepth'" symbol-color="#000" :line-width="1"
+                        :view-path="getZoneRefLine(zone.startDepth)" :view-height="trackBodyScale"
+                    />
+                    <v-path
+                        v-if="enableZoneRef && $store.state.zone_tracks.length > 0"
+                        v-for="zone in $store.state.zone_tracks[0].zone_set.zones"
+                        :key="zone.idZoneTemplate + 'endDepth'" symbol-color="#000" :line-width="1"
+                        :view-path="getZoneRefLine(zone.endDepth)" :view-height="trackBodyScale"
+                    />
                 <fragment
                     v-for="(shading, idx) in track.shadings"
                     :key="shading.name + shading.idControlCurve + shading.idShading">

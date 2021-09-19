@@ -13,21 +13,26 @@ const app = new Vue({
 	el: "#vue-app",
 	template: `<fragment>
         <v-scene :transparent="true" :view-width="width" :view-height="height" 
-				x-transform="linear" y-transform="linear" :view-pos-x="0" :view-pos-y="0"
-        		:real-min-x="0" :real-max-x="5" :real-min-y="10" :real-max-y="500">
-			<v-rect :line-width="1" line-color="red" :view-pos-x="50"
-				:view-pos-y="50" 
-				:clipped="false"
-				:view-width="width-400" :view-height="height-100"
-				:real-min-x="0" :real-max-x="5"
-				:real-min-y="0" :real-max-y="500"
-				x-transform='linear'
-				y-transform='linear'
-			>
-				<v-path :real-path="path" :enabled="true" :symbol-shape="symbolShape" 
-					:symbol-size="symbolSize" :symbol-color="symbolColor" :line-dash="lineDash">
-				</v-path>
-			</v-rect>
+					x-transform="linear" y-transform="linear" :view-pos-x="0" :view-pos-y="0"
+        	:real-min-x="0" :real-max-x="5" :real-min-y="10" :real-max-y="500">
+					<v-rect :line-width="1" line-color="red" :view-pos-x="50"
+						:view-pos-y="50" 
+						:clipped="true"
+						:view-width="400" :view-height="height-100"
+						:real-min-x="0" :real-max-x="3"
+						:real-min-y="0" :real-max-y="500"
+						x-transform='linear' y-transform='linear'
+						>
+						<v-path :real-path="path" :enabled="true" :symbol-shape="symbolShape" 
+							:symbol-size="symbolSize" :symbol-color="symbolColor" :line-dash="lineDash">
+						</v-path>
+					</v-rect>
+					<v-rect :line-width="1" line-color="red" :view-pos-x="450"
+						:view-pos-y="50" 
+						:clipped="false"
+						:view-width="width-400" :view-height="height-100"
+						>
+					</v-rect>
         </v-scene>
         <button v-on:click="double">Click me</button>
     </fragment>
